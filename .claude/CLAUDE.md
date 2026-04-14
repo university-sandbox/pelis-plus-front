@@ -119,10 +119,17 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## UI / UX Standards
 
+The full design system is in **`docs/ui-ux-guide.md`**. That file is the source of truth for colors, typography, spacing, component specs, motion rules, and per-page layout. Always read it before building any new screen.
+
+Quick rules:
+- Dark theme only. Use the CSS design tokens defined in `docs/ui-ux-guide.md` — never hardcode hex values.
+- Primary accent: `#00C9A7`. All interactive elements use this color consistently.
 - Every screen must have a clear visual hierarchy: the most important action is always the most prominent element.
 - Use skeleton loaders for any async content — never show an empty container while data is loading.
-- Every destructive or irreversible action (delete, cancel, log out) must ask for explicit confirmation.
+- Every destructive or irreversible action must ask for explicit confirmation via `ConfirmDialog`.
 - Forms must show inline validation errors below each field; never clear field values on failed submission.
 - All interactive states must be covered: default, hover, focus, active, disabled, loading, error, empty.
-- Transitions and micro-animations should be subtle and purposeful — they communicate state changes, not decoration.
+- Animate only `transform` and `opacity`. Respect `prefers-reduced-motion`.
 - Mobile-first: every layout must be usable on a 375 px screen before scaling up.
+- Icons: **Lucide** only — never mix icon libraries.
+- UI copy is in Spanish, verb-first CTAs, friendly "tú" form. See `docs/ui-ux-guide.md` section 10.
