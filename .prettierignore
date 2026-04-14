@@ -1,0 +1,14 @@
+node_modules
+dist
+coverage
+.angular
+.agents
+.claude
+.cortex
+.github
+AGENTS.md
+playwright-report
+test-results
+package-lock.json
+bun.lock
+skills-lock.json

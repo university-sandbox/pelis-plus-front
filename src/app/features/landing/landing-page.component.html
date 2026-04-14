@@ -1,0 +1,21 @@
+<app-page-shell
+  [brandName]="appName"
+  title="Landing"
+  subtitle="This is a reusable blank page shell for your future modules and sections."
+>
+  <div class="grid gap-4">
+    <p class="text-base text-slate-800">Start building your feature pages here.</p>
+
+    @if (isAuthenticated()) {
+      <p class="text-sm font-medium text-emerald-700">Current auth state: logged in.</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <button type="button" mat-stroked-button (click)="logout()">Log out</button>
+      </div>
+    } @else {
+      <p class="text-sm font-medium text-amber-700">Current auth state: anonymous.</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <a routerLink="/login" mat-flat-button color="primary">Go to login</a>
+      </div>
+    }
+  </div>
+</app-page-shell>
