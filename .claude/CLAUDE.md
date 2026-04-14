@@ -99,6 +99,19 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - During frontend-only development, services return **mock data** using the same return type that the real HTTP call will use. Mock data must be defined inside the service file — never inline in a component.
 - Use `httpResource()` for read operations and `HttpClient` for mutations (POST / PUT / PATCH / DELETE).
 
+## Progress tracking
+
+- After completing any task that appears in `docs/developmentPhases.md`, immediately mark it as done by changing `- [ ]` to `- [x]`. Do not batch updates — mark each task the moment it is finished.
+- If a task is partially done, add an inline note: `- [x] Task title — ⚠️ partially done: what remains`.
+- If a new piece of work is done that is not yet in the file, add it and mark it done.
+
+## Mock tracking
+
+- Any service method, guard, or behaviour that is faked because the backend is not ready **must be logged in `docs/mocks.md`** immediately — before moving on.
+- Follow the mocking pattern defined in `docs/mocks.md`: environment flag `mock.enabled`, mock data in `src/app/core/mocks/<feature>.mock.ts`, `delay(400)` to simulate network latency.
+- Never inline mock data inside a component or template.
+- Auth can be faked by checking demo credentials from `environment.auth.demoEmail / demoPassword` and returning a hardcoded JWT string. Log it in `docs/mocks.md`.
+
 ## API Endpoint Management
 
 - The source of truth for every URL is `src/app/core/api/endpoints.ts`. Import `TMDB` or `BACKEND` from there — never write a URL string anywhere else.

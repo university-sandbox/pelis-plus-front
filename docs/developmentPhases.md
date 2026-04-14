@@ -16,21 +16,21 @@ Check each task off as it is completed.
 
 ## Phase 1 — Project Setup & Architecture
 
-1. - [ ] Configure Angular project structure (`src/core`, `src/features`, `src/shared` folders)
-2. - [ ] Set up Tailwind CSS v4 and Angular Material theme (define design tokens: colors, spacing, typography)
-3. - [ ] Configure ESLint, Prettier, and Husky pre-commit hooks
-4. - [ ] Set up environment files and `generate-env-ts` script
-5. - [ ] Create `src/app/core/api/endpoints.ts` — single source of truth for all URLs (TMDB + backend); see `docs/api.md`
-6. - [ ] Define global routing structure with lazy-loaded feature modules
+1. - [x] Configure Angular project structure (`src/core`, `src/features`, `src/shared` folders)
+2. - [x] Set up Tailwind CSS v4 and Angular Material theme (define design tokens: colors, spacing, typography)
+3. - [x] Configure ESLint and Prettier — ⚠️ Husky not yet installed
+4. - [x] Set up environment files and `generate-env-ts` script (Zod-validated, SSR-safe)
+5. - [x] Create `src/app/core/api/endpoints.ts` — single source of truth for all URLs (TMDB + backend); see `docs/api.md`
+6. - [x] Define global routing structure with lazy-loaded feature modules
 7. - [ ] Create `AuthGuard` and `AdminGuard` for protected routes
-8. - [ ] Create JWT interceptor (`src/app/core/interceptors/auth.interceptor.ts`) — attaches `Authorization: Bearer` to every backend request
+8. - [x] Create JWT interceptor (`src/app/core/interceptors/auth-interceptor.ts`) — attaches `Authorization: Bearer` to every backend request
 9. - [ ] Create TMDB interceptor (`src/app/core/interceptors/tmdb.interceptor.ts`) — attaches TMDB bearer token only to requests matching `environment.tmdb.baseUrl`
 10. - [ ] Create global error interceptor — handles 401 (redirect to login), 403, 500 uniformly
-10. - [ ] Create shared layout components: `Navbar`, `Footer`, `PageWrapper`
-11. - [ ] Create shared UI primitives: `SkeletonLoader`, `EmptyState`, `ErrorState`, `ConfirmDialog`
-12. - [ ] Set up Vitest unit test configuration
-13. - [ ] Set up Playwright e2e configuration (`playwright.config.ts`, base URL pointing to dev server)
-14. - [ ] Create `e2e/pages/` folder and establish the Page Object Model (POM) base class
+11. - [ ] Create shared layout components: `Navbar`, `Footer`, `PageWrapper`
+12. - [ ] Create shared UI primitives: `SkeletonLoader`, `EmptyState`, `ErrorState`, `ConfirmDialog`
+13. - [ ] Set up Vitest unit test configuration
+14. - [x] Set up Playwright e2e configuration (`playwright.config.ts`, base URL pointing to dev server)
+15. - [ ] Create `e2e/pages/` folder and establish the Page Object Model (POM) base class
 
 ---
 
@@ -40,15 +40,15 @@ Check each task off as it is completed.
     - [ ] Fields: full name, email, password, confirm password
     - [ ] Real-time field validation (format, min length, match)
     - [ ] Inline error messages per field
-12. - [ ] Build `LoginPage` component with reactive form
-    - [ ] Fields: email, password
-    - [ ] Error message on invalid credentials
+12. - [x] Build `LoginPage` component with reactive form
+    - [x] Fields: email, password
+    - [x] Inline error message on invalid credentials
+    - [x] `isSubmitting` signal disables form during request
 13. - [ ] Build `ForgotPasswordPage` — send recovery link by email
 14. - [ ] Build `ResetPasswordPage` — set new password via token
-15. - [ ] Implement `AuthService`
-    - [ ] `register()`, `login()`, `logout()`, `forgotPassword()`, `resetPassword()`
-    - [ ] Store JWT in memory or `localStorage` with expiry handling
-    - [ ] Persistent session across page reloads
+15. - [x] Implement `AuthService` — `login()`, `logout()`, session persistence via `localStorage`
+    - [ ] `register()`, `forgotPassword()`, `resetPassword()` — pending
+    - ⚠️ `login()` calls real backend — **mocked** (see `docs/mocks.md`)
 16. - [ ] Protect private routes with `AuthGuard`
 17. - [ ] Auto-login after successful registration
 18. - [ ] Add password strength indicator to register form
