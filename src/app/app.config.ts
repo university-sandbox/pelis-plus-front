@@ -6,11 +6,16 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
+import { tmdbInterceptor } from './core/interceptors/tmdb.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([tmdbInterceptor, authInterceptor, errorInterceptor]),
+    ),
     provideRouter(routes),
     provideAnimationsAsync(),
     provideClientHydration(withEventReplay()),

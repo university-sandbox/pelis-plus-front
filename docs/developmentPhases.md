@@ -22,50 +22,48 @@ Check each task off as it is completed.
 4. - [x] Set up environment files and `generate-env-ts` script (Zod-validated, SSR-safe)
 5. - [x] Create `src/app/core/api/endpoints.ts` — single source of truth for all URLs (TMDB + backend); see `docs/api.md`
 6. - [x] Define global routing structure with lazy-loaded feature modules
-7. - [ ] Create `AuthGuard` and `AdminGuard` for protected routes
+7. - [x] Create `AuthGuard` and `AdminGuard` for protected routes
 8. - [x] Create JWT interceptor (`src/app/core/interceptors/auth-interceptor.ts`) — attaches `Authorization: Bearer` to every backend request
-9. - [ ] Create TMDB interceptor (`src/app/core/interceptors/tmdb.interceptor.ts`) — attaches TMDB bearer token only to requests matching `environment.tmdb.baseUrl`
-10. - [ ] Create global error interceptor — handles 401 (redirect to login), 403, 500 uniformly
-11. - [ ] Create shared layout components: `Navbar`, `Footer`, `PageWrapper`
-12. - [ ] Create shared UI primitives: `SkeletonLoader`, `EmptyState`, `ErrorState`, `ConfirmDialog`
+9. - [x] Create TMDB interceptor (`src/app/core/interceptors/tmdb.interceptor.ts`) — attaches TMDB bearer token only to requests matching `environment.tmdb.baseUrl`
+10. - [x] Create global error interceptor — handles 401 (redirect to login), 403, 500 uniformly
+11. - [x] Create shared layout components: `Navbar` — ⚠️ partially done: Footer and PageWrapper pending
+12. - [x] Create shared UI primitives: `SkeletonLoader`, `EmptyState`, `ErrorState` — ⚠️ partially done: `ConfirmDialog` pending
 13. - [ ] Set up Vitest unit test configuration
 14. - [x] Set up Playwright e2e configuration (`playwright.config.ts`, base URL pointing to dev server)
-15. - [ ] Create `e2e/pages/` folder and establish the Page Object Model (POM) base class
+15. - [x] Create `e2e/pages/` folder and establish the Page Object Model (POM) base class
 
 ---
 
 ## Phase 2 — Authentication
 
-11. - [ ] Build `RegisterPage` component with reactive form
-    - [ ] Fields: full name, email, password, confirm password
-    - [ ] Real-time field validation (format, min length, match)
-    - [ ] Inline error messages per field
+11. - [x] Build `RegisterPage` component with reactive form
+    - [x] Fields: full name, email, password, confirm password
+    - [x] Real-time field validation (format, min length, match)
+    - [x] Inline error messages per field
 12. - [x] Build `LoginPage` component with reactive form
     - [x] Fields: email, password
     - [x] Inline error message on invalid credentials
     - [x] `isSubmitting` signal disables form during request
-13. - [ ] Build `ForgotPasswordPage` — send recovery link by email
-14. - [ ] Build `ResetPasswordPage` — set new password via token
-15. - [x] Implement `AuthService` — `login()`, `logout()`, session persistence via `localStorage`
-    - [ ] `register()`, `forgotPassword()`, `resetPassword()` — pending
-    - ⚠️ `login()` calls real backend — **mocked** (see `docs/mocks.md`)
-16. - [ ] Protect private routes with `AuthGuard`
-17. - [ ] Auto-login after successful registration
-18. - [ ] Add password strength indicator to register form
+13. - [x] Build `ForgotPasswordPage` — send recovery link by email
+14. - [x] Build `ResetPasswordPage` — set new password via token
+15. - [x] Implement `AuthService` — `login()`, `logout()`, `register()`, `forgotPassword()`, `resetPassword()`, session persistence via `localStorage` — ⚠️ all mocked (see `docs/mocks.md`)
+16. - [x] Protect private routes with `AuthGuard`
+17. - [x] Auto-login after successful registration
+18. - [x] Add password strength indicator to register form
 
 ---
 
 ## Phase 3 — Movie Catalog
 
-19. - [ ] Build `CatalogPage` — grid of movie cards
-    - [ ] Card fields: poster, title, genre, duration, rating, short synopsis, status badge
-20. - [ ] Build `MovieCard` component
-    - [ ] Quick-preview on hover/focus: synopsis, trailer link, "Buy" CTA
+19. - [x] Build `CatalogPage` — hero banner + horizontal scroll rows + grid search results
+    - [x] Card fields: poster, title, rating, year
+20. - [x] Build `MovieCard` component
+    - [x] Quick-preview on hover/focus: "Comprar" CTA
 21. - [ ] Build `MovieDetailPage`
     - [ ] Full synopsis, trailer embed, duration, genre, rating, languages, formats, schedules
-22. - [ ] Implement `MovieService` — fetch catalog and movie detail
-23. - [ ] Add search by movie title
-24. - [ ] Add filters: genre, format (2D / 3D / XD), showtime, venue
+22. - [x] Implement `MovieService` — fetch catalog and movie detail (TMDB)
+23. - [x] Add search by movie title
+24. - [x] Add filters: genre pills — ⚠️ partially done: format/showtime/venue filters pending
 25. - [ ] Show active vs. inactive movies distinctly
 26. - [ ] Add visual labels: premiere, children, subtitled, dubbed
 

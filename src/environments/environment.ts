@@ -18,6 +18,10 @@ const commonEnvSchema = z.object({
   NG_APP_AUTH_DEMO_EMAIL: z.string().min(1),
   NG_APP_AUTH_DEMO_PASSWORD: z.string().min(1),
   NG_APP_AUTH_TOKEN_STORAGE_KEY: z.string().min(1),
+  NG_APP_MOCK_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
 });
 
 // In SSR (Node.js), process.env holds runtime values and takes precedence.
@@ -43,6 +47,7 @@ const runtimeEnv = {
   NG_APP_AUTH_DEMO_EMAIL: readEnv('NG_APP_AUTH_DEMO_EMAIL'),
   NG_APP_AUTH_DEMO_PASSWORD: readEnv('NG_APP_AUTH_DEMO_PASSWORD'),
   NG_APP_AUTH_TOKEN_STORAGE_KEY: readEnv('NG_APP_AUTH_TOKEN_STORAGE_KEY'),
+  NG_APP_MOCK_ENABLED: readEnv('NG_APP_MOCK_ENABLED'),
 };
 
 const parsedEnv = commonEnvSchema.safeParse(runtimeEnv);
@@ -79,5 +84,8 @@ export const environment: AppEnvironment = {
     demoEmail: parsedEnv.data.NG_APP_AUTH_DEMO_EMAIL,
     demoPassword: parsedEnv.data.NG_APP_AUTH_DEMO_PASSWORD,
     tokenStorageKey: parsedEnv.data.NG_APP_AUTH_TOKEN_STORAGE_KEY,
+  },
+  mock: {
+    enabled: parsedEnv.data.NG_APP_MOCK_ENABLED,
   },
 };

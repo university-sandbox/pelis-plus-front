@@ -67,36 +67,19 @@ mock: { enabled: parsedEnv.data.NG_APP_MOCK_ENABLED },
 
 ## Active mocks
 
-### AUTH — `AuthService.login()`
+### AUTH — `AuthService` (all methods)
 
 | Field | Value |
 |-------|-------|
 | File | `src/app/core/services/auth.service.ts` |
-| Mock data | Hardcoded demo credentials from `environment.auth.demoEmail / demoPassword` |
-| Current behaviour | Calls real backend at `environment.backend.baseUrl/v1/auth/login`. Fails silently if backend is unreachable. |
-| Needed mock | If `email === environment.auth.demoEmail && password === environment.auth.demoPassword` → return `of(FAKE_JWT)`. Otherwise throw `401`. |
-| Mock file | `src/app/core/mocks/auth.mock.ts` |
+| Mock data | `src/app/core/mocks/auth.mock.ts` — `MOCK_JWT` constant |
+| Current behaviour | `login()`: checks demo credentials, returns `MOCK_JWT`. Others (`register`, `forgotPassword`, `resetPassword`): return success after delay. |
+| Status | ✅ Implemented with `environment.mock.enabled` guard |
 
 **Cleanup when backend is ready:**
-- [ ] Remove the `if (environment.mock.enabled)` guard in `AuthService.login()`
+- [ ] Remove all `if (environment.mock.enabled)` guards in `AuthService`
 - [ ] Delete `src/app/core/mocks/auth.mock.ts`
-- [ ] Remove `NG_APP_MOCK_ENABLED` from `.env`
-- [ ] Remove `mock` block from `environment.model.ts` and `environment.ts`
-
----
-
-### AUTH — `AuthService.register()` / `forgotPassword()` / `resetPassword()`
-
-| Field | Value |
-|-------|-------|
-| File | `src/app/core/services/auth.service.ts` |
-| Current behaviour | Methods do not exist yet |
-| Needed mock | `register()` → return `of(FAKE_JWT)` after 600 ms delay. `forgotPassword()` / `resetPassword()` → return `of(void 0)`. |
-| Mock file | `src/app/core/mocks/auth.mock.ts` |
-
-**Cleanup when backend is ready:**
-- [ ] Replace mock return with real HTTP call in each method
-- [ ] Verify response shape matches and update adapter if needed
+- [ ] Set `NG_APP_MOCK_ENABLED=false` in `.env`
 
 ---
 

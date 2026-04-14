@@ -3,7 +3,44 @@
 @source "./**/*.{html,ts}";
 
 @theme {
-  --font-sans: 'Roboto', 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', 'Roboto', system-ui, sans-serif;
+
+  /* ── Design tokens ─────────────────────────────────── */
+
+  /* Base */
+  --color-bg:              #09090F;
+  --color-surface:         #111118;
+  --color-surface-raised:  #1A1A24;
+  --color-border:          #2A2A38;
+  --color-border-strong:   #3D3D52;
+
+  /* Brand accent */
+  --color-accent:          #00C9A7;
+  --color-accent-hover:    #00B394;
+  --color-accent-muted:    rgba(0,201,167,.13);
+
+  /* Text */
+  --color-text-primary:    #F1F1F5;
+  --color-text-secondary:  #9090A8;
+  --color-text-disabled:   #4A4A60;
+  --color-text-inverse:    #09090F;
+
+  /* Semantic */
+  --color-success:  #22C55E;
+  --color-warning:  #F59E0B;
+  --color-error:    #EF4444;
+  --color-info:     #3B82F6;
+
+  /* Seat states */
+  --color-seat-free:         #2A2A38;
+  --color-seat-selected:     #00C9A7;
+  --color-seat-occupied:     #3D2A2A;
+  --color-seat-preferential: #7C3AED;
+
+  /* Shadows */
+  --shadow-card:  0 4px 24px rgba(0,0,0,.45);
+  --shadow-modal: 0 8px 48px rgba(0,0,0,.70);
+  --shadow-glow:  0 0 24px rgba(0,201,167,.25);
 }
 
 @layer base {
@@ -22,6 +59,9 @@
     margin: 0;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
   }
 
   img,
@@ -39,4 +79,10 @@
   select {
     font: inherit;
   }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-bg); }
+  ::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }
 }

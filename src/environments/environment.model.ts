@@ -23,4 +23,8 @@ export interface AppEnvironment {
     demoPassword: string;
     tokenStorageKey: string;
   };
+  mock: {
+    /** When true, service methods return fake data instead of calling the backend. */
+    enabled: boolean;
+  };
 }
