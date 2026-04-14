@@ -1,16 +1,14 @@
 import { type Routes } from '@angular/router';
 
-import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
-import { environment } from '../environments/environment';
-
-const indexRoute = environment.app.indexPage;
 
 export const routes: Routes = [
+  // ── Root — public catalog ────────────────────────────
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: indexRoute,
+    loadComponent: () =>
+      import('./features/catalog/catalog-page.component').then((c) => c.CatalogPageComponent),
   },
 
   // ── Auth ────────────────────────────────────────────
@@ -45,16 +43,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/landing/landing-page.component').then((c) => c.LandingPageComponent),
   },
-
-  // ── Protected (user) ────────────────────────────────
   {
     path: 'catalog',
-    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/catalog/catalog-page.component').then((c) => c.CatalogPageComponent),
   },
 
-  // ── Admin ────────────────────────────────────────────
+  // ── Admin (protected) ────────────────────────────────
   {
     path: 'admin',
     canActivate: [adminGuard],
@@ -65,6 +60,6 @@ export const routes: Routes = [
   // ── Catch-all ────────────────────────────────────────
   {
     path: '**',
-    redirectTo: indexRoute,
+    redirectTo: '',
   },
 ];

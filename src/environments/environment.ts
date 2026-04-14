@@ -49,7 +49,6 @@ const runtimeEnv = {
   NG_APP_AUTH_TOKEN_STORAGE_KEY: readEnv('NG_APP_AUTH_TOKEN_STORAGE_KEY'),
   NG_APP_MOCK_ENABLED: readEnv('NG_APP_MOCK_ENABLED'),
 };
-
 const parsedEnv = commonEnvSchema.safeParse(runtimeEnv);
 if (!parsedEnv.success) {
   const details = parsedEnv.error.issues
@@ -59,10 +58,10 @@ if (!parsedEnv.success) {
 }
 
 function getIndexPageEnv(value: string): IndexPage {
-  if (value === 'login' || value === 'landing') {
+  if (value === 'catalog' || value === 'landing' || value === 'login') {
     return value;
   }
-  throw new Error(`Invalid NG_APP_INDEX_PAGE: "${value}". Allowed values are "login" or "landing".`);
+  throw new Error(`Invalid NG_APP_INDEX_PAGE: "${value}". Allowed values are "catalog", "landing", or "login".`);
 }
 
 export const environment: AppEnvironment = {

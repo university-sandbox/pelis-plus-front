@@ -1,4 +1,4 @@
-export type IndexPage = 'login' | 'landing';
+export type IndexPage = 'catalog' | 'landing' | 'login';
 
 export interface AppEnvironment {
   production: boolean;
