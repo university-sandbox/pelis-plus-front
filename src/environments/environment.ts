@@ -11,6 +11,10 @@ const commonEnvSchema = z.object({
   NG_APP_INDEX_PAGE: z.string().min(1),
   NG_APP_POST_LOGIN_ROUTE: z.string().min(1),
   NG_APP_BACKEND_BASE_URL: z.string().url(),
+  // TMDB — used while the real backend is not yet available
+  NG_APP_TMDB_BASE_URL: z.string().url().default('https://api.themoviedb.org/3'),
+  NG_APP_TMDB_IMAGE_BASE_URL: z.string().url().default('https://image.tmdb.org/t/p'),
+  NG_APP_TMDB_ACCESS_TOKEN: z.string().min(1),
   NG_APP_AUTH_DEMO_EMAIL: z.string().min(1),
   NG_APP_AUTH_DEMO_PASSWORD: z.string().min(1),
   NG_APP_AUTH_TOKEN_STORAGE_KEY: z.string().min(1),
@@ -33,6 +37,9 @@ const runtimeEnv = {
   NG_APP_INDEX_PAGE: readEnv('NG_APP_INDEX_PAGE'),
   NG_APP_POST_LOGIN_ROUTE: readEnv('NG_APP_POST_LOGIN_ROUTE'),
   NG_APP_BACKEND_BASE_URL: readEnv('NG_APP_BACKEND_BASE_URL'),
+  NG_APP_TMDB_BASE_URL: readEnv('NG_APP_TMDB_BASE_URL'),
+  NG_APP_TMDB_IMAGE_BASE_URL: readEnv('NG_APP_TMDB_IMAGE_BASE_URL'),
+  NG_APP_TMDB_ACCESS_TOKEN: readEnv('NG_APP_TMDB_ACCESS_TOKEN'),
   NG_APP_AUTH_DEMO_EMAIL: readEnv('NG_APP_AUTH_DEMO_EMAIL'),
   NG_APP_AUTH_DEMO_PASSWORD: readEnv('NG_APP_AUTH_DEMO_PASSWORD'),
   NG_APP_AUTH_TOKEN_STORAGE_KEY: readEnv('NG_APP_AUTH_TOKEN_STORAGE_KEY'),
@@ -62,6 +69,11 @@ export const environment: AppEnvironment = {
   },
   backend: {
     baseUrl: parsedEnv.data.NG_APP_BACKEND_BASE_URL,
+  },
+  tmdb: {
+    baseUrl: parsedEnv.data.NG_APP_TMDB_BASE_URL,
+    imageBaseUrl: parsedEnv.data.NG_APP_TMDB_IMAGE_BASE_URL,
+    accessToken: parsedEnv.data.NG_APP_TMDB_ACCESS_TOKEN,
   },
   auth: {
     demoEmail: parsedEnv.data.NG_APP_AUTH_DEMO_EMAIL,

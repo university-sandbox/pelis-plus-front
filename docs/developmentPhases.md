@@ -20,11 +20,12 @@ Check each task off as it is completed.
 2. - [ ] Set up Tailwind CSS v4 and Angular Material theme (define design tokens: colors, spacing, typography)
 3. - [ ] Configure ESLint, Prettier, and Husky pre-commit hooks
 4. - [ ] Set up environment files and `generate-env-ts` script
-5. - [ ] Create `src/core/api/endpoints.ts` — single source of truth for all backend URLs (see `docs/api.md`)
+5. - [ ] Create `src/app/core/api/endpoints.ts` — single source of truth for all URLs (TMDB + backend); see `docs/api.md`
 6. - [ ] Define global routing structure with lazy-loaded feature modules
 7. - [ ] Create `AuthGuard` and `AdminGuard` for protected routes
-8. - [ ] Create JWT interceptor (`src/core/interceptors/auth.interceptor.ts`) — attaches `Authorization` header to every request
-9. - [ ] Create global error interceptor — handles 401, 403, 500 responses uniformly
+8. - [ ] Create JWT interceptor (`src/app/core/interceptors/auth.interceptor.ts`) — attaches `Authorization: Bearer` to every backend request
+9. - [ ] Create TMDB interceptor (`src/app/core/interceptors/tmdb.interceptor.ts`) — attaches TMDB bearer token only to requests matching `environment.tmdb.baseUrl`
+10. - [ ] Create global error interceptor — handles 401 (redirect to login), 403, 500 uniformly
 10. - [ ] Create shared layout components: `Navbar`, `Footer`, `PageWrapper`
 11. - [ ] Create shared UI primitives: `SkeletonLoader`, `EmptyState`, `ErrorState`, `ConfirmDialog`
 12. - [ ] Set up Vitest unit test configuration

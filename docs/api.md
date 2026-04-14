@@ -1,180 +1,276 @@
-# API Endpoints — Pelis Plus
+# API Reference — Pelis Plus
 
-This file is the single source of truth for every backend endpoint the frontend expects.
-It maps directly to `src/core/api/endpoints.ts`.
-
-**Current status**: frontend-only development — all services return mock data.
-When the real backend is ready, update `src/core/api/endpoints.ts` and swap the mock
-implementations in each service for real `httpResource()` / `HttpClient` calls.
+This file documents every external data source the frontend talks to.
+The single source of truth for all URLs is **`src/app/core/api/endpoints.ts`**.
+Never hardcode a URL anywhere else — import from that file.
 
 ---
 
-## Base URL
+## Data Source Strategy
+
+The app uses two data sources in parallel:
+
+| Domain | Source now | Source after backend |
+|--------|-----------|---------------------|
+| Movie catalog, search, genres, videos | **TMDB API** | Pelis Plus backend |
+| Auth, screenings, seats, snacks, orders, memberships, admin | **Mock data in services** | Pelis Plus backend |
+
+When the backend is ready, the migration is intentionally minimal:
+1. Replace `TMDB.MOVIES.*` references in `MovieService` with `BACKEND.MOVIES.*`.
+2. Update the response adapter in `MovieService` if the backend shape differs from TMDB's.
+3. Remove the `TmdbInterceptor` from `app.config.ts`.
+4. Everything else (auth, orders, etc.) already points to `BACKEND.*` — just remove the mock return and uncomment the real HTTP call.
+
+---
+
+## Environment variables required
+
+Add these to your `.env` file:
+
+```bash
+# Pelis Plus backend (mocked until backend is ready — must still be a valid URL)
+NG_APP_BACKEND_BASE_URL=http://localhost:3000
+
+# TMDB (active data source for movie catalog)
+NG_APP_TMDB_BASE_URL=https://api.themoviedb.org/3
+NG_APP_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p
+NG_APP_TMDB_ACCESS_TOKEN=your_tmdb_bearer_token_here
+```
+
+Get your TMDB access token at: https://www.themoviedb.org/settings/api
+
+---
+
+## TMDB API (active — movie catalog)
+
+Base URL: `https://api.themoviedb.org/3`
+Auth: `Authorization: Bearer <NG_APP_TMDB_ACCESS_TOKEN>` — injected by `TmdbInterceptor`.
+Docs: https://developer.themoviedb.org/reference/getting-started
+
+### Interceptor
+
+`TmdbInterceptor` (`src/app/core/interceptors/tmdb.interceptor.ts`) intercepts every
+request whose URL starts with `environment.tmdb.baseUrl` and attaches the bearer token.
+No service needs to handle auth headers manually for TMDB.
+
+### Image URLs
 
 ```
-// src/core/api/endpoints.ts
-export const API_BASE = environment.apiUrl; // set via environment file
+TMDB.imageUrl(size, filePath)
+// e.g. TMDB.imageUrl('w342', movie.poster_path)
+// → https://image.tmdb.org/t/p/w342/abc123.jpg
 ```
 
----
+| Size token | Use case |
+|-----------|----------|
+| `w185` | Thumbnail |
+| `w342` | Movie card (catalog, rows) |
+| `w500` | Movie card (large / hover) |
+| `w780` | Detail page poster |
+| `w1280` | Hero backdrop |
+| `original` | Download, print |
 
-## Auth
+### Movie endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/auth/register` | Register a new user |
-| `POST` | `/auth/login` | Log in, returns JWT |
-| `POST` | `/auth/logout` | Invalidate session |
-| `POST` | `/auth/forgot-password` | Send password reset email |
-| `POST` | `/auth/reset-password` | Set new password via token |
-| `GET` | `/auth/me` | Get current authenticated user |
+| Constant | Method | TMDB path | Query params | Backend equivalent |
+|----------|--------|-----------|--------------|--------------------|
+| `TMDB.MOVIES.NOW_PLAYING` | GET | `/movie/now_playing` | `language`, `page`, `region` | `BACKEND.MOVIES.LIST?status=now_playing` |
+| `TMDB.MOVIES.UPCOMING` | GET | `/movie/upcoming` | `language`, `page`, `region` | `BACKEND.MOVIES.LIST?status=upcoming` |
+| `TMDB.MOVIES.POPULAR` | GET | `/movie/popular` | `language`, `page`, `region` | `BACKEND.MOVIES.LIST?sort=popular` |
+| `TMDB.MOVIES.DETAIL(id)` | GET | `/movie/{id}` | `language`, `append_to_response` | `BACKEND.MOVIES.DETAIL(id)` |
+| `TMDB.MOVIES.VIDEOS(id)` | GET | `/movie/{id}/videos` | `language` | included in `BACKEND.MOVIES.DETAIL(id)` |
 
----
+### Search
 
-## Movies
+| Constant | Method | TMDB path | Query params | Backend equivalent |
+|----------|--------|-----------|--------------|--------------------|
+| `TMDB.SEARCH.MOVIES` | GET | `/search/movie` | `query` *(required)*, `language`, `page` | `BACKEND.MOVIES.LIST?search=` |
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/movies` | List all active movies (supports `?genre=&format=&search=`) |
-| `GET` | `/movies/:id` | Movie detail |
-| `GET` | `/movies/:id/screenings` | All screenings for a movie (supports `?venueId=&date=&format=`) |
+### Genres
 
-### Admin — Movies
+| Constant | Method | TMDB path | Query params | Backend equivalent |
+|----------|--------|-----------|--------------|--------------------|
+| `TMDB.GENRES.LIST` | GET | `/genre/movie/list` | `language` | `BACKEND.MOVIES.GENRES` |
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/admin/movies` | List all movies including inactive |
-| `POST` | `/admin/movies` | Create a movie |
-| `PUT` | `/admin/movies/:id` | Update a movie |
-| `PATCH` | `/admin/movies/:id/status` | Toggle active / inactive |
+### Discover (filtered queries)
 
----
+| Constant | Method | TMDB path | Key query params | Backend equivalent |
+|----------|--------|-----------|------------------|--------------------|
+| `TMDB.DISCOVER.MOVIES` | GET | `/discover/movie` | `with_genres`, `sort_by`, `page`, `primary_release_year`, `vote_average.gte` | `BACKEND.MOVIES.LIST?genre=&sort=` |
 
-## Venues & Rooms
+### TMDB response shape → internal `Movie` model mapping
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/venues` | List all venues |
-| `GET` | `/venues/:id/rooms` | List rooms for a venue |
+```
+TMDB field           → App model field
+─────────────────────────────────────────
+id                   → id
+title                → title
+overview             → synopsis
+poster_path          → posterPath   (use TMDB.imageUrl('w342', value))
+backdrop_path        → backdropPath (use TMDB.imageUrl('w1280', value))
+genre_ids            → genreIds     (resolve names via TMDB.GENRES.LIST)
+vote_average         → rating
+release_date         → releaseDate
+original_language    → language
+runtime              → duration     (only in DETAIL response)
+videos.results[]     → trailers     (filter by type === 'Trailer', site === 'YouTube')
+```
 
-### Admin — Rooms
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/admin/rooms` | List all rooms |
-| `POST` | `/admin/rooms` | Create a room |
-| `PUT` | `/admin/rooms/:id` | Update a room |
-| `PATCH` | `/admin/rooms/:id/status` | Toggle active / inactive |
-
----
-
-## Screenings
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/screenings/:id` | Screening detail with availability |
-| `GET` | `/screenings/:id/seats` | Seat map for a screening |
-
-### Admin — Screenings
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/admin/screenings` | List all screenings (supports `?date=&status=&movieId=`) |
-| `POST` | `/admin/screenings` | Create a screening |
-| `PUT` | `/admin/screenings/:id` | Update a screening |
-| `PATCH` | `/admin/screenings/:id/cancel` | Cancel a screening (releases reserved seats) |
+Adapter lives in `MovieService`. When migrating to backend, update only this adapter.
 
 ---
 
-## Seats
+## Pelis Plus Backend (mocked — will be real endpoints)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/screenings/:id/seats/reserve` | Temporarily reserve seats (returns expiry timestamp) |
-| `DELETE` | `/screenings/:id/seats/reserve` | Release a temporary reservation |
+Base URL: `environment.backend.baseUrl`
+Auth: `Authorization: Bearer <jwt>` — injected globally by `AuthInterceptor`.
+
+### Auth
+
+| Constant | Method | Path | Body / Params | Response |
+|----------|--------|------|---------------|----------|
+| `BACKEND.AUTH.LOGIN` | POST | `/auth/login` | `{ email, password }` | `{ token }` |
+| `BACKEND.AUTH.REGISTER` | POST | `/auth/register` | `{ name, email, password }` | `{ token }` |
+| `BACKEND.AUTH.LOGOUT` | POST | `/auth/logout` | — | `204` |
+| `BACKEND.AUTH.FORGOT_PASSWORD` | POST | `/auth/forgot-password` | `{ email }` | `204` |
+| `BACKEND.AUTH.RESET_PASSWORD` | POST | `/auth/reset-password` | `{ token, newPassword }` | `204` |
+| `BACKEND.AUTH.ME` | GET | `/auth/me` | — | `User` |
+
+### Movies (backend version)
+
+| Constant | Method | Path | Params | Response |
+|----------|--------|------|--------|----------|
+| `BACKEND.MOVIES.LIST` | GET | `/movies` | `?genre=&format=&search=&status=&page=` | `PaginatedList<Movie>` |
+| `BACKEND.MOVIES.DETAIL(id)` | GET | `/movies/:id` | — | `Movie` |
+| `BACKEND.MOVIES.SCREENINGS(id)` | GET | `/movies/:id/screenings` | `?venueId=&date=&format=` | `Screening[]` |
+| `BACKEND.MOVIES.GENRES` | GET | `/movies/genres` | — | `Genre[]` |
+
+### Venues & Rooms
+
+| Constant | Method | Path | Response |
+|----------|--------|------|----------|
+| `BACKEND.VENUES.LIST` | GET | `/venues` | `Venue[]` |
+| `BACKEND.VENUES.ROOMS(venueId)` | GET | `/venues/:id/rooms` | `Room[]` |
+
+### Screenings
+
+| Constant | Method | Path | Body / Params | Response |
+|----------|--------|------|---------------|----------|
+| `BACKEND.SCREENINGS.DETAIL(id)` | GET | `/screenings/:id` | — | `Screening` |
+| `BACKEND.SCREENINGS.SEATS(id)` | GET | `/screenings/:id/seats` | — | `SeatMap` |
+| `BACKEND.SCREENINGS.RESERVE_SEATS(id)` | POST | `/screenings/:id/seats/reserve` | `{ seatIds[] }` | `{ expiresAt }` |
+| `BACKEND.SCREENINGS.RELEASE_SEATS(id)` | DELETE | `/screenings/:id/seats/reserve` | — | `204` |
+
+### Snacks
+
+| Constant | Method | Path | Params | Response |
+|----------|--------|------|--------|----------|
+| `BACKEND.SNACKS.LIST` | GET | `/snacks` | `?category=` | `Snack[]` |
+| `BACKEND.SNACKS.CATEGORIES` | GET | `/snacks/categories` | — | `string[]` |
+
+### Orders & Checkout
+
+| Constant | Method | Path | Body | Response |
+|----------|--------|------|------|----------|
+| `BACKEND.ORDERS.CREATE` | POST | `/orders` | `CartPayload` | `{ orderId, formToken }` |
+| `BACKEND.ORDERS.CONFIRM(id)` | POST | `/orders/:id/confirm` | `{ paymentResult }` | `Order` |
+| `BACKEND.ORDERS.DETAIL(id)` | GET | `/orders/:id` | — | `Order` |
+| `BACKEND.ORDERS.MY_ORDERS` | GET | `/orders/me` | — | `Order[]` |
+
+### Tickets
+
+| Constant | Method | Path | Response |
+|----------|--------|------|----------|
+| `BACKEND.TICKETS.MY_TICKETS` | GET | `/tickets/me` | `Ticket[]` |
+| `BACKEND.TICKETS.DETAIL(id)` | GET | `/tickets/:id` | `Ticket` |
+
+### Memberships
+
+| Constant | Method | Path | Body | Response |
+|----------|--------|------|------|----------|
+| `BACKEND.MEMBERSHIPS.PLANS` | GET | `/memberships/plans` | — | `Plan[]` |
+| `BACKEND.MEMBERSHIPS.MY_PLAN` | GET | `/memberships/me` | — | `ActiveMembership` |
+| `BACKEND.MEMBERSHIPS.MY_BENEFITS` | GET | `/memberships/me/benefits` | — | `Benefit[]` |
+| `BACKEND.MEMBERSHIPS.SUBSCRIBE` | POST | `/memberships/subscribe` | `{ planId }` | `{ orderId, formToken }` |
+| `BACKEND.MEMBERSHIPS.CONFIRM` | POST | `/memberships/me/confirm` | `{ paymentResult }` | `ActiveMembership` |
+| `BACKEND.MEMBERSHIPS.CANCEL` | PATCH | `/memberships/me/cancel` | — | `204` |
+
+### User Profile
+
+| Constant | Method | Path | Body | Response |
+|----------|--------|------|------|----------|
+| `BACKEND.USERS.UPDATE_PROFILE` | PUT | `/users/me` | `{ name, email }` | `User` |
+| `BACKEND.USERS.CHANGE_PASSWORD` | PUT | `/users/me/password` | `{ current, newPassword }` | `204` |
+
+### Admin
+
+All admin routes are protected by `AdminGuard` client-side and validated server-side.
+
+#### Movies
+
+| Constant | Method | Path |
+|----------|--------|------|
+| `BACKEND.ADMIN.MOVIES.LIST` | GET | `/admin/movies` |
+| `BACKEND.ADMIN.MOVIES.CREATE` | POST | `/admin/movies` |
+| `BACKEND.ADMIN.MOVIES.UPDATE(id)` | PUT | `/admin/movies/:id` |
+| `BACKEND.ADMIN.MOVIES.TOGGLE_STATUS(id)` | PATCH | `/admin/movies/:id/status` |
+
+#### Rooms
+
+| Constant | Method | Path |
+|----------|--------|------|
+| `BACKEND.ADMIN.ROOMS.LIST` | GET | `/admin/rooms` |
+| `BACKEND.ADMIN.ROOMS.CREATE` | POST | `/admin/rooms` |
+| `BACKEND.ADMIN.ROOMS.UPDATE(id)` | PUT | `/admin/rooms/:id` |
+| `BACKEND.ADMIN.ROOMS.TOGGLE_STATUS(id)` | PATCH | `/admin/rooms/:id/status` |
+
+#### Screenings
+
+| Constant | Method | Path |
+|----------|--------|------|
+| `BACKEND.ADMIN.SCREENINGS.LIST` | GET | `/admin/screenings` |
+| `BACKEND.ADMIN.SCREENINGS.CREATE` | POST | `/admin/screenings` |
+| `BACKEND.ADMIN.SCREENINGS.UPDATE(id)` | PUT | `/admin/screenings/:id` |
+| `BACKEND.ADMIN.SCREENINGS.CANCEL(id)` | PATCH | `/admin/screenings/:id/cancel` |
+
+#### Snacks
+
+| Constant | Method | Path |
+|----------|--------|------|
+| `BACKEND.ADMIN.SNACKS.LIST` | GET | `/admin/snacks` |
+| `BACKEND.ADMIN.SNACKS.CREATE` | POST | `/admin/snacks` |
+| `BACKEND.ADMIN.SNACKS.UPDATE(id)` | PUT | `/admin/snacks/:id` |
+| `BACKEND.ADMIN.SNACKS.TOGGLE_STATUS(id)` | PATCH | `/admin/snacks/:id/status` |
+
+#### Orders
+
+| Constant | Method | Path |
+|----------|--------|------|
+| `BACKEND.ADMIN.ORDERS.LIST` | GET | `/admin/orders` |
+| `BACKEND.ADMIN.ORDERS.DETAIL(id)` | GET | `/admin/orders/:id` |
+
+#### Users
+
+| Constant | Method | Path |
+|----------|--------|------|
+| `BACKEND.ADMIN.USERS.LIST` | GET | `/admin/users` |
+| `BACKEND.ADMIN.USERS.DETAIL(id)` | GET | `/admin/users/:id` |
+| `BACKEND.ADMIN.USERS.TOGGLE_STATUS(id)` | PATCH | `/admin/users/:id/status` |
 
 ---
 
-## Snacks
+## Migration checklist (TMDB → backend)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/snacks` | List all active snacks (supports `?category=`) |
-| `GET` | `/snacks/categories` | List all snack categories |
+When the backend is implemented, complete these steps in order:
 
-### Admin — Snacks
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/admin/snacks` | List all snacks including inactive |
-| `POST` | `/admin/snacks` | Create a snack |
-| `PUT` | `/admin/snacks/:id` | Update a snack |
-| `PATCH` | `/admin/snacks/:id/status` | Toggle active / inactive |
-
----
-
-## Orders & Checkout
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/orders` | Create an order from the cart, returns Izipay `formToken` |
-| `POST` | `/orders/:id/confirm` | Verify Izipay `paymentResult` server-side and confirm the order |
-| `GET` | `/orders/:id` | Order detail |
-| `GET` | `/orders/me` | Current user's order history |
-
-### Admin — Orders
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/admin/orders` | List all orders (supports `?date=&status=&movieId=`) |
-| `GET` | `/admin/orders/:id` | Order detail |
-
----
-
-## Tickets
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/tickets/me` | Current user's ticket list |
-| `GET` | `/tickets/:id` | Ticket detail with QR payload |
-
----
-
-## Memberships
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/memberships/plans` | List available membership plans |
-| `GET` | `/memberships/me` | Current user's active membership |
-| `POST` | `/memberships/subscribe` | Subscribe to a plan (creates order via Izipay) |
-| `POST` | `/memberships/me/confirm` | Confirm membership payment (Izipay callback) |
-| `PATCH` | `/memberships/me/cancel` | Cancel current membership |
-| `GET` | `/memberships/me/benefits` | List benefits with consumed / remaining counts |
-
----
-
-## Users (Admin)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/admin/users` | List all users |
-| `GET` | `/admin/users/:id` | User detail |
-| `PATCH` | `/admin/users/:id/status` | Toggle user active / inactive |
-
----
-
-## User Profile
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `PUT` | `/users/me` | Update profile (name, email) |
-| `PUT` | `/users/me/password` | Change password |
-
----
-
-## Notes for implementation
-
-- All authenticated endpoints require `Authorization: Bearer <token>` header — handled globally by the JWT interceptor in `src/core/interceptors/auth.interceptor.ts`.
-- All admin endpoints require the user role to be `admin` — enforced by `AdminGuard` on the route and validated server-side.
-- Temporary seat reservations expire after a configurable TTL (suggested: 10 minutes). The frontend must display a countdown and release the reservation if the user abandons checkout.
-- Izipay payment results must always be **verified server-side** via `/orders/:id/confirm` before the order status is updated. Never trust the client-side result alone.
+- [ ] Backend implements `GET /movies` with same query params as documented above
+- [ ] Backend implements `GET /movies/:id` including a `videos` array (trailers)
+- [ ] Verify backend response matches `Movie` model or update `MovieService` adapter
+- [ ] Replace `TMDB.MOVIES.*` with `BACKEND.MOVIES.*` in `MovieService`
+- [ ] Replace `TMDB.SEARCH.MOVIES` with `BACKEND.MOVIES.LIST?search=` in `MovieService`
+- [ ] Replace `TMDB.GENRES.LIST` with `BACKEND.MOVIES.GENRES` in `GenreService`
+- [ ] Replace `TMDB.DISCOVER.MOVIES` with `BACKEND.MOVIES.LIST` in `MovieService`
+- [ ] Remove `TmdbInterceptor` from `app.config.ts`
+- [ ] Remove `TMDB` block from `endpoints.ts`
+- [ ] Remove `tmdb` block from `environment.model.ts` and `environment.ts`
+- [ ] Remove `NG_APP_TMDB_*` vars from `.env`

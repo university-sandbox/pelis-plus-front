@@ -10,6 +10,14 @@ export interface AppEnvironment {
   backend: {
     baseUrl: string;
   };
+  tmdb: {
+    /** https://api.themoviedb.org/3 */
+    baseUrl: string;
+    /** https://image.tmdb.org/t/p */
+    imageBaseUrl: string;
+    /** Bearer token from TMDB developer dashboard */
+    accessToken: string;
+  };
   auth: {
     demoEmail: string;
     demoPassword: string;

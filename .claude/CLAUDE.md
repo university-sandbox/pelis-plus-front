@@ -101,9 +101,10 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 
 ## API Endpoint Management
 
-- The source of truth for all backend URLs is `src/core/api/endpoints.ts`.
-- Group endpoints by feature domain. Each entry is a function or string constant — never a hardcoded URL inside a service method.
-- See `docs/api.md` for the full catalogue of expected endpoints.
+- The source of truth for every URL is `src/app/core/api/endpoints.ts`. Import `TMDB` or `BACKEND` from there — never write a URL string anywhere else.
+- Movie catalog data comes from **TMDB** (`TMDB.MOVIES.*`) while the backend is not ready. Everything else (auth, orders, etc.) uses `BACKEND.*` constants pointing to mock returns in services.
+- `TmdbInterceptor` (`src/app/core/interceptors/tmdb.interceptor.ts`) automatically attaches the TMDB bearer token to any request whose URL starts with `environment.tmdb.baseUrl`. Services must not add auth headers manually for TMDB requests.
+- See `docs/api.md` for the full endpoint catalogue and the step-by-step TMDB → backend migration checklist.
 
 ## Testing
 
