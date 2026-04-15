@@ -1,0 +1,31 @@
+# Dependencies — reinstalled inside the image
+node_modules/
+
+# Build output — created inside the image
+dist/
+
+# Local env files — never bake secrets into the image layer
+.env
+.env.*
+!.env.example
+
+# Dev / test artifacts
+e2e/
+coverage/
+.angular/
+
+# Git & IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Docs & references (not needed at runtime)
+docs/
+pelis-plus-references/
+*.md
+!README.md
+
+# OS noise
+.DS_Store
+Thumbs.db
