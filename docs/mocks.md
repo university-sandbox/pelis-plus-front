@@ -83,69 +83,260 @@ mock: { enabled: parsedEnv.data.NG_APP_MOCK_ENABLED },
 
 ---
 
-### MOVIES — `MovieService` (entire service, not yet created)
+### MOVIES — `MovieService`
 
 | Field | Value |
 |-------|-------|
-| File | `src/app/core/services/movie.service.ts` — not yet created |
+| File | `src/app/core/services/movie.service.ts` |
 | Data source | **TMDB** (not mocked — real HTTP calls via `TMDB.*` endpoints) |
-| Auth | `TmdbInterceptor` attaches bearer token — not yet created |
+| Auth | `TmdbInterceptor` attaches bearer token automatically |
 | Note | TMDB is the real data source for movies, not a mock. No cleanup needed here beyond the TMDB → backend migration described in `docs/api.md`. |
 
 ---
 
-### SCREENINGS — `ScreeningService` (not yet created)
+### SCREENINGS — `ScreeningService` ✅ Implemented
 
 | Field | Value |
 |-------|-------|
-| Needed mock | Return a static list of 3–4 screenings per movie with varied dates/times/formats |
-| Mock file | `src/app/core/mocks/screening.mock.ts` |
+| File | `src/app/core/services/screening.service.ts` |
+| Mock data | `src/app/core/mocks/screening.mock.ts` — `buildMockScreenings(movieId, title)` |
+| Current behaviour | Returns 6 screenings per movie across 3 venues and 4 dates. Includes varied formats (2D, 3D, IMAX) and one sold-out screening. |
+| Latency simulation | `delay(400)` |
+| Status | ✅ Implemented with `environment.mock.enabled` guard |
 
-**Cleanup:** replace `of(MOCK_SCREENINGS)` with `BACKEND.SCREENINGS.*` HTTP calls.
+**Expected backend shape** (`GET /movies/:id/screenings`):
+```json
+[
+  {
+    "id": "sc-123-1",
+    "movieId": 123,
+    "movieTitle": "Dune: Part Two",
+    "venue": { "id": "v1", "name": "PelisPlus Miraflores", "address": "...", "city": "Lima" },
+    "room": { "id": "r1", "venueId": "v1", "name": "Sala 1", "capacity": 80, "rows": 8, "cols": 10 },
+    "date": "2024-04-15",
+    "time": "15:30",
+    "format": "standard",
+    "price": 22,
+    "availableSeats": 48,
+    "totalSeats": 80,
+    "status": "active"
+  }
+]
+```
+
+**Cleanup:** remove `if (environment.mock.enabled)` block and import in `ScreeningService`. Replace with real HTTP calls to `BACKEND.MOVIES.SCREENINGS(movieId)`.
 
 ---
 
-### SEATS — `SeatService` (not yet created)
+### VENUES — `ScreeningService.getVenues()` ✅ Implemented
 
 | Field | Value |
 |-------|-------|
-| Needed mock | Return a 10×8 seat grid with ~20% occupied seats randomly pre-set |
-| Mock file | `src/app/core/mocks/seat.mock.ts` |
+| File | `src/app/core/services/screening.service.ts` |
+| Mock data | `src/app/core/mocks/venue.mock.ts` — `MOCK_VENUES` |
+| Current behaviour | Returns 3 static venues in Lima. |
+| Status | ✅ Implemented |
 
-**Cleanup:** replace with `BACKEND.SCREENINGS.SEATS(id)` HTTP call.
+**Expected backend shape** (`GET /venues`):
+```json
+[{ "id": "v1", "name": "PelisPlus Miraflores", "address": "Av. Larco 345", "city": "Lima" }]
+```
+
+**Cleanup:** replace with `BACKEND.VENUES.LIST` HTTP call in a dedicated `VenueService`.
 
 ---
 
-### SNACKS — `SnackService` (not yet created)
+### SEATS — `SeatService` ✅ Implemented
 
 | Field | Value |
 |-------|-------|
-| Needed mock | Return 8–12 static products across 4 categories |
-| Mock file | `src/app/core/mocks/snack.mock.ts` |
+| File | `src/app/core/services/seat.service.ts` |
+| Mock data | `src/app/core/mocks/seat.mock.ts` — `buildMockSeatMap(screeningId)` |
+| Current behaviour | Returns 10-column × 8-row grid. ~20% occupied (hardcoded IDs). Rows D–E are preferential. |
+| Latency simulation | `delay(400)` |
+| Status | ✅ Implemented with `environment.mock.enabled` guard |
 
-**Cleanup:** replace with `BACKEND.SNACKS.LIST` HTTP call.
+**Expected backend shape** (`GET /screenings/:id/seats`):
+```json
+{
+  "screeningId": "sc-123-1",
+  "rows": ["A","B","C","D","E","F","G","H"],
+  "cols": [1,2,3,4,5,6,7,8,9,10],
+  "seats": [
+    [
+      { "id": "A1", "row": "A", "col": 1, "status": "free", "type": "standard" },
+      ...
+    ]
+  ]
+}
+```
+
+`status` values: `"free"` | `"occupied"` | `"reserved"` (reserved = temp lock by another user)
+`type` values: `"standard"` | `"preferential"`
+
+**Cleanup:** replace `buildMockSeatMap()` with `BACKEND.SCREENINGS.SEATS(screeningId)` HTTP call.
 
 ---
 
-### ORDERS — `OrderService` (not yet created)
+### SNACKS — `SnackService` ✅ Implemented
 
 | Field | Value |
 |-------|-------|
-| Needed mock | `createOrder()` → return `{ orderId: 'mock-001', formToken: 'FAKE_TOKEN' }`. Izipay sandbox will be used for actual payment UI even in mock mode. |
-| Mock file | `src/app/core/mocks/order.mock.ts` |
+| File | `src/app/core/services/snack.service.ts` |
+| Mock data | `src/app/core/mocks/snack.mock.ts` — `MOCK_SNACKS` (11 products, 5 categories) |
+| Current behaviour | Returns all active snacks, supports category filter. |
+| Latency simulation | `delay(400)` |
+| Status | ✅ Implemented with `environment.mock.enabled` guard |
 
-**Cleanup:** replace with `BACKEND.ORDERS.CREATE` POST call.
+**Expected backend shape** (`GET /snacks?category=popcorn`):
+```json
+[
+  {
+    "id": "sn-1",
+    "name": "Canchita Clásica",
+    "description": "...",
+    "category": "popcorn",
+    "price": 12,
+    "image": null,
+    "status": "active",
+    "options": [{ "label": "Tamaño", "choices": ["Pequeño","Mediano","Grande"] }]
+  }
+]
+```
+
+**Cleanup:** replace `MOCK_SNACKS` filter with `BACKEND.SNACKS.LIST` HTTP call.
 
 ---
 
-### MEMBERSHIPS — `MembershipService` (not yet created)
+### ORDERS — `OrderService` ✅ Implemented
 
 | Field | Value |
 |-------|-------|
-| Needed mock | Return 3 static plans (Plata, Oro, Black). `getMyPlan()` returns `null` (no active plan). |
-| Mock file | `src/app/core/mocks/membership.mock.ts` |
+| File | `src/app/core/services/order.service.ts` |
+| Mock data | `src/app/core/mocks/order.mock.ts` — `MOCK_CREATE_ORDER_RESPONSE`, `MOCK_ORDER` |
+| Current behaviour | `createOrder()` returns a fake `{ orderId, formToken }`. `confirmOrder()` returns a confirmed order immediately (skips real Izipay). |
+| Latency simulation | `delay(600)` on create, `delay(400)` on confirm |
+| Status | ✅ Implemented with `environment.mock.enabled` guard |
 
-**Cleanup:** replace with `BACKEND.MEMBERSHIPS.*` HTTP calls.
+**Expected backend shape** (`POST /orders`):
+- Request: `{ tickets: CartTicket[], snacks: CartSnackItem[], membershipDiscount: number }`
+- Response: `{ orderId: string, formToken: string }` (Izipay form token)
+
+**`POST /orders/:id/confirm`**:
+- Request: `{ paymentResult: object }` (Izipay callback payload)
+- Response: `Order` object
+
+**Cleanup:**
+1. Implement real `createOrder()` POST to `BACKEND.ORDERS.CREATE`
+2. Load Izipay SDK, mount embedded form using `formToken`
+3. On Izipay callback, call `confirmOrder()` with `paymentResult`
+4. Remove mock blocks
+
+---
+
+### TICKETS — `TicketService` ✅ Implemented
+
+| Field | Value |
+|-------|-------|
+| File | `src/app/core/services/ticket.service.ts` |
+| Mock data | `src/app/core/mocks/ticket.mock.ts` — `MOCK_TICKETS` (1 demo ticket) |
+| Current behaviour | `getMyTickets()` returns 1 demo ticket. `buildTicketsFromOrder()` constructs ticket objects from cart data for immediate display on `ConfirmationPage`. |
+| Status | ✅ Implemented with `environment.mock.enabled` guard |
+
+**Expected backend shape** (`GET /tickets/me`):
+```json
+[
+  {
+    "id": "tk-001",
+    "orderId": "order-001",
+    "bookingCode": "PLX-2024-001",
+    "userName": "Usuario Demo",
+    "movie": "Dune: Part Two",
+    "moviePosterPath": "/abc123.jpg",
+    "venue": "PelisPlus Miraflores",
+    "room": "Sala IMAX",
+    "date": "2024-04-20",
+    "time": "19:00",
+    "seat": "D5",
+    "format": "imax",
+    "totalPaid": 38,
+    "qrData": "PLX-2024-001",
+    "issuedAt": "2024-04-15T10:00:00Z"
+  }
+]
+```
+
+**Cleanup:** replace `MOCK_TICKETS` with real `BACKEND.TICKETS.MY_TICKETS` HTTP call. Remove `buildTicketsFromOrder()` helper.
+
+---
+
+### MEMBERSHIPS — `MembershipService` ✅ Implemented
+
+| Field | Value |
+|-------|-------|
+| File | `src/app/core/services/membership.service.ts` |
+| Mock data | `src/app/core/mocks/membership.mock.ts` — `MOCK_MEMBERSHIP_PLANS` (Plata/Oro/Black) |
+| Current behaviour | `getPlans()` returns 3 static plans. `getMyPlan()` returns `null` (no active plan). `subscribe()` + `confirmSubscription()` mock a successful Izipay flow. |
+| Latency simulation | `delay(400)` |
+| Status | ✅ Implemented with `environment.mock.enabled` guard |
+
+**Expected backend shapes:**
+
+`GET /memberships/plans`:
+```json
+[{
+  "id": "plan-oro",
+  "name": "Oro",
+  "price": 59,
+  "validity": "1 mes",
+  "discountPercentage": 20,
+  "ticketsPerMonth": 4,
+  "recommended": true,
+  "color": "#F59E0B",
+  "benefits": [{ "label": "4 entradas al mes", "description": "..." }]
+}]
+```
+
+`GET /memberships/me`:
+```json
+{
+  "planId": "plan-oro",
+  "planName": "Oro",
+  "expiresAt": "2024-05-15",
+  "ticketsUsed": 1,
+  "ticketsTotal": 4,
+  "discountUsed": 22
+}
+```
+Returns `null` (or 404) when user has no active plan.
+
+**Cleanup:** replace all mock blocks with `BACKEND.MEMBERSHIPS.*` HTTP calls.
+
+---
+
+### USER — `UserService` ✅ Implemented
+
+| Field | Value |
+|-------|-------|
+| File | `src/app/core/services/user.service.ts` |
+| Mock data | `src/app/core/mocks/user.mock.ts` — `MOCK_USER_PROFILE` |
+| Current behaviour | `getProfile()` returns static demo user. `updateProfile()` merges changes onto mock. `changePassword()` returns success after delay. |
+| Latency simulation | `delay(300–500)` |
+| Status | ✅ Implemented with `environment.mock.enabled` guard |
+
+**Expected backend shape** (`GET /auth/me`):
+```json
+{
+  "id": "user-123",
+  "name": "Usuario Demo",
+  "email": "demo@pelisplus.com",
+  "avatar": null,
+  "membership": null,
+  "createdAt": "2024-01-15T10:00:00Z"
+}
+```
+
+**Cleanup:** replace `MOCK_USER_PROFILE` with `BACKEND.AUTH.ME` HTTP call.
 
 ---
 
@@ -164,9 +355,9 @@ mock: { enabled: parsedEnv.data.NG_APP_MOCK_ENABLED },
 
 | Field | Value |
 |-------|-------|
-| File | `src/app/core/guards/auth.guard.ts` — not yet created |
-| Needed mock | Check if a JWT string exists in `localStorage` at `environment.auth.tokenStorageKey`. If yes → allow. If no → redirect to `/login`. The token itself is fake (not validated against a real backend). |
-| Note | This is sufficient for frontend dev. The guard only checks presence, not validity. |
+| File | `src/app/core/guards/auth.guard.ts` ✅ created |
+| Current mock | Checks if a JWT string exists in `localStorage` at `environment.auth.tokenStorageKey`. If yes → allow. If no → redirect to `/login`. Token itself not validated against backend. |
+| Note | Sufficient for frontend dev. Guard only checks presence, not validity. |
 
 **Cleanup:** no code change needed in the guard itself. Once the backend validates JWTs on every API call, invalid/expired tokens will return 401, which the global error interceptor redirects to `/login`.
 

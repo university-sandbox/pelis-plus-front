@@ -1,0 +1,498 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DecimalPipe, NgOptimizedImage, SlicePipe } from '@angular/common';
+import {
+  LucideAngularModule,
+  Star,
+  Clock,
+  Globe,
+  Play,
+  ArrowLeft,
+  ShoppingCart,
+  Calendar,
+  MapPin,
+  ChevronRight,
+} from 'lucide-angular';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+
+import { MovieService } from '../../core/services/movie.service';
+import { ScreeningService } from '../../core/services/screening.service';
+import { CartService } from '../../core/services/cart.service';
+import { type Movie } from '../../core/models/movie.model';
+import { type Screening, type ScreeningFormat, type Venue } from '../../core/models/screening.model';
+import { TMDB } from '../../core/api/endpoints';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
+import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
+
+interface TmdbVideoResult {
+  key: string;
+  name: string;
+  type: string;
+  site: string;
+}
+
+const FORMAT_LABELS: Record<ScreeningFormat, string> = {
+  standard: '2D',
+  '3d': '3D',
+  imax: 'IMAX',
+  dbox: 'D-BOX',
+};
+
+@Component({
+  selector: 'app-movie-detail-page',
+  imports: [
+    RouterLink,
+    DecimalPipe,
+    SlicePipe,
+    NgOptimizedImage,
+    LucideAngularModule,
+    NavbarComponent,
+    SkeletonLoaderComponent,
+    ErrorStateComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <app-navbar />
+
+    <main class="min-h-dvh" style="background: var(--color-bg);">
+
+      <!-- Backdrop hero -->
+      @if (movie(); as m) {
+        <section class="relative w-full overflow-hidden" style="height: 50vh; min-height: 280px; max-height: 520px;">
+          @if (m.backdropPath) {
+            <img
+              [ngSrc]="backdropUrl(m.backdropPath)"
+              [alt]="m.title"
+              fill
+              priority
+              class="object-cover"
+            />
+          }
+          <div class="absolute inset-0" style="background: linear-gradient(to top, #09090F 0%, rgba(9,9,15,.4) 60%, transparent 100%);"></div>
+          <div class="absolute inset-0" style="background: linear-gradient(to right, #09090F 0%, transparent 50%);"></div>
+          <a
+            routerLink="/"
+            class="absolute left-4 top-4 flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors"
+            style="background: rgba(255,255,255,.1); color: var(--color-text-primary); backdrop-filter: blur(8px);"
+          >
+            <lucide-icon [img]="ArrowLeft" [size]="14" aria-hidden="true" />
+            Volver
+          </a>
+        </section>
+      }
+
+      @if (loading()) {
+        <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+          <div class="flex flex-col gap-6 sm:flex-row">
+            <app-skeleton-loader height="0" radius="12px" class="flex-none" style="width: 160px; aspect-ratio: 2/3;" />
+            <div class="flex-1 space-y-3">
+              <app-skeleton-loader height="32px" radius="6px" />
+              <app-skeleton-loader height="16px" radius="6px" style="width: 60%;" />
+              <app-skeleton-loader height="16px" radius="6px" style="width: 80%;" />
+              <app-skeleton-loader height="80px" radius="6px" />
+            </div>
+          </div>
+        </div>
+      } @else if (error()) {
+        <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+          <app-error-state
+            title="No pudimos cargar la película"
+            description="Verifica tu conexión e inténtalo de nuevo."
+            (retry)="loadMovie()"
+          />
+        </div>
+      } @else if (movie(); as m) {
+        <div class="mx-auto max-w-5xl px-4 pb-16 sm:px-6 lg:px-8" style="margin-top: -120px; position: relative; z-index: 1;">
+
+          <!-- Movie info row -->
+          <div class="flex flex-col gap-6 sm:flex-row">
+            <!-- Poster -->
+            <div class="flex-none">
+              <div class="relative overflow-hidden rounded-xl shadow-lg" style="width: 140px; aspect-ratio: 2/3; box-shadow: var(--shadow-modal);">
+                @if (posterUrl(m.posterPath)) {
+                  <img
+                    [ngSrc]="posterUrl(m.posterPath)!"
+                    [alt]="m.title"
+                    fill
+                    class="object-cover"
+                  />
+                } @else {
+                  <div class="flex h-full w-full items-center justify-center rounded-xl" style="background: var(--color-surface-raised);">
+                    <span class="text-xs" style="color: var(--color-text-disabled);">Sin imagen</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 pt-2 sm:pt-16">
+              <!-- Genres -->
+              @if (m.genres && m.genres.length > 0) {
+                <div class="mb-2 flex flex-wrap gap-2">
+                  @for (g of m.genres; track g.id) {
+                    <span
+                      class="rounded-full px-3 py-0.5 text-xs font-medium"
+                      style="background: var(--color-accent-muted); color: var(--color-accent);"
+                    >{{ g.name }}</span>
+                  }
+                </div>
+              }
+
+              <h1 class="mb-2 text-2xl font-extrabold leading-tight sm:text-3xl lg:text-4xl" style="color: var(--color-text-primary);">
+                {{ m.title }}
+              </h1>
+
+              <!-- Metadata row -->
+              <div class="mb-4 flex flex-wrap items-center gap-3 text-sm" style="color: var(--color-text-secondary);">
+                <span class="flex items-center gap-1">
+                  <lucide-icon [img]="Star" [size]="14" style="color: var(--color-warning);" aria-hidden="true" />
+                  {{ m.voteAverage | number:'1.1-1' }}
+                </span>
+                @if (m.runtime) {
+                  <span class="flex items-center gap-1">
+                    <lucide-icon [img]="Clock" [size]="14" aria-hidden="true" />
+                    {{ formatRuntime(m.runtime) }}
+                  </span>
+                }
+                @if (m.releaseDate) {
+                  <span>{{ m.releaseDate | slice:0:4 }}</span>
+                }
+                <span class="flex items-center gap-1 uppercase text-xs font-medium">
+                  <lucide-icon [img]="Globe" [size]="12" aria-hidden="true" />
+                  {{ m.originalLanguage }}
+                </span>
+              </div>
+
+              <p class="mb-5 text-sm leading-relaxed" style="color: var(--color-text-secondary);">
+                {{ m.overview || 'Sin sinopsis disponible.' }}
+              </p>
+
+              <!-- Trailer button -->
+              @if (trailerKey()) {
+                <button
+                  type="button"
+                  (click)="showTrailer.set(true)"
+                  class="mb-4 flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
+                  style="background: var(--color-surface-raised); border: 1px solid var(--color-border-strong); color: var(--color-text-primary);"
+                >
+                  <lucide-icon [img]="Play" [size]="16" aria-hidden="true" />
+                  Ver tráiler
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Trailer modal -->
+          @if (showTrailer() && trailerKey()) {
+            <div
+              class="fixed inset-0 z-50 flex items-center justify-center p-4"
+              style="background: rgba(9,9,15,.85); backdrop-filter: blur(4px);"
+              (click)="showTrailer.set(false)"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Tráiler de la película"
+            >
+              <div
+                class="w-full max-w-3xl overflow-hidden rounded-xl"
+                style="box-shadow: var(--shadow-modal);"
+                (click)="$event.stopPropagation()"
+              >
+                <div class="relative" style="padding-top: 56.25%;">
+                  <iframe
+                    class="absolute inset-0 h-full w-full"
+                    [src]="safeTrailerUrl()"
+                    title="Tráiler"
+                    allow="autoplay; encrypted-media"
+                    allowfullscreen
+                  ></iframe>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- ── Screenings section ───────────────────────────── -->
+          <section class="mt-10" aria-label="Funciones disponibles">
+            <h2 class="mb-5 text-xl font-bold" style="color: var(--color-text-primary);">Selecciona tu función</h2>
+
+            @if (screeningsLoading()) {
+              <div class="space-y-3">
+                @for (n of [1,2,3]; track n) {
+                  <app-skeleton-loader height="80px" radius="12px" />
+                }
+              </div>
+            } @else if (screeningsError()) {
+              <app-error-state
+                title="No pudimos cargar las funciones"
+                (retry)="loadScreenings()"
+              />
+            } @else {
+
+              <!-- Venue filter tabs -->
+              @if (venues().length > 1) {
+                <div class="mb-4 flex gap-2 overflow-x-auto pb-2" style="scrollbar-width: none;">
+                  <button
+                    type="button"
+                    (click)="selectedVenueId.set(null)"
+                    class="flex-none rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors"
+                    [style.background]="selectedVenueId() === null ? 'var(--color-accent)' : 'var(--color-surface-raised)'"
+                    [style.color]="selectedVenueId() === null ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)'"
+                  >Todos los cines</button>
+                  @for (v of venues(); track v.id) {
+                    <button
+                      type="button"
+                      (click)="selectedVenueId.set(v.id)"
+                      class="flex-none rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors"
+                      [style.background]="selectedVenueId() === v.id ? 'var(--color-accent)' : 'var(--color-surface-raised)'"
+                      [style.color]="selectedVenueId() === v.id ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)'"
+                    >{{ v.name }}</button>
+                  }
+                </div>
+              }
+
+              <!-- Date tabs -->
+              @if (availableDates().length > 0) {
+                <div class="mb-6 flex gap-2 overflow-x-auto pb-2" style="scrollbar-width: none;">
+                  @for (d of availableDates(); track d) {
+                    <button
+                      type="button"
+                      (click)="selectedDate.set(d)"
+                      class="flex-none rounded-xl px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors"
+                      [style.background]="selectedDate() === d ? 'var(--color-accent)' : 'var(--color-surface)'"
+                      [style.color]="selectedDate() === d ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)'"
+                      [style.border]="'1px solid ' + (selectedDate() === d ? 'transparent' : 'var(--color-border)')"
+                    >
+                      <span class="block text-xs">{{ dayLabel(d) }}</span>
+                      <span class="block font-bold">{{ dateNum(d) }}</span>
+                    </button>
+                  }
+                </div>
+              }
+
+              <!-- Screening cards grouped by format -->
+              @if (filteredScreenings().length === 0) {
+                <p class="text-sm" style="color: var(--color-text-secondary);">No hay funciones disponibles para este día.</p>
+              } @else {
+                <div class="space-y-3">
+                  @for (sc of filteredScreenings(); track sc.id) {
+                    <div
+                      class="screening-card rounded-xl p-4 transition-colors"
+                      style="background: var(--color-surface); border: 1px solid var(--color-border);"
+                      [class.opacity-50]="sc.status === 'sold_out'"
+                    >
+                      <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-4">
+                          <!-- Time & format -->
+                          <div>
+                            <span class="text-2xl font-bold" style="color: var(--color-text-primary);">{{ sc.time }}</span>
+                            <span
+                              class="ml-2 rounded px-2 py-0.5 text-xs font-bold"
+                              style="background: var(--color-accent-muted); color: var(--color-accent);"
+                            >{{ formatLabel(sc.format) }}</span>
+                          </div>
+                          <!-- Venue & room -->
+                          <div class="text-sm" style="color: var(--color-text-secondary);">
+                            <div class="flex items-center gap-1">
+                              <lucide-icon [img]="MapPin" [size]="12" aria-hidden="true" />
+                              {{ sc.venue.name }}
+                            </div>
+                            <div class="mt-0.5">{{ sc.room.name }}</div>
+                          </div>
+                        </div>
+                        <!-- Price & action -->
+                        <div class="flex items-center gap-4">
+                          <div class="text-right">
+                            <div class="text-lg font-bold" style="color: var(--color-text-primary);">S/ {{ sc.price }}</div>
+                            @if (sc.status === 'sold_out') {
+                              <div class="text-xs font-medium" style="color: var(--color-error);">Agotado</div>
+                            } @else {
+                              <div class="text-xs" style="color: var(--color-text-secondary);">{{ sc.availableSeats }} asientos</div>
+                            }
+                          </div>
+                          @if (sc.status !== 'sold_out') {
+                            <button
+                              type="button"
+                              (click)="goToSeats(sc)"
+                              class="flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors"
+                              style="background: var(--color-accent); color: var(--color-text-inverse);"
+                            >
+                              Elegir asientos
+                              <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </section>
+        </div>
+      }
+    </main>
+  `,
+  styles: `
+    .screening-card:hover {
+      border-color: var(--color-border-strong) !important;
+    }
+  `,
+})
+export class MovieDetailPageComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly movieService = inject(MovieService);
+  private readonly screeningService = inject(ScreeningService);
+  private readonly cartService = inject(CartService);
+  private readonly sanitizer = inject(DomSanitizer);
+
+  readonly movie = signal<Movie | null>(null);
+  readonly loading = signal(true);
+  readonly error = signal(false);
+
+  readonly screenings = signal<Screening[]>([]);
+  readonly screeningsLoading = signal(true);
+  readonly screeningsError = signal(false);
+
+  readonly selectedVenueId = signal<string | null>(null);
+  readonly selectedDate = signal<string | null>(null);
+  readonly showTrailer = signal(false);
+
+  readonly Star = Star;
+  readonly Clock = Clock;
+  readonly Globe = Globe;
+  readonly Play = Play;
+  readonly ArrowLeft = ArrowLeft;
+  readonly ShoppingCart = ShoppingCart;
+  readonly Calendar = Calendar;
+  readonly MapPin = MapPin;
+  readonly ChevronRight = ChevronRight;
+
+  readonly venues = computed<Venue[]>(() => {
+    const seen = new Set<string>();
+    return this.screenings()
+      .map((s) => s.venue)
+      .filter((v) => { if (seen.has(v.id)) return false; seen.add(v.id); return true; });
+  });
+
+  readonly availableDates = computed<string[]>(() => {
+    const sc = this.selectedVenueId()
+      ? this.screenings().filter((s) => s.venue.id === this.selectedVenueId())
+      : this.screenings();
+    return [...new Set(sc.map((s) => s.date))].sort();
+  });
+
+  readonly filteredScreenings = computed<Screening[]>(() => {
+    let list = this.screenings().filter((s) => s.status !== 'cancelled');
+    if (this.selectedVenueId()) {
+      list = list.filter((s) => s.venue.id === this.selectedVenueId());
+    }
+    const date = this.selectedDate() ?? this.availableDates()[0] ?? null;
+    if (date) {
+      list = list.filter((s) => s.date === date);
+    }
+    return list.sort((a, b) => a.time.localeCompare(b.time));
+  });
+
+  readonly trailerKey = computed<string | null>(() => {
+    const m = this.movie();
+    if (!m) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const videos: TmdbVideoResult[] = (m as any).videos?.results ?? [];
+    const trailer = videos.find((v) => v.type === 'Trailer' && v.site === 'YouTube');
+    return trailer?.key ?? null;
+  });
+
+  ngOnInit(): void {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!id) {
+      void this.router.navigate(['/']);
+      return;
+    }
+    this.loadMovie(id);
+  }
+
+  loadMovie(id?: number): void {
+    const movieId = id ?? Number(this.route.snapshot.paramMap.get('id'));
+    this.loading.set(true);
+    this.error.set(false);
+    this.movieService.getDetail(movieId).subscribe({
+      next: (m) => {
+        this.movie.set(m);
+        this.loading.set(false);
+        this.loadScreenings(movieId, m.title);
+      },
+      error: () => {
+        this.error.set(true);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  loadScreenings(movieId?: number, title?: string): void {
+    const id = movieId ?? Number(this.route.snapshot.paramMap.get('id'));
+    const t = title ?? this.movie()?.title ?? '';
+    this.screeningsLoading.set(true);
+    this.screeningsError.set(false);
+    this.screeningService.getForMovie(id, t).subscribe({
+      next: (list) => {
+        this.screenings.set(list);
+        this.screeningsLoading.set(false);
+        if (list.length > 0) {
+          this.selectedDate.set(list[0].date);
+        }
+      },
+      error: () => {
+        this.screeningsError.set(true);
+        this.screeningsLoading.set(false);
+      },
+    });
+  }
+
+  goToSeats(screening: Screening): void {
+    void this.router.navigate(['/seats', screening.id], {
+      state: { screening, movie: this.movie() },
+    });
+  }
+
+  backdropUrl(path: string): string {
+    return TMDB.imageUrl('w1280', path);
+  }
+
+  posterUrl(path: string | null): string | null {
+    return path ? TMDB.imageUrl('w500', path) : null;
+  }
+
+  safeTrailerUrl(): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.youtube.com/embed/${this.trailerKey()}?autoplay=1`,
+    );
+  }
+
+  formatRuntime(minutes: number): string {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return h > 0 ? `${h}h ${m}min` : `${m}min`;
+  }
+
+  formatLabel(format: ScreeningFormat): string {
+    return FORMAT_LABELS[format] ?? format.toUpperCase();
+  }
+
+  dayLabel(dateStr: string): string {
+    const date = new Date(dateStr + 'T12:00:00');
+    return date.toLocaleDateString('es-PE', { weekday: 'short' }).replace('.', '');
+  }
+
+  dateNum(dateStr: string): string {
+    const date = new Date(dateStr + 'T12:00:00');
+    return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+  }
+}

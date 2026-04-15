@@ -1,0 +1,167 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { Router } from '@angular/router';
+import { LucideAngularModule, Crown, Check, Zap } from 'lucide-angular';
+
+import { MembershipService } from '../../core/services/membership.service';
+import { type MembershipPlan } from '../../core/models/membership.model';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
+import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
+
+@Component({
+  selector: 'app-memberships-page',
+  imports: [LucideAngularModule, NavbarComponent, SkeletonLoaderComponent, ErrorStateComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <app-navbar />
+
+    <main class="min-h-dvh pb-16" style="background: var(--color-bg);">
+      <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-10 text-center">
+          <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full" style="background: var(--color-accent-muted);">
+            <lucide-icon [img]="Crown" [size]="28" style="color: var(--color-accent);" aria-hidden="true" />
+          </div>
+          <h1 class="text-3xl font-extrabold" style="color: var(--color-text-primary);">Membresías PelisPlus</h1>
+          <p class="mt-2 text-base" style="color: var(--color-text-secondary);">
+            Elige el plan que mejor se adapte a ti y ahorra en cada visita.
+          </p>
+        </div>
+
+        @if (loading()) {
+          <div class="grid gap-6 sm:grid-cols-3">
+            @for (n of [1,2,3]; track n) {
+              <app-skeleton-loader height="480px" radius="16px" />
+            }
+          </div>
+        } @else if (error()) {
+          <app-error-state title="No pudimos cargar los planes" (retry)="loadPlans()" />
+        } @else {
+          <div class="grid gap-6 sm:grid-cols-3">
+            @for (plan of plans(); track plan.id) {
+              <article
+                class="relative flex flex-col overflow-hidden rounded-2xl transition-transform duration-200 hover:-translate-y-1"
+                style="background: var(--color-surface); border: 1px solid var(--color-border); box-shadow: var(--shadow-card);"
+                [style.border-color]="plan.recommended ? 'var(--color-accent)' : 'var(--color-border)'"
+                [attr.aria-label]="'Plan ' + plan.name"
+              >
+                @if (plan.recommended) {
+                  <div
+                    class="absolute right-0 top-0 rounded-bl-xl px-3 py-1 text-xs font-bold"
+                    style="background: var(--color-accent); color: var(--color-text-inverse);"
+                  >
+                    <lucide-icon [img]="Zap" [size]="11" class="inline-block mr-1" aria-hidden="true" />
+                    Más popular
+                  </div>
+                }
+
+                <!-- Tier header -->
+                <div class="px-6 pt-6 pb-4">
+                  <div
+                    class="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-bold"
+                    [style.background]="plan.color + '20'"
+                    [style.color]="plan.color"
+                  >
+                    <lucide-icon [img]="Crown" [size]="14" aria-hidden="true" />
+                    {{ plan.name }}
+                  </div>
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-3xl font-extrabold" style="color: var(--color-text-primary);">S/ {{ plan.price }}</span>
+                    <span class="text-sm" style="color: var(--color-text-secondary);">/ mes</span>
+                  </div>
+                  <p class="mt-1 text-xs" style="color: var(--color-text-secondary);">{{ plan.validity }}</p>
+                </div>
+
+                <!-- Benefits list -->
+                <ul class="flex-1 space-y-3 px-6 pb-6" role="list">
+                  @for (benefit of plan.benefits; track benefit.label) {
+                    <li class="flex items-start gap-2">
+                      <lucide-icon
+                        [img]="Check"
+                        [size]="14"
+                        class="mt-0.5 flex-shrink-0"
+                        style="color: var(--color-success);"
+                        aria-hidden="true"
+                      />
+                      <span class="text-sm" style="color: var(--color-text-secondary);">{{ benefit.label }}</span>
+                    </li>
+                  }
+                </ul>
+
+                <!-- CTA -->
+                <div class="px-6 pb-6">
+                  <button
+                    type="button"
+                    (click)="subscribe(plan)"
+                    [disabled]="subscribing() === plan.id"
+                    class="w-full rounded-full py-3 text-sm font-bold transition-colors"
+                    [style.background]="plan.recommended ? 'var(--color-accent)' : 'var(--color-surface-raised)'"
+                    [style.color]="plan.recommended ? 'var(--color-text-inverse)' : 'var(--color-text-primary)'"
+                    [style.border]="plan.recommended ? 'none' : '1px solid var(--color-border-strong)'"
+                    [style.opacity]="subscribing() === plan.id ? '0.7' : '1'"
+                  >
+                    {{ subscribing() === plan.id ? 'Procesando...' : 'Suscribirme' }}
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+
+          <p class="mt-8 text-center text-xs" style="color: var(--color-text-disabled);">
+            Cancela en cualquier momento. Sin cargos ocultos. Pagos procesados por Izipay.
+          </p>
+        }
+      </div>
+    </main>
+  `,
+})
+export class MembershipsPageComponent implements OnInit {
+  private readonly membershipService = inject(MembershipService);
+  private readonly router = inject(Router);
+
+  readonly plans = signal<MembershipPlan[]>([]);
+  readonly loading = signal(true);
+  readonly error = signal(false);
+  readonly subscribing = signal<string | null>(null);
+
+  readonly Crown = Crown;
+  readonly Check = Check;
+  readonly Zap = Zap;
+
+  ngOnInit(): void {
+    this.loadPlans();
+  }
+
+  loadPlans(): void {
+    this.loading.set(true);
+    this.error.set(false);
+    this.membershipService.getPlans().subscribe({
+      next: (p) => { this.plans.set(p); this.loading.set(false); },
+      error: () => { this.error.set(true); this.loading.set(false); },
+    });
+  }
+
+  subscribe(plan: MembershipPlan): void {
+    this.subscribing.set(plan.id);
+    this.membershipService.subscribe(plan.id).subscribe({
+      next: (res) => {
+        // Mock: confirm immediately, then redirect to profile
+        this.membershipService.confirmSubscription({ mock: true }).subscribe({
+          next: () => {
+            this.subscribing.set(null);
+            void this.router.navigate(['/profile'], { queryParams: { tab: 'membership' } });
+          },
+          error: () => this.subscribing.set(null),
+        });
+      },
+      error: () => this.subscribing.set(null),
+    });
+  }
+}

@@ -1,0 +1,397 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { SlicePipe } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { LucideAngularModule, User, Shield, Ticket, History, Crown, Save, Eye, EyeOff } from 'lucide-angular';
+
+import { UserService } from '../../core/services/user.service';
+import { TicketService } from '../../core/services/ticket.service';
+import { OrderService } from '../../core/services/order.service';
+import { AuthService } from '../../core/services/auth.service';
+import { type UserProfile } from '../../core/models/user.model';
+import { type Ticket as TicketModel } from '../../core/models/ticket.model';
+import { type Order } from '../../core/models/order.model';
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
+import { TicketComponent } from '../checkout/ticket.component';
+
+type ProfileTab = 'personal' | 'security' | 'tickets' | 'history' | 'membership';
+
+@Component({
+  selector: 'app-profile-page',
+  imports: [RouterLink, SlicePipe, ReactiveFormsModule, LucideAngularModule, NavbarComponent, SkeletonLoaderComponent, TicketComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <app-navbar />
+
+    <main class="min-h-dvh pb-16" style="background: var(--color-bg);">
+      <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+
+        <!-- Profile header -->
+        <div class="mb-8 flex items-center gap-4">
+          <div
+            class="flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold"
+            style="background: var(--color-accent-muted); color: var(--color-accent);"
+            aria-hidden="true"
+          >
+            {{ userInitial() }}
+          </div>
+          <div>
+            @if (profileLoading()) {
+              <app-skeleton-loader height="20px" radius="4px" style="width: 160px;" />
+              <app-skeleton-loader height="14px" radius="4px" style="width: 120px; margin-top: 6px;" />
+            } @else if (profile(); as p) {
+              <h1 class="text-xl font-bold" style="color: var(--color-text-primary);">{{ p.name }}</h1>
+              <p class="text-sm" style="color: var(--color-text-secondary);">{{ p.email }}</p>
+            }
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-6 lg:flex-row">
+          <!-- Sidebar tabs -->
+          <nav class="lg:w-52" aria-label="Secciones de perfil">
+            <ul class="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0" style="scrollbar-width: none;">
+              @for (tab of tabs; track tab.id) {
+                <li>
+                  <button
+                    type="button"
+                    (click)="activeTab.set(tab.id)"
+                    class="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium whitespace-nowrap transition-colors lg:whitespace-normal"
+                    [style.background]="activeTab() === tab.id ? 'var(--color-accent-muted)' : 'transparent'"
+                    [style.color]="activeTab() === tab.id ? 'var(--color-accent)' : 'var(--color-text-secondary)'"
+                    [attr.aria-current]="activeTab() === tab.id ? 'page' : null"
+                  >
+                    <lucide-icon [img]="tab.icon" [size]="16" aria-hidden="true" />
+                    {{ tab.label }}
+                  </button>
+                </li>
+              }
+            </ul>
+          </nav>
+
+          <!-- Tab content -->
+          <div class="flex-1">
+
+            <!-- Personal data tab -->
+            @if (activeTab() === 'personal') {
+              <section aria-label="Datos personales">
+                <h2 class="mb-4 text-lg font-bold" style="color: var(--color-text-primary);">Datos personales</h2>
+                <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-4 max-w-md">
+                  <div>
+                    <label for="profile-name" class="block mb-1 text-sm font-medium" style="color: var(--color-text-primary);">Nombre completo</label>
+                    <input
+                      id="profile-name"
+                      type="text"
+                      formControlName="name"
+                      class="profile-input w-full rounded-xl px-4 py-2.5 text-sm"
+                      style="background: var(--color-surface); border: 1px solid var(--color-border-strong); color: var(--color-text-primary);"
+                    />
+                  </div>
+                  <div>
+                    <label for="profile-email" class="block mb-1 text-sm font-medium" style="color: var(--color-text-primary);">Correo electrónico</label>
+                    <input
+                      id="profile-email"
+                      type="email"
+                      formControlName="email"
+                      class="profile-input w-full rounded-xl px-4 py-2.5 text-sm"
+                      style="background: var(--color-surface); border: 1px solid var(--color-border-strong); color: var(--color-text-primary);"
+                    />
+                  </div>
+                  @if (profileSaved()) {
+                    <p class="text-sm" style="color: var(--color-success);">Cambios guardados.</p>
+                  }
+                  <button
+                    type="submit"
+                    [disabled]="profileForm.invalid || savingProfile()"
+                    class="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
+                    style="background: var(--color-accent); color: var(--color-text-inverse);"
+                    [style.opacity]="profileForm.invalid || savingProfile() ? '0.6' : '1'"
+                  >
+                    <lucide-icon [img]="Save" [size]="14" aria-hidden="true" />
+                    {{ savingProfile() ? 'Guardando...' : 'Guardar cambios' }}
+                  </button>
+                </form>
+              </section>
+            }
+
+            <!-- Security tab -->
+            @if (activeTab() === 'security') {
+              <section aria-label="Seguridad">
+                <h2 class="mb-4 text-lg font-bold" style="color: var(--color-text-primary);">Cambiar contraseña</h2>
+                <form [formGroup]="passwordForm" (ngSubmit)="savePassword()" class="space-y-4 max-w-md">
+                  <div>
+                    <label for="current-pwd" class="block mb-1 text-sm font-medium" style="color: var(--color-text-primary);">Contraseña actual</label>
+                    <div class="relative">
+                      <input
+                        id="current-pwd"
+                        [type]="showCurrentPwd() ? 'text' : 'password'"
+                        formControlName="current"
+                        class="profile-input w-full rounded-xl px-4 py-2.5 pr-10 text-sm"
+                        style="background: var(--color-surface); border: 1px solid var(--color-border-strong); color: var(--color-text-primary);"
+                      />
+                      <button type="button" (click)="showCurrentPwd.update(v => !v)" class="absolute right-3 top-1/2 -translate-y-1/2" style="color: var(--color-text-secondary);" aria-label="Mostrar / ocultar contraseña">
+                        <lucide-icon [img]="showCurrentPwd() ? EyeOff : Eye" [size]="16" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label for="new-pwd" class="block mb-1 text-sm font-medium" style="color: var(--color-text-primary);">Nueva contraseña</label>
+                    <div class="relative">
+                      <input
+                        id="new-pwd"
+                        [type]="showNewPwd() ? 'text' : 'password'"
+                        formControlName="newPassword"
+                        class="profile-input w-full rounded-xl px-4 py-2.5 pr-10 text-sm"
+                        style="background: var(--color-surface); border: 1px solid var(--color-border-strong); color: var(--color-text-primary);"
+                      />
+                      <button type="button" (click)="showNewPwd.update(v => !v)" class="absolute right-3 top-1/2 -translate-y-1/2" style="color: var(--color-text-secondary);" aria-label="Mostrar / ocultar nueva contraseña">
+                        <lucide-icon [img]="showNewPwd() ? EyeOff : Eye" [size]="16" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+                  @if (passwordError()) {
+                    <p class="text-sm" style="color: var(--color-error);">{{ passwordError() }}</p>
+                  }
+                  @if (passwordSaved()) {
+                    <p class="text-sm" style="color: var(--color-success);">Contraseña actualizada.</p>
+                  }
+                  <button
+                    type="submit"
+                    [disabled]="passwordForm.invalid || savingPassword()"
+                    class="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
+                    style="background: var(--color-accent); color: var(--color-text-inverse);"
+                    [style.opacity]="passwordForm.invalid || savingPassword() ? '0.6' : '1'"
+                  >
+                    <lucide-icon [img]="Save" [size]="14" aria-hidden="true" />
+                    {{ savingPassword() ? 'Guardando...' : 'Actualizar contraseña' }}
+                  </button>
+                </form>
+              </section>
+            }
+
+            <!-- Tickets tab -->
+            @if (activeTab() === 'tickets') {
+              <section aria-label="Mis entradas">
+                <h2 class="mb-4 text-lg font-bold" style="color: var(--color-text-primary);">Mis entradas</h2>
+                @if (ticketsLoading()) {
+                  <div class="space-y-4">
+                    @for (n of [1,2]; track n) {
+                      <app-skeleton-loader height="300px" radius="16px" />
+                    }
+                  </div>
+                } @else if (tickets().length === 0) {
+                  <p class="text-sm" style="color: var(--color-text-secondary);">No tienes entradas aún. ¡Compra tus primeras entradas!</p>
+                } @else {
+                  <div class="space-y-4">
+                    @for (t of tickets(); track t.id) {
+                      <app-ticket [ticket]="t" />
+                    }
+                  </div>
+                }
+              </section>
+            }
+
+            <!-- History tab -->
+            @if (activeTab() === 'history') {
+              <section aria-label="Historial de compras">
+                <h2 class="mb-4 text-lg font-bold" style="color: var(--color-text-primary);">Historial de compras</h2>
+                @if (ordersLoading()) {
+                  <div class="space-y-3">
+                    @for (n of [1,2,3]; track n) {
+                      <app-skeleton-loader height="80px" radius="12px" />
+                    }
+                  </div>
+                } @else if (orders().length === 0) {
+                  <p class="text-sm" style="color: var(--color-text-secondary);">No tienes compras aún.</p>
+                } @else {
+                  <div class="space-y-3">
+                    @for (order of orders(); track order.id) {
+                      <div class="flex items-center justify-between gap-4 rounded-xl p-4" style="background: var(--color-surface); border: 1px solid var(--color-border);">
+                        <div>
+                          <p class="font-semibold text-sm" style="color: var(--color-text-primary);">Orden #{{ order.id }}</p>
+                          <p class="text-xs mt-0.5" style="color: var(--color-text-secondary);">{{ order.createdAt | slice:0:10 }}</p>
+                        </div>
+                        <div class="text-right">
+                          <p class="font-bold text-sm" style="color: var(--color-text-primary);">S/ {{ order.total }}</p>
+                          <span
+                            class="text-xs font-medium"
+                            [style.color]="order.paymentStatus === 'approved' ? 'var(--color-success)' : 'var(--color-warning)'"
+                          >{{ order.paymentStatus }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </section>
+            }
+
+            <!-- Membership tab -->
+            @if (activeTab() === 'membership') {
+              <section aria-label="Mi membresía">
+                <h2 class="mb-4 text-lg font-bold" style="color: var(--color-text-primary);">Mi membresía</h2>
+                @if (profile()?.membership; as mem) {
+                  <div class="rounded-xl p-5" style="background: var(--color-surface); border: 1px solid var(--color-border);">
+                    <div class="flex items-center gap-3 mb-4">
+                      <div class="flex h-10 w-10 items-center justify-center rounded-full" style="background: var(--color-accent-muted);">
+                        <lucide-icon [img]="Crown" [size]="20" style="color: var(--color-accent);" aria-hidden="true" />
+                      </div>
+                      <div>
+                        <p class="font-bold" style="color: var(--color-text-primary);">{{ mem.planName }}</p>
+                        <p class="text-xs" style="color: var(--color-text-secondary);">Vence el {{ mem.expiresAt }}</p>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div class="rounded-xl p-3" style="background: var(--color-surface-raised);">
+                        <p class="text-xs" style="color: var(--color-text-secondary);">Entradas usadas</p>
+                        <p class="text-lg font-bold" style="color: var(--color-text-primary);">{{ mem.ticketsUsed }} / {{ mem.ticketsTotal }}</p>
+                      </div>
+                      <div class="rounded-xl p-3" style="background: var(--color-surface-raised);">
+                        <p class="text-xs" style="color: var(--color-text-secondary);">Ahorrado este mes</p>
+                        <p class="text-lg font-bold" style="color: var(--color-accent);">S/ {{ mem.discountUsed }}</p>
+                      </div>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="rounded-xl p-6 text-center" style="background: var(--color-surface); border: 1px solid var(--color-border);">
+                    <lucide-icon [img]="Crown" [size]="32" style="color: var(--color-text-disabled); margin: 0 auto 12px;" aria-hidden="true" />
+                    <p class="mb-4 font-semibold" style="color: var(--color-text-primary);">No tienes una membresía activa</p>
+                    <a
+                      routerLink="/memberships"
+                      class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
+                      style="background: var(--color-accent); color: var(--color-text-inverse);"
+                    >Ver planes</a>
+                  </div>
+                }
+              </section>
+            }
+          </div>
+        </div>
+      </div>
+    </main>
+  `,
+  styles: `
+    .profile-input {
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .profile-input:focus {
+      border-color: var(--color-accent) !important;
+      box-shadow: 0 0 0 2px var(--color-accent-muted);
+    }
+  `,
+})
+export class ProfilePageComponent implements OnInit {
+  private readonly userService = inject(UserService);
+  private readonly ticketService = inject(TicketService);
+  private readonly orderService = inject(OrderService);
+  private readonly authService = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
+
+  readonly profile = signal<UserProfile | null>(null);
+  readonly profileLoading = signal(true);
+  readonly tickets = signal<TicketModel[]>([]);
+  readonly ticketsLoading = signal(true);
+  readonly orders = signal<Order[]>([]);
+  readonly ordersLoading = signal(true);
+
+  readonly activeTab = signal<ProfileTab>('personal');
+  readonly savingProfile = signal(false);
+  readonly profileSaved = signal(false);
+  readonly savingPassword = signal(false);
+  readonly passwordSaved = signal(false);
+  readonly passwordError = signal('');
+  readonly showCurrentPwd = signal(false);
+  readonly showNewPwd = signal(false);
+
+  readonly User = User;
+  readonly Shield = Shield;
+  readonly Ticket = Ticket;
+  readonly History = History;
+  readonly Crown = Crown;
+  readonly Save = Save;
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
+
+  readonly tabs = [
+    { id: 'personal' as ProfileTab, label: 'Datos personales', icon: User },
+    { id: 'security' as ProfileTab, label: 'Seguridad', icon: Shield },
+    { id: 'tickets' as ProfileTab, label: 'Mis entradas', icon: Ticket },
+    { id: 'history' as ProfileTab, label: 'Historial', icon: History },
+    { id: 'membership' as ProfileTab, label: 'Membresía', icon: Crown },
+  ];
+
+  readonly profileForm = this.fb.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    email: ['', [Validators.required, Validators.email]],
+  });
+
+  readonly passwordForm = this.fb.group({
+    current: ['', [Validators.required, Validators.minLength(8)]],
+    newPassword: ['', [Validators.required, Validators.minLength(8)]],
+  });
+
+  readonly userInitial = computed(() => {
+    const name = this.profile()?.name ?? '';
+    return name.charAt(0).toUpperCase() || 'U';
+  });
+
+  ngOnInit(): void {
+    this.userService.getProfile().subscribe({
+      next: (p) => {
+        this.profile.set(p);
+        this.profileForm.patchValue({ name: p.name, email: p.email });
+        this.profileLoading.set(false);
+      },
+      error: () => this.profileLoading.set(false),
+    });
+    this.ticketService.getMyTickets().subscribe({
+      next: (t) => { this.tickets.set(t); this.ticketsLoading.set(false); },
+      error: () => this.ticketsLoading.set(false),
+    });
+    this.orderService.getMyOrders().subscribe({
+      next: (o) => { this.orders.set(o); this.ordersLoading.set(false); },
+      error: () => this.ordersLoading.set(false),
+    });
+  }
+
+  saveProfile(): void {
+    if (this.profileForm.invalid) return;
+    const { name, email } = this.profileForm.value;
+    this.savingProfile.set(true);
+    this.userService.updateProfile({ name: name!, email: email! }).subscribe({
+      next: (p) => {
+        this.profile.set(p);
+        this.savingProfile.set(false);
+        this.profileSaved.set(true);
+        setTimeout(() => this.profileSaved.set(false), 3000);
+      },
+      error: () => this.savingProfile.set(false),
+    });
+  }
+
+  savePassword(): void {
+    if (this.passwordForm.invalid) return;
+    const { current, newPassword } = this.passwordForm.value;
+    this.savingPassword.set(true);
+    this.passwordError.set('');
+    this.userService.changePassword(current!, newPassword!).subscribe({
+      next: () => {
+        this.savingPassword.set(false);
+        this.passwordSaved.set(true);
+        this.passwordForm.reset();
+        setTimeout(() => this.passwordSaved.set(false), 3000);
+      },
+      error: () => {
+        this.savingPassword.set(false);
+        this.passwordError.set('No se pudo actualizar la contraseña. Verifica tu contraseña actual.');
+      },
+    });
+  }
+}

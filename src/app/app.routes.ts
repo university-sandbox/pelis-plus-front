@@ -1,6 +1,7 @@
 import { type Routes } from '@angular/router';
 
 import { adminGuard } from './core/guards/admin.guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   // ── Root — public catalog ────────────────────────────
@@ -37,16 +38,68 @@ export const routes: Routes = [
       ),
   },
 
-  // ── Public ──────────────────────────────────────────
+  // ── Public catalog ───────────────────────────────────
+  {
+    path: 'catalog',
+    loadComponent: () =>
+      import('./features/catalog/catalog-page.component').then((c) => c.CatalogPageComponent),
+  },
   {
     path: 'landing',
     loadComponent: () =>
       import('./features/landing/landing-page.component').then((c) => c.LandingPageComponent),
   },
+
+  // ── Movie detail & booking flow ──────────────────────
   {
-    path: 'catalog',
+    path: 'movie/:id',
     loadComponent: () =>
-      import('./features/catalog/catalog-page.component').then((c) => c.CatalogPageComponent),
+      import('./features/movie/movie-detail-page.component').then(
+        (c) => c.MovieDetailPageComponent,
+      ),
+  },
+  {
+    path: 'seats/:screeningId',
+    loadComponent: () =>
+      import('./features/seats/seat-map-page.component').then((c) => c.SeatMapPageComponent),
+  },
+  {
+    path: 'snacks',
+    loadComponent: () =>
+      import('./features/snacks/snacks-page.component').then((c) => c.SnacksPageComponent),
+  },
+
+  // ── Checkout (auth required) ─────────────────────────
+  {
+    path: 'checkout',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/checkout/checkout-page.component').then((c) => c.CheckoutPageComponent),
+  },
+  {
+    path: 'confirmation/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/checkout/confirmation-page.component').then(
+        (c) => c.ConfirmationPageComponent,
+      ),
+  },
+
+  // ── User profile (auth required) ─────────────────────
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/profile/profile-page.component').then((c) => c.ProfilePageComponent),
+  },
+
+  // ── Memberships (public) ─────────────────────────────
+  {
+    path: 'memberships',
+    loadComponent: () =>
+      import('./features/memberships/memberships-page.component').then(
+        (c) => c.MembershipsPageComponent,
+      ),
   },
 
   // ── Admin (protected) ────────────────────────────────

@@ -1,0 +1,206 @@
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { LucideAngularModule, X, Trash2, Minus, Plus, ShoppingCart, ChevronRight } from 'lucide-angular';
+
+import { CartService } from '../../core/services/cart.service';
+import { type CartTicket, type CartSnackItem } from '../../core/models/cart.model';
+
+const FORMAT_LABELS: Record<string, string> = {
+  standard: '2D', '3d': '3D', imax: 'IMAX', dbox: 'D-BOX',
+};
+
+@Component({
+  selector: 'app-cart-sidebar',
+  imports: [RouterLink, LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <!-- Backdrop -->
+    @if (cartService.isOpen()) {
+      <div
+        class="fixed inset-0 z-40"
+        style="background: rgba(9,9,15,.6); backdrop-filter: blur(2px);"
+        (click)="cartService.closeSidebar()"
+        aria-hidden="true"
+      ></div>
+    }
+
+    <!-- Drawer -->
+    <aside
+      class="fixed top-0 right-0 z-50 flex h-full w-full max-w-sm flex-col transition-transform duration-300"
+      style="background: var(--color-surface); border-left: 1px solid var(--color-border); box-shadow: var(--shadow-modal);"
+      [style.transform]="cartService.isOpen() ? 'translateX(0)' : 'translateX(100%)'"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Carrito de compras"
+    >
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b p-4" style="border-color: var(--color-border);">
+        <div class="flex items-center gap-2">
+          <lucide-icon [img]="ShoppingCart" [size]="18" style="color: var(--color-accent);" aria-hidden="true" />
+          <h2 class="font-bold text-base" style="color: var(--color-text-primary);">Tu carrito</h2>
+          @if (cartService.itemCount() > 0) {
+            <span
+              class="flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold"
+              style="background: var(--color-accent); color: var(--color-text-inverse);"
+            >{{ cartService.itemCount() }}</span>
+          }
+        </div>
+        <button
+          type="button"
+          (click)="cartService.closeSidebar()"
+          class="flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+          style="background: var(--color-surface-raised); color: var(--color-text-secondary);"
+          aria-label="Cerrar carrito"
+        >
+          <lucide-icon [img]="X" [size]="16" aria-hidden="true" />
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto">
+        @if (cartService.cart().tickets.length === 0 && cartService.cart().snacks.length === 0) {
+          <!-- Empty state -->
+          <div class="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
+            <lucide-icon [img]="ShoppingCart" [size]="40" style="color: var(--color-text-disabled);" aria-hidden="true" />
+            <p class="font-semibold" style="color: var(--color-text-secondary);">Tu carrito está vacío</p>
+            <a
+              routerLink="/"
+              (click)="cartService.closeSidebar()"
+              class="rounded-full px-4 py-2 text-sm font-semibold transition-colors"
+              style="background: var(--color-accent); color: var(--color-text-inverse);"
+            >Explorar películas</a>
+          </div>
+        } @else {
+          <div class="divide-y" style="border-color: var(--color-border);">
+
+            <!-- Tickets -->
+            @if (cartService.cart().tickets.length > 0) {
+              <div class="p-4">
+                <p class="mb-3 text-xs font-semibold uppercase tracking-wider" style="color: var(--color-text-secondary);">Entradas</p>
+                <div class="space-y-3">
+                  @for (ticket of cartService.cart().tickets; track ticket.seat.id) {
+                    <div class="flex items-start gap-3 rounded-xl p-3" style="background: var(--color-surface-raised);">
+                      <div class="flex-1 min-w-0">
+                        <p class="truncate text-sm font-semibold" style="color: var(--color-text-primary);">{{ ticket.movieTitle }}</p>
+                        <p class="mt-0.5 text-xs" style="color: var(--color-text-secondary);">
+                          {{ ticket.date }} · {{ ticket.time }} · {{ formatLabel(ticket.format) }}
+                        </p>
+                        <p class="text-xs" style="color: var(--color-text-secondary);">
+                          Asiento {{ ticket.seat.row }}{{ ticket.seat.col }} · {{ ticket.venue }}
+                        </p>
+                      </div>
+                      <div class="flex items-start gap-2">
+                        <span class="font-bold text-sm" style="color: var(--color-text-primary);">S/ {{ ticket.price }}</span>
+                        <button
+                          type="button"
+                          (click)="removeTicket(ticket)"
+                          class="rounded p-0.5 transition-colors"
+                          style="color: var(--color-text-disabled);"
+                          [attr.aria-label]="'Eliminar entrada asiento ' + ticket.seat.row + ticket.seat.col"
+                        >
+                          <lucide-icon [img]="Trash2" [size]="13" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Snacks -->
+            @if (cartService.cart().snacks.length > 0) {
+              <div class="p-4">
+                <p class="mb-3 text-xs font-semibold uppercase tracking-wider" style="color: var(--color-text-secondary);">Confitería</p>
+                <div class="space-y-3">
+                  @for (item of cartService.cart().snacks; track item.snack.id) {
+                    <div class="flex items-center gap-3 rounded-xl p-3" style="background: var(--color-surface-raised);">
+                      <div class="flex-1 min-w-0">
+                        <p class="truncate text-sm font-semibold" style="color: var(--color-text-primary);">{{ item.snack.name }}</p>
+                        <p class="text-xs" style="color: var(--color-text-secondary);">S/ {{ item.snack.price }} c/u</p>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <button
+                          type="button"
+                          (click)="decrementSnack(item)"
+                          class="flex h-6 w-6 items-center justify-center rounded-full"
+                          style="background: var(--color-surface); color: var(--color-text-primary);"
+                          [attr.aria-label]="'Quitar ' + item.snack.name"
+                        >
+                          <lucide-icon [img]="Minus" [size]="10" aria-hidden="true" />
+                        </button>
+                        <span class="w-4 text-center text-xs font-bold" style="color: var(--color-text-primary);">{{ item.quantity }}</span>
+                        <button
+                          type="button"
+                          (click)="incrementSnack(item)"
+                          class="flex h-6 w-6 items-center justify-center rounded-full"
+                          style="background: var(--color-accent); color: var(--color-text-inverse);"
+                          [attr.aria-label]="'Agregar ' + item.snack.name"
+                        >
+                          <lucide-icon [img]="Plus" [size]="10" aria-hidden="true" />
+                        </button>
+                        <span class="w-12 text-right text-sm font-bold" style="color: var(--color-text-primary);">
+                          S/ {{ item.snack.price * item.quantity }}
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Footer -->
+      @if (cartService.itemCount() > 0) {
+        <div class="border-t p-4" style="border-color: var(--color-border);">
+          @if (cartService.cart().membershipDiscount > 0) {
+            <div class="mb-2 flex justify-between text-sm" style="color: var(--color-success);">
+              <span>Descuento membresía</span>
+              <span>- S/ {{ cartService.cart().membershipDiscount }}</span>
+            </div>
+          }
+          <div class="mb-4 flex justify-between text-base font-bold" style="color: var(--color-text-primary);">
+            <span>Total</span>
+            <span>S/ {{ cartService.total() }}</span>
+          </div>
+          <a
+            routerLink="/checkout"
+            (click)="cartService.closeSidebar()"
+            class="flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-bold transition-colors"
+            style="background: var(--color-accent); color: var(--color-text-inverse);"
+          >
+            Ir al pago
+            <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
+          </a>
+        </div>
+      }
+    </aside>
+  `,
+})
+export class CartSidebarComponent {
+  readonly cartService = inject(CartService);
+
+  readonly X = X;
+  readonly Trash2 = Trash2;
+  readonly Minus = Minus;
+  readonly Plus = Plus;
+  readonly ShoppingCart = ShoppingCart;
+  readonly ChevronRight = ChevronRight;
+
+  formatLabel(format: string): string {
+    return FORMAT_LABELS[format] ?? format.toUpperCase();
+  }
+
+  removeTicket(ticket: CartTicket): void {
+    this.cartService.removeTicket(ticket.seat.id);
+  }
+
+  incrementSnack(item: CartSnackItem): void {
+    this.cartService.updateSnackQuantity(item.snack.id, item.quantity + 1, item.selectedOptions);
+  }
+
+  decrementSnack(item: CartSnackItem): void {
+    this.cartService.updateSnackQuantity(item.snack.id, item.quantity - 1, item.selectedOptions);
+  }
+}

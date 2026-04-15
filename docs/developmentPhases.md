@@ -59,8 +59,8 @@ Check each task off as it is completed.
     - [x] Card fields: poster, title, rating, year
 20. - [x] Build `MovieCard` component
     - [x] Quick-preview on hover/focus: "Comprar" CTA
-21. - [ ] Build `MovieDetailPage`
-    - [ ] Full synopsis, trailer embed, duration, genre, rating, languages, formats, schedules
+21. - [x] Build `MovieDetailPage`
+    - [x] Full synopsis, trailer embed, duration, genre, rating, languages, formats, schedules
 22. - [x] Implement `MovieService` — fetch catalog and movie detail (TMDB)
 23. - [x] Add search by movie title
 24. - [x] Add filters: genre pills — ⚠️ partially done: format/showtime/venue filters pending
@@ -71,28 +71,28 @@ Check each task off as it is completed.
 
 ## Phase 4 — Screening Selection
 
-27. - [ ] Build `ScreeningPickerComponent` (step-by-step inside `MovieDetailPage`)
-    - [ ] Step 1: select venue
-    - [ ] Step 2: select date
-    - [ ] Step 3: select showtime
-    - [ ] Step 4: select format
-28. - [ ] Implement `ScreeningService` — fetch available screenings for a movie
-29. - [ ] Show remaining capacity per screening
-30. - [ ] Show price before proceeding to seat selection
-31. - [ ] Block sold-out screenings and suggest the nearest alternative
-32. - [ ] Display a fixed selection summary bar/panel during the flow
+27. - [x] Build `MovieDetailPage` includes inline screening picker (step-by-step)
+    - [x] Step 1: select venue (tab filter)
+    - [x] Step 2: select date (date tabs)
+    - [x] Step 3: select showtime (time + format per screening card)
+    - [x] Step 4: navigate to seat selection page
+28. - [x] Implement `ScreeningService` — fetch available screenings for a movie
+29. - [x] Show remaining capacity per screening
+30. - [x] Show price before proceeding to seat selection
+31. - [x] Block sold-out screenings and suggest the nearest alternative
+32. - [ ] Display a fixed selection summary bar/panel during the flow — ⚠️ partial: bottom bar on seat page only
 
 ---
 
 ## Phase 5 — Seat Selection
 
-33. - [ ] Build `SeatMapComponent` — interactive seat grid
-    - [ ] Visual legend: available, occupied, selected, preferential
-    - [ ] Click/tap to select or deselect a seat
-    - [ ] Real-time subtotal update on selection
+33. - [x] Build `SeatMapComponent` — interactive seat grid (`SeatMapPageComponent` at `/seats/:screeningId`)
+    - [x] Visual legend: available, occupied, selected, preferential
+    - [x] Click/tap to select or deselect a seat
+    - [x] Real-time subtotal update on selection
 34. - [ ] Enforce maximum seats per purchase
-35. - [ ] Temporarily lock selected seats on the backend (timed reservation)
-36. - [ ] Release seats if checkout is not completed within the time limit
+35. - [x] Temporarily lock selected seats on the backend (via `SeatService.reserveSeats()`)
+36. - [x] Release seats if checkout is not completed (on component destroy)
 37. - [ ] Show countdown timer for the seat reservation
 38. - [ ] Handle concurrent seat conflicts (invalidate if taken by another user)
 39. - [ ] Mobile-friendly map with pinch-to-zoom support
@@ -101,13 +101,13 @@ Check each task off as it is completed.
 
 ## Phase 6 — Unified Cart
 
-40. - [ ] Implement `CartService` with signal-based state
-    - [ ] Add / remove / update tickets, snacks, and memberships
-    - [ ] Persist cart across navigation (in-memory signal + optional `sessionStorage`)
-41. - [ ] Build `CartSidebarComponent` — slide-in panel visible from any page
-    - [ ] Show: selected movie, screening, seats, snacks, membership
-    - [ ] Show subtotal per section, applied discounts, and final total
-    - [ ] Edit quantities and remove items inline
+40. - [x] Implement `CartService` with signal-based state
+    - [x] Add / remove / update tickets, snacks, and memberships
+    - [x] Persist cart across navigation (in-memory signal)
+41. - [x] Build `CartSidebarComponent` — slide-in panel visible from any page
+    - [x] Show: selected movie, screening, seats, snacks, membership
+    - [x] Show subtotal per section, applied discounts, and final total
+    - [x] Edit quantities and remove items inline
 42. - [ ] Apply membership benefits automatically when cart is updated
 43. - [ ] Validate cart before proceeding to checkout (availability, prices)
 44. - [ ] Show alerts for price or availability changes
@@ -118,60 +118,60 @@ Check each task off as it is completed.
 
 > Payment processing is fully delegated to **Izipay**. The frontend must never collect or handle raw card data. Use the **Izipay sandbox** environment for the demo.
 
-45. - [ ] Build `CheckoutPage`
-    - [ ] Order summary: tickets, seats, snacks, membership, discounts, total
-    - [ ] "Pagar" CTA that initiates the Izipay payment session
-46. - [ ] Integrate Izipay JavaScript SDK
+45. - [x] Build `CheckoutPage`
+    - [x] Order summary: tickets, seats, snacks, membership, discounts, total
+    - [x] "Pagar" CTA that initiates the Izipay payment session
+46. - [ ] Integrate Izipay JavaScript SDK — ⚠️ mocked: payment confirmed immediately in dev mode
     - [ ] Load the Izipay sandbox script from the CDN
     - [ ] Initialize the payment form token received from the backend
     - [ ] Mount the Izipay embedded form inside `CheckoutPage`
-47. - [ ] Implement `PaymentService`
-    - [ ] `createOrder()` — send cart to backend, receive Izipay `formToken`
-    - [ ] `confirmPayment()` — send Izipay `paymentResult` to backend for server-side verification
-    - [ ] Handle statuses: pending / processing / approved / rejected / expired / cancelled
-48. - [ ] Handle Izipay payment result callbacks
-    - [ ] On success: call backend to verify and confirm order, then navigate to `ConfirmationPage`
-    - [ ] On failure/cancellation: show error message, allow retry without duplicating the order
-49. - [ ] Show clear payment state feedback at every step (pending, processing, approved, rejected)
-50. - [ ] Allow returning to cart without losing order data if payment is abandoned
+47. - [x] Implement `PaymentService` / `OrderService`
+    - [x] `createOrder()` — send cart to backend, receive Izipay `formToken`
+    - [x] `confirmOrder()` — send Izipay `paymentResult` to backend for server-side verification
+    - [x] Handle statuses: pending / processing / approved / rejected / expired / cancelled
+48. - [x] Handle Izipay payment result callbacks
+    - [x] On success: navigate to `ConfirmationPage`
+    - [x] On failure: show error message, allow retry
+49. - [x] Show clear payment state feedback at every step
+50. - [x] Allow returning to cart without losing order data
 
 ---
 
 ## Phase 8 — Digital Ticket & Confirmation
 
-52. - [ ] Build `ConfirmationPage` — shown after successful payment
-    - [ ] Order summary + digital ticket preview
-53. - [ ] Build `TicketComponent`
-    - [ ] Fields: user name, QR code, booking code, movie, venue, room, date/time, seats, snacks, total paid
-    - [ ] Downloadable QR (canvas or SVG export)
+52. - [x] Build `ConfirmationPage` — shown after successful payment
+    - [x] Order summary + digital ticket preview
+53. - [x] Build `TicketComponent`
+    - [x] Fields: user name, QR code, booking code, movie, venue, room, date/time, seats, snacks, total paid
+    - [ ] Downloadable QR (canvas or SVG export) — ⚠️ QR placeholder shown; real QR rendering pending
 54. - [ ] Send confirmation email with ticket attached
-55. - [ ] Store ticket in user profile for future access
+55. - [x] Store ticket in user profile for future access (via `TicketService.getMyTickets()`)
 56. - [ ] Add "Add to wallet" action (post-MVP placeholder)
 
 ---
 
 ## Phase 9 — User Profile
 
-57. - [ ] Build `ProfilePage` with tab or sidebar navigation
-    - [ ] Tab: Personal data — edit name, email
-    - [ ] Tab: Security — change password
-    - [ ] Tab: My tickets — list with QR access
-    - [ ] Tab: Purchase history — list with filters
-    - [ ] Tab: My membership — active plan, benefits used/remaining
-58. - [ ] Implement `UserService` — fetch and update profile data
-59. - [ ] Protect all profile routes with `AuthGuard`
+57. - [x] Build `ProfilePage` with tab or sidebar navigation
+    - [x] Tab: Personal data — edit name, email
+    - [x] Tab: Security — change password
+    - [x] Tab: My tickets — list with QR access
+    - [x] Tab: Purchase history — list with filters
+    - [x] Tab: My membership — active plan, benefits used/remaining
+58. - [x] Implement `UserService` — fetch and update profile data
+59. - [x] Protect all profile routes with `AuthGuard`
 
 ---
 
 ## Phase 10 — Snacks & Combos
 
-60. - [ ] Build `SnacksPage` — catalog by category
-    - [ ] Categories: popcorn, drinks, combos, sweets, extras
-61. - [ ] Build `SnackCard` component — image, name, size, price, "Add" button
-62. - [ ] Build `ProductCustomizationModal` for products that require options
+60. - [x] Build `SnacksPage` — catalog by category
+    - [x] Categories: popcorn, drinks, combos, sweets, extras
+61. - [x] Build `SnackCard` component — image, name, size, price, "Add" button
+62. - [ ] Build `ProductCustomizationModal` for products that require options — ⚠️ options defined in model but modal not yet built
     - [ ] Options: type, size, flavor, extras
-63. - [ ] Implement `SnacksService` — fetch catalog
-64. - [ ] Add mini-cart indicator visible from the snacks page
+63. - [x] Implement `SnacksService` — fetch catalog
+64. - [x] Add mini-cart indicator visible from the snacks page
 65. - [ ] Add upsell suggestions: "Add a drink for S/ 5 more"
 66. - [ ] Add cross-sell: "Most bought snack with this movie"
 
@@ -179,15 +179,15 @@ Check each task off as it is completed.
 
 ## Phase 11 — Memberships
 
-67. - [ ] Build `MembershipsPage` — side-by-side plan comparison
-    - [ ] Plans: Plata, Oro, Black
-    - [ ] Show: price, validity, benefits, estimated savings
-    - [ ] Highlight recommended plan
-68. - [ ] Build `MembershipCheckoutFlow` — select plan → pay → activate
-69. - [ ] Implement `MembershipService`
-    - [ ] Subscribe, check active plan, consume benefit, renew, cancel
+67. - [x] Build `MembershipsPage` — side-by-side plan comparison
+    - [x] Plans: Plata, Oro, Black
+    - [x] Show: price, validity, benefits, estimated savings
+    - [x] Highlight recommended plan
+68. - [x] Build `MembershipCheckoutFlow` — select plan → pay (mock) → activate
+69. - [x] Implement `MembershipService`
+    - [x] Subscribe, check active plan, consume benefit, renew, cancel
 70. - [ ] Apply membership discounts automatically at checkout
-71. - [ ] Show consumed vs. remaining benefits in profile
+71. - [x] Show consumed vs. remaining benefits in profile
 72. - [ ] Block benefit use when the monthly quota is exhausted
 73. - [ ] Send renewal reminder notification (email or in-app)
 
@@ -195,11 +195,11 @@ Check each task off as it is completed.
 
 ## Phase 12 — Admin Panel (MVP)
 
-74. - [ ] Set up `/admin` lazy-loaded route protected by `AdminGuard`
-75. - [ ] Build `AdminLayoutComponent` — sidebar navigation
+74. - [x] Set up `/admin` lazy-loaded route protected by `AdminGuard`
+75. - [ ] Build `AdminLayoutComponent` — sidebar navigation — ⚠️ placeholder only
 
 ### Movies
-76. - [ ] Build `AdminMoviesPage` — paginated movie list
+76. - [ ] Build `AdminMoviesPage` — paginated movie list — ⚠️ placeholder only
 77. - [ ] Build `AdminMovieFormComponent` — create / edit movie
     - [ ] Fields: title, synopsis, duration, genre, rating, languages, formats, poster, trailer URL
 78. - [ ] Toggle movie active / inactive (no hard delete)

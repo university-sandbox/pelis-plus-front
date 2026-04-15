@@ -15,6 +15,7 @@ import {
 } from 'lucide-angular';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { CartService } from '../../../core/services/cart.service';
 
 @Component({
   selector: 'app-navbar',
@@ -71,19 +72,30 @@ import { AuthService } from '../../../core/services/auth.service';
           <!-- Cart -->
           <button
             type="button"
+            (click)="cartService.openSidebar()"
             class="icon-btn relative rounded-full p-2 transition-colors"
-            aria-label="Carrito de compras"
+            [attr.aria-label]="cartService.itemCount() + ' artículos en el carrito'"
           >
             <lucide-icon [img]="ShoppingCart" [size]="20" aria-hidden="true" />
-            <span
-              class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold"
-              style="background: var(--color-accent); color: var(--color-text-inverse);"
-              aria-label="0 artículos en el carrito"
-            >0</span>
+            @if (cartService.itemCount() > 0) {
+              <span
+                class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold"
+                style="background: var(--color-accent); color: var(--color-text-inverse);"
+                aria-hidden="true"
+              >{{ cartService.itemCount() }}</span>
+            }
           </button>
 
           <!-- Auth -->
           @if (isAuthenticated()) {
+            <a
+              routerLink="/profile"
+              class="icon-btn hidden h-8 w-8 items-center justify-center rounded-full sm:flex"
+              style="background: var(--color-surface-raised); border: 1.5px solid var(--color-border-strong);"
+              aria-label="Mi perfil"
+            >
+              <lucide-icon [img]="User" [size]="16" style="color: var(--color-text-secondary);" aria-hidden="true" />
+            </a>
             <button
               type="button"
               (click)="logout()"
@@ -92,13 +104,6 @@ import { AuthService } from '../../../core/services/auth.service';
             >
               <lucide-icon [img]="LogOut" [size]="20" aria-hidden="true" />
             </button>
-            <div
-              class="hidden h-8 w-8 items-center justify-center rounded-full sm:flex"
-              style="background: var(--color-surface-raised); border: 1.5px solid var(--color-border-strong);"
-              aria-label="Perfil de usuario"
-            >
-              <lucide-icon [img]="User" [size]="16" style="color: var(--color-text-secondary);" aria-hidden="true" />
-            </div>
           } @else {
             <a
               routerLink="/login"
@@ -223,6 +228,7 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class NavbarComponent {
   private readonly authService = inject(AuthService);
+  readonly cartService = inject(CartService);
 
   readonly isAuthenticated = this.authService.isAuthenticated;
   readonly mobileMenuOpen = signal(false);
