@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        NG_APP_PRODUCTION: ${NG_APP_PRODUCTION:-true}
+        NG_APP_NAME: ${NG_APP_NAME:-Pelis Plus}
+        NG_APP_INDEX_PAGE: ${NG_APP_INDEX_PAGE:-landing}
+        NG_APP_POST_LOGIN_ROUTE: ${NG_APP_POST_LOGIN_ROUTE:-/landing}
+        NG_APP_BACKEND_BASE_URL: ${NG_APP_BACKEND_BASE_URL:-http://localhost:8080/api}
+        NG_APP_TMDB_BASE_URL: ${NG_APP_TMDB_BASE_URL:-https://api.themoviedb.org/3}
+        NG_APP_TMDB_IMAGE_BASE_URL: ${NG_APP_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
+        NG_APP_MOCK_ENABLED: ${NG_APP_MOCK_ENABLED:-false}
+    ports:
+      - "${PORT:-4000}:4000"
+    environment:
+      PORT: ${PORT:-4000}
+      NODE_ENV: production
+      # Runtime-only secrets — never baked into the bundle
+      NG_APP_TMDB_TOKEN: ${NG_APP_TMDB_TOKEN}
+      NG_APP_AUTH_DEMO_EMAIL: ${NG_APP_AUTH_DEMO_EMAIL}
+      NG_APP_AUTH_DEMO_PASSWORD: ${NG_APP_AUTH_DEMO_PASSWORD}
+      NG_APP_AUTH_TOKEN_STORAGE_KEY: ${NG_APP_AUTH_TOKEN_STORAGE_KEY}
