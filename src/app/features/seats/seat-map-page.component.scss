@@ -1,0 +1,8 @@
+
+    .seat-btn:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 1px;
+    }
+    .seat-btn:not(:disabled):hover {
+      transform: scale(1.15);
+    }

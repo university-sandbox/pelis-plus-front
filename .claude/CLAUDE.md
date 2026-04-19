@@ -67,7 +67,7 @@ Expert in TypeScript, Angular, scalable web apps. Write functional, maintainable
 - Use `input()` and `output()` functions instead of decorators
 - Use `computed()` for derived state
 - Set `changeDetection: ChangeDetectionStrategy.OnPush` in `@Component`
-- Prefer inline templates for small components
+- **Always use external files**: `templateUrl` + `styleUrl` — never inline `template:` or `styles:` in the decorator, regardless of component size
 - Prefer Reactive forms over Template-driven
 - Do NOT use `ngClass`, use `class` bindings
 - Do NOT use `ngStyle`, use `style` bindings

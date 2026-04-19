@@ -9,67 +9,7 @@ import { type CartSnackItem } from '../../core/models/cart.model';
   selector: 'app-snack-card',
   imports: [LucideAngularModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div
-      class="flex flex-col rounded-xl overflow-hidden h-full"
-      style="background: var(--color-surface); border: 1px solid var(--color-border);"
-    >
-      <!-- Image placeholder -->
-      <div
-        class="flex items-center justify-center"
-        style="height: 120px; background: var(--color-surface-raised);"
-        aria-hidden="true"
-      >
-        <span class="text-3xl">{{ categoryEmoji(snack().category) }}</span>
-      </div>
-
-      <div class="flex flex-1 flex-col gap-2 p-3">
-        <div class="flex-1">
-          <p class="font-semibold text-sm leading-tight" style="color: var(--color-text-primary);">{{ snack().name }}</p>
-          <p class="mt-1 text-xs leading-snug" style="color: var(--color-text-secondary);">{{ snack().description }}</p>
-        </div>
-
-        <div class="flex items-center justify-between gap-2 mt-auto">
-          <span class="text-base font-bold" style="color: var(--color-accent);">S/ {{ snack().price }}</span>
-
-          @if (quantity() > 0) {
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                (click)="decrement.emit(snack())"
-                class="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
-                style="background: var(--color-surface-raised); color: var(--color-text-primary);"
-                [attr.aria-label]="'Quitar ' + snack().name"
-              >
-                <lucide-icon [img]="Minus" [size]="12" aria-hidden="true" />
-              </button>
-              <span class="w-5 text-center text-sm font-bold" style="color: var(--color-text-primary);">{{ quantity() }}</span>
-              <button
-                type="button"
-                (click)="increment.emit(snack())"
-                class="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
-                style="background: var(--color-accent); color: var(--color-text-inverse);"
-                [attr.aria-label]="'Agregar ' + snack().name"
-              >
-                <lucide-icon [img]="Plus" [size]="12" aria-hidden="true" />
-              </button>
-            </div>
-          } @else {
-            <button
-              type="button"
-              (click)="increment.emit(snack())"
-              class="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors"
-              style="background: var(--color-accent); color: var(--color-text-inverse);"
-              [attr.aria-label]="'Agregar ' + snack().name"
-            >
-              <lucide-icon [img]="Plus" [size]="12" aria-hidden="true" />
-              Agregar
-            </button>
-          }
-        </div>
-      </div>
-    </div>
-  `,
+  templateUrl: './snack-card.component.html',
 })
 export class SnackCardComponent {
   readonly snack = input.required<Snack>();

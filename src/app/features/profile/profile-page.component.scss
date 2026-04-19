@@ -1,0 +1,9 @@
+
+    .profile-input {
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .profile-input:focus {
+      border-color: var(--color-accent) !important;
+      box-shadow: 0 0 0 2px var(--color-accent-muted);
+    }

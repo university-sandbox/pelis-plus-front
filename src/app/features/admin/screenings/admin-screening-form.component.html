@@ -1,0 +1,138 @@
+
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style="background: rgba(0,0,0,0.7);"
+      (click)="onBackdrop($event)"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        class="relative w-full max-w-lg overflow-y-auto rounded-2xl"
+        style="background: var(--color-surface); border: 1px solid var(--color-border);"
+        (click)="$event.stopPropagation()"
+      >
+        <div
+          class="flex items-center justify-between px-6 py-4"
+          style="border-bottom: 1px solid var(--color-border);"
+        >
+          <h2 class="text-base font-bold" style="color: var(--color-text-primary);">
+            {{ screening() ? 'Editar función' : 'Nueva función' }}
+          </h2>
+          <button type="button" (click)="cancelled.emit()" style="color: var(--color-text-secondary);" aria-label="Cerrar">
+            <lucide-icon [img]="X" [size]="18" />
+          </button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="p-6 space-y-4">
+          <!-- Movie -->
+          <div>
+            <label class="mb-1 block text-xs font-semibold" style="color: var(--color-text-secondary);">Película *</label>
+            <select
+              formControlName="movieId"
+              class="form-input w-full rounded-lg px-3 py-2 text-sm"
+              style="background: var(--color-surface-raised); border: 1px solid var(--color-border); color: var(--color-text-primary);"
+            >
+              <option value="">Seleccionar película</option>
+              @for (m of movies(); track m.id) {
+                <option [value]="m.id">{{ m.title }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Room -->
+          <div>
+            <label class="mb-1 block text-xs font-semibold" style="color: var(--color-text-secondary);">Sede / Sala *</label>
+            <div class="grid grid-cols-2 gap-2">
+              <select
+                (change)="onVenueChange($event)"
+                class="form-input rounded-lg px-3 py-2 text-sm"
+                style="background: var(--color-surface-raised); border: 1px solid var(--color-border); color: var(--color-text-primary);"
+              >
+                <option value="">Sede</option>
+                @for (v of venues(); track v.id) {
+                  <option [value]="v.id">{{ v.name }}</option>
+                }
+              </select>
+              <select
+                formControlName="roomId"
+                class="form-input rounded-lg px-3 py-2 text-sm"
+                style="background: var(--color-surface-raised); border: 1px solid var(--color-border); color: var(--color-text-primary);"
+              >
+                <option value="">Sala</option>
+                @for (r of rooms(); track r.id) {
+                  <option [value]="r.id">{{ r.name }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Date -->
+            <div>
+              <label class="mb-1 block text-xs font-semibold" style="color: var(--color-text-secondary);">Fecha *</label>
+              <input
+                formControlName="date"
+                type="date"
+                class="form-input w-full rounded-lg px-3 py-2 text-sm"
+                style="background: var(--color-surface-raised); border: 1px solid var(--color-border); color: var(--color-text-primary);"
+              />
+            </div>
+            <!-- Time -->
+            <div>
+              <label class="mb-1 block text-xs font-semibold" style="color: var(--color-text-secondary);">Hora *</label>
+              <input
+                formControlName="time"
+                type="time"
+                class="form-input w-full rounded-lg px-3 py-2 text-sm"
+                style="background: var(--color-surface-raised); border: 1px solid var(--color-border); color: var(--color-text-primary);"
+              />
+            </div>
+            <!-- Format -->
+            <div>
+              <label class="mb-1 block text-xs font-semibold" style="color: var(--color-text-secondary);">Formato *</label>
+              <select
+                formControlName="format"
+                class="form-input w-full rounded-lg px-3 py-2 text-sm"
+                style="background: var(--color-surface-raised); border: 1px solid var(--color-border); color: var(--color-text-primary);"
+              >
+                <option value="standard">2D</option>
+                <option value="3d">3D</option>
+                <option value="imax">IMAX</option>
+                <option value="dbox">D-BOX</option>
+              </select>
+            </div>
+            <!-- Price -->
+            <div>
+              <label class="mb-1 block text-xs font-semibold" style="color: var(--color-text-secondary);">Precio (S/) *</label>
+              <input
+                formControlName="price"
+                type="number"
+                step="0.5"
+                min="0"
+                class="form-input w-full rounded-lg px-3 py-2 text-sm"
+                style="background: var(--color-surface-raised); border: 1px solid var(--color-border); color: var(--color-text-primary);"
+                placeholder="22.00"
+              />
+            </div>
+          </div>
+
+          @if (serverError()) {
+            <p class="rounded-lg px-3 py-2 text-sm" style="background: rgba(239,68,68,0.1); color: var(--color-error);">
+              {{ serverError() }}
+            </p>
+          }
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button type="button" (click)="cancelled.emit()"
+              class="rounded-full border px-5 py-2 text-sm font-medium"
+              style="border-color: var(--color-border-strong); color: var(--color-text-secondary);">Cancelar</button>
+            <button type="submit" [disabled]="submitting() || form.invalid"
+              class="flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold disabled:opacity-50"
+              style="background: var(--color-accent); color: var(--color-text-inverse);">
+              <lucide-icon [img]="Save" [size]="14" />
+              {{ submitting() ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>

@@ -1,0 +1,195 @@
+
+    <app-navbar />
+
+    <main class="min-h-dvh pb-8" style="background: var(--color-bg);">
+      <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <div class="mb-6 flex items-center gap-3">
+          <a
+            routerLink="/snacks"
+            class="flex items-center gap-2 rounded-full p-2 transition-colors"
+            style="background: var(--color-surface-raised); color: var(--color-text-secondary);"
+            aria-label="Volver"
+          >
+            <lucide-icon [img]="ArrowLeft" [size]="18" aria-hidden="true" />
+          </a>
+          <h1 class="text-xl font-bold" style="color: var(--color-text-primary);">Resumen de tu pedido</h1>
+        </div>
+
+        @if (cartService.cart().tickets.length === 0) {
+          <!-- Empty cart -->
+          <div class="rounded-xl p-12 text-center" style="background: var(--color-surface); border: 1px solid var(--color-border);">
+            <p class="mb-4 text-lg font-semibold" style="color: var(--color-text-primary);">Tu carrito está vacío</p>
+            <a
+              routerLink="/"
+              class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
+              style="background: var(--color-accent); color: var(--color-text-inverse);"
+            >Explorar películas</a>
+          </div>
+        } @else {
+          <div class="grid gap-6 lg:grid-cols-[1fr_320px]">
+
+            <!-- Left column — items -->
+            <div class="space-y-4">
+
+              <!-- Tickets section -->
+              <section aria-label="Entradas">
+                <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider" style="color: var(--color-text-secondary);">Entradas</h2>
+                <div class="rounded-xl overflow-hidden" style="background: var(--color-surface); border: 1px solid var(--color-border);">
+                  @for (ticket of cartService.cart().tickets; track ticket.seat.id; let last = $last) {
+                    <div class="flex items-start justify-between gap-4 p-4" [class.border-b]="!last" [style.border-color]="'var(--color-border)'">
+                      <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-sm leading-tight mb-1" style="color: var(--color-text-primary);">{{ ticket.movieTitle }}</p>
+                        <p class="text-xs" style="color: var(--color-text-secondary);">
+                          {{ ticket.date }} · {{ ticket.time }} · {{ formatLabel(ticket.format) }}
+                        </p>
+                        <p class="text-xs mt-0.5" style="color: var(--color-text-secondary);">
+                          {{ ticket.venue }} · {{ ticket.room }} · Asiento {{ ticket.seat.row }}{{ ticket.seat.col }}
+                        </p>
+                        @if (ticket.seat.type === 'preferential') {
+                          <span
+                            class="mt-1 inline-block rounded px-1.5 py-0.5 text-xs font-medium"
+                            style="background: rgba(124,58,237,.2); color: #7C3AED;"
+                          >Preferencial</span>
+                        }
+                      </div>
+                      <div class="flex items-start gap-3">
+                        <span class="font-bold" style="color: var(--color-text-primary);">S/ {{ ticket.price }}</span>
+                        <button
+                          type="button"
+                          (click)="removeTicket(ticket)"
+                          class="rounded p-1 transition-colors"
+                          style="color: var(--color-text-disabled);"
+                          [attr.aria-label]="'Eliminar entrada ' + ticket.seat.row + ticket.seat.col"
+                        >
+                          <lucide-icon [img]="Trash2" [size]="14" aria-hidden="true" />
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </section>
+
+              <!-- Snacks section -->
+              @if (cartService.cart().snacks.length > 0) {
+                <section aria-label="Confitería">
+                  <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider" style="color: var(--color-text-secondary);">Confitería</h2>
+                  <div class="rounded-xl overflow-hidden" style="background: var(--color-surface); border: 1px solid var(--color-border);">
+                    @for (item of cartService.cart().snacks; track item.snack.id; let last = $last) {
+                      <div class="flex items-center justify-between gap-4 p-4" [class.border-b]="!last" [style.border-color]="'var(--color-border)'">
+                        <div class="flex-1 min-w-0">
+                          <p class="font-semibold text-sm" style="color: var(--color-text-primary);">{{ item.snack.name }}</p>
+                          <p class="text-xs" style="color: var(--color-text-secondary);">S/ {{ item.snack.price }} c/u</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                          <div class="flex items-center gap-2">
+                            <button
+                              type="button"
+                              (click)="decrementSnack(item)"
+                              class="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+                              style="background: var(--color-surface-raised); color: var(--color-text-primary);"
+                              [attr.aria-label]="'Quitar ' + item.snack.name"
+                            >
+                              <lucide-icon [img]="Minus" [size]="12" aria-hidden="true" />
+                            </button>
+                            <span class="w-5 text-center text-sm font-bold" style="color: var(--color-text-primary);">{{ item.quantity }}</span>
+                            <button
+                              type="button"
+                              (click)="incrementSnack(item)"
+                              class="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+                              style="background: var(--color-accent); color: var(--color-text-inverse);"
+                              [attr.aria-label]="'Agregar ' + item.snack.name"
+                            >
+                              <lucide-icon [img]="Plus" [size]="12" aria-hidden="true" />
+                            </button>
+                          </div>
+                          <span class="w-16 text-right font-bold" style="color: var(--color-text-primary);">
+                            S/ {{ item.snack.price * item.quantity }}
+                          </span>
+                          <button
+                            type="button"
+                            (click)="removeSnack(item)"
+                            class="rounded p-1 transition-colors"
+                            style="color: var(--color-text-disabled);"
+                            [attr.aria-label]="'Eliminar ' + item.snack.name"
+                          >
+                            <lucide-icon [img]="Trash2" [size]="14" aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </section>
+              }
+            </div>
+
+            <!-- Right column — summary & payment -->
+            <div class="space-y-4">
+              <!-- Summary card -->
+              <div class="rounded-xl p-5" style="background: var(--color-surface); border: 1px solid var(--color-border);">
+                <h2 class="mb-4 font-bold" style="color: var(--color-text-primary);">Resumen</h2>
+                <div class="space-y-2 text-sm">
+                  <div class="flex justify-between" style="color: var(--color-text-secondary);">
+                    <span>Entradas ({{ cartService.cart().tickets.length }})</span>
+                    <span>S/ {{ ticketTotal() }}</span>
+                  </div>
+                  @if (cartService.cart().snacks.length > 0) {
+                    <div class="flex justify-between" style="color: var(--color-text-secondary);">
+                      <span>Confitería</span>
+                      <span>S/ {{ snackTotal() }}</span>
+                    </div>
+                  }
+                  @if (cartService.cart().membershipDiscount > 0) {
+                    <div class="flex items-center justify-between" style="color: var(--color-success);">
+                      <span class="flex items-center gap-1">
+                        <lucide-icon [img]="Tag" [size]="12" aria-hidden="true" />
+                        Desc. membresía{{ membershipName() ? ' ' + membershipName() : '' }}
+                      </span>
+                      <span>- S/ {{ cartService.cart().membershipDiscount }}</span>
+                    </div>
+                  }
+                  <div class="border-t pt-2" style="border-color: var(--color-border);">
+                    <div class="flex justify-between text-base font-bold" style="color: var(--color-text-primary);">
+                      <span>Total</span>
+                      <span>S/ {{ cartService.total() }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payment security note -->
+              <div class="flex items-center gap-2 rounded-xl p-4" style="background: var(--color-surface); border: 1px solid var(--color-border);">
+                <lucide-icon [img]="ShieldCheck" [size]="20" style="color: var(--color-success); flex-shrink: 0;" aria-hidden="true" />
+                <p class="text-xs" style="color: var(--color-text-secondary);">
+                  Pago seguro procesado por <strong style="color: var(--color-text-primary);">Izipay</strong>. Nunca almacenamos tus datos de tarjeta.
+                </p>
+              </div>
+
+              <!-- Pay CTA -->
+              <button
+                type="button"
+                (click)="pay()"
+                [disabled]="paying()"
+                class="flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-base font-bold transition-colors"
+                style="background: var(--color-accent); color: var(--color-text-inverse);"
+                [style.opacity]="paying() ? '0.7' : '1'"
+              >
+                @if (paying()) {
+                  <span>Procesando pago...</span>
+                } @else {
+                  <lucide-icon [img]="CreditCard" [size]="18" aria-hidden="true" />
+                  <span>Pagar S/ {{ cartService.total() }}</span>
+                }
+              </button>
+
+              @if (paymentError()) {
+                <p class="text-center text-sm" style="color: var(--color-error);">
+                  El pago no pudo procesarse. Inténtalo de nuevo.
+                </p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </main>

@@ -1,0 +1,12 @@
+
+    .nav-link:hover {
+      background: var(--color-surface-raised);
+      color: var(--color-text-primary) !important;
+    }
+    .nav-active {
+      background: rgba(0, 201, 167, 0.12) !important;
+      color: var(--color-accent) !important;
+    }
+    .nav-active lucide-icon {
+      color: var(--color-accent);
+    }

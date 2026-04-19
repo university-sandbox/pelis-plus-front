@@ -1,0 +1,84 @@
+
+    <div>
+      <div class="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <h1 class="text-xl font-bold" style="color: var(--color-text-primary);">Confitería</h1>
+          <p class="text-sm" style="color: var(--color-text-secondary);">{{ snacks().length }} productos</p>
+        </div>
+        <button type="button" (click)="openCreate()"
+          class="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
+          style="background: var(--color-accent); color: var(--color-text-inverse);">
+          <lucide-icon [img]="Plus" [size]="15" />Nuevo producto
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          @for (n of [1,2,3,4,5,6]; track n) { <app-skeleton-loader height="120px" radius="12px" /> }
+        </div>
+      } @else if (error()) {
+        <div class="rounded-xl p-6 text-center" style="background: var(--color-surface); border: 1px solid var(--color-border);">
+          <p class="mb-3 text-sm" style="color: var(--color-text-secondary);">Error al cargar productos.</p>
+          <button type="button" (click)="load()" class="text-sm" style="color: var(--color-accent);">
+            <lucide-icon [img]="RefreshCw" [size]="14" class="inline mr-1" />Reintentar</button>
+        </div>
+      } @else {
+        <div class="overflow-hidden rounded-xl" style="border: 1px solid var(--color-border); background: var(--color-surface);">
+          <table class="w-full text-sm">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--color-border); background: var(--color-surface-raised);">
+                <th class="px-4 py-3 text-left font-semibold" style="color: var(--color-text-secondary);">Producto</th>
+                <th class="px-4 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-secondary);">Categoría</th>
+                <th class="px-4 py-3 text-left font-semibold hidden md:table-cell" style="color: var(--color-text-secondary);">Precio</th>
+                <th class="px-4 py-3 text-left font-semibold hidden sm:table-cell" style="color: var(--color-text-secondary);">Activo</th>
+                <th class="px-4 py-3 text-right font-semibold" style="color: var(--color-text-secondary);">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (snack of snacks(); track snack.id) {
+                <tr style="border-bottom: 1px solid var(--color-border);">
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      @if (snack.image) {
+                        <img [src]="snack.image" [alt]="snack.name"
+                          class="h-10 w-10 flex-none rounded-lg object-cover" loading="lazy" />
+                      } @else {
+                        <div class="h-10 w-10 flex-none rounded-lg" style="background: var(--color-surface-raised);"></div>
+                      }
+                      <span class="font-medium" style="color: var(--color-text-primary);">{{ snack.name }}</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 hidden sm:table-cell" style="color: var(--color-text-secondary);">
+                    {{ categoryLabel(snack.category) }}
+                  </td>
+                  <td class="px-4 py-3 hidden md:table-cell" style="color: var(--color-text-secondary);">S/ {{ snack.price }}</td>
+                  <td class="px-4 py-3 hidden sm:table-cell">
+                    <button type="button" (click)="toggleStatus(snack)" [disabled]="toggling() === snack.id">
+                      @if (snack.status === 'active') {
+                        <lucide-icon [img]="ToggleRight" [size]="22" style="color: var(--color-success);" />
+                      } @else {
+                        <lucide-icon [img]="ToggleLeft" [size]="22" style="color: var(--color-text-disabled);" />
+                      }
+                    </button>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <button type="button" (click)="openEdit(snack)"
+                      class="rounded-lg p-2 transition-colors" style="color: var(--color-text-secondary);">
+                      <lucide-icon [img]="Pencil" [size]="14" />
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    @if (showForm()) {
+      <app-admin-snack-form
+        [snack]="editingSnack()"
+        (saved)="onSaved($event)"
+        (cancelled)="showForm.set(false)"
+      />
+    }
