@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
-import { LucideAngularModule, Mail, Lock, Film, Eye, EyeOff, AlertCircle } from 'lucide-angular';
+import { LucideAngularModule, Mail, Lock, Film, Eye, EyeOff, AlertCircle, ArrowLeft } from 'lucide-angular';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
@@ -27,6 +27,17 @@ interface LoginForm {
         class="w-full max-w-md rounded-2xl p-8 shadow-xl"
         style="background: var(--color-surface); border: 1px solid var(--color-border);"
       >
+        <!-- Back to catalog -->
+        <a
+          routerLink="/"
+          class="back-btn mb-6 flex w-fit items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium transition-colors"
+          style="color: var(--color-text-secondary);"
+          aria-label="Volver al catálogo"
+        >
+          <lucide-icon [img]="ArrowLeft" [size]="16" aria-hidden="true" />
+          Volver
+        </a>
+
         <!-- Logo -->
         <div class="mb-8 flex flex-col items-center gap-2 text-center">
           <div
@@ -219,6 +230,16 @@ interface LoginForm {
       outline: 2px solid var(--color-accent);
       outline-offset: 2px;
     }
+
+    .back-btn:hover {
+      background: var(--color-surface-raised);
+      color: var(--color-text-primary) !important;
+    }
+
+    .back-btn:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
   `,
 })
 export class LoginPageComponent {
@@ -237,6 +258,7 @@ export class LoginPageComponent {
   readonly Eye = Eye;
   readonly EyeOff = EyeOff;
   readonly AlertCircle = AlertCircle;
+  readonly ArrowLeft = ArrowLeft;
 
   readonly loginForm = new FormGroup<LoginForm>({
     email: new FormControl('', {

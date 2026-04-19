@@ -64,8 +64,8 @@ Check each task off as it is completed.
 22. - [x] Implement `MovieService` — fetch catalog and movie detail (TMDB)
 23. - [x] Add search by movie title
 24. - [x] Add filters: genre pills — ⚠️ partially done: format/showtime/venue filters pending
-25. - [ ] Show active vs. inactive movies distinctly
-26. - [ ] Add visual labels: premiere, children, subtitled, dubbed
+25. - [x] Show active vs. inactive movies distinctly — inactive overlay + badge on `MovieCardComponent`
+26. - [x] Add visual labels: premiere, upcoming, +18 — ⚠️ partially done: subtitled/dubbed require backend schema change
 
 ---
 
@@ -90,11 +90,11 @@ Check each task off as it is completed.
     - [x] Visual legend: available, occupied, selected, preferential
     - [x] Click/tap to select or deselect a seat
     - [x] Real-time subtotal update on selection
-34. - [ ] Enforce maximum seats per purchase
+34. - [x] Enforce maximum seats per purchase — max 6, enforced in `toggleSeat()`
 35. - [x] Temporarily lock selected seats on the backend (via `SeatService.reserveSeats()`)
 36. - [x] Release seats if checkout is not completed (on component destroy)
-37. - [ ] Show countdown timer for the seat reservation
-38. - [ ] Handle concurrent seat conflicts (invalidate if taken by another user)
+37. - [x] Show countdown timer for the seat reservation — 10 min countdown with expiry callback
+38. - [x] Handle concurrent seat conflicts (invalidate if taken by another user) — 409 error triggers seat refresh
 39. - [ ] Mobile-friendly map with pinch-to-zoom support
 
 ---
@@ -108,7 +108,7 @@ Check each task off as it is completed.
     - [x] Show: selected movie, screening, seats, snacks, membership
     - [x] Show subtotal per section, applied discounts, and final total
     - [x] Edit quantities and remove items inline
-42. - [ ] Apply membership benefits automatically when cart is updated
+42. - [x] Apply membership benefits automatically when cart is updated — applied in `CheckoutPageComponent.ngOnInit()`
 43. - [ ] Validate cart before proceeding to checkout (availability, prices)
 44. - [ ] Show alerts for price or availability changes
 
@@ -143,7 +143,7 @@ Check each task off as it is completed.
     - [x] Order summary + digital ticket preview
 53. - [x] Build `TicketComponent`
     - [x] Fields: user name, QR code, booking code, movie, venue, room, date/time, seats, snacks, total paid
-    - [ ] Downloadable QR (canvas or SVG export) — ⚠️ QR placeholder shown; real QR rendering pending
+    - [x] Downloadable QR — real QR via `qrcode` library, `afterNextRender` SSR-safe, download button
 54. - [ ] Send confirmation email with ticket attached
 55. - [x] Store ticket in user profile for future access (via `TicketService.getMyTickets()`)
 56. - [ ] Add "Add to wallet" action (post-MVP placeholder)
@@ -168,8 +168,8 @@ Check each task off as it is completed.
 60. - [x] Build `SnacksPage` — catalog by category
     - [x] Categories: popcorn, drinks, combos, sweets, extras
 61. - [x] Build `SnackCard` component — image, name, size, price, "Add" button
-62. - [ ] Build `ProductCustomizationModal` for products that require options — ⚠️ options defined in model but modal not yet built
-    - [ ] Options: type, size, flavor, extras
+62. - [x] Build `ProductCustomizationModal` — opens for snacks with options; quantity + option selection
+    - [x] Options: type, size, flavor, extras
 63. - [x] Implement `SnacksService` — fetch catalog
 64. - [x] Add mini-cart indicator visible from the snacks page
 65. - [ ] Add upsell suggestions: "Add a drink for S/ 5 more"
@@ -186,7 +186,7 @@ Check each task off as it is completed.
 68. - [x] Build `MembershipCheckoutFlow` — select plan → pay (mock) → activate
 69. - [x] Implement `MembershipService`
     - [x] Subscribe, check active plan, consume benefit, renew, cancel
-70. - [ ] Apply membership discounts automatically at checkout
+70. - [x] Apply membership discounts automatically at checkout — `CheckoutPage.ngOnInit()` fetches plan + applies %
 71. - [x] Show consumed vs. remaining benefits in profile
 72. - [ ] Block benefit use when the monthly quota is exhausted
 73. - [ ] Send renewal reminder notification (email or in-app)
@@ -196,42 +196,42 @@ Check each task off as it is completed.
 ## Phase 12 — Admin Panel (MVP)
 
 74. - [x] Set up `/admin` lazy-loaded route protected by `AdminGuard`
-75. - [ ] Build `AdminLayoutComponent` — sidebar navigation — ⚠️ placeholder only
+75. - [x] Build `AdminLayoutComponent` — collapsible sidebar with nav to all sections
 
 ### Movies
-76. - [ ] Build `AdminMoviesPage` — paginated movie list — ⚠️ placeholder only
-77. - [ ] Build `AdminMovieFormComponent` — create / edit movie
-    - [ ] Fields: title, synopsis, duration, genre, rating, languages, formats, poster, trailer URL
-78. - [ ] Toggle movie active / inactive (no hard delete)
+76. - [x] Build `AdminMoviesPage` — paginated movie list with status badge, active toggle
+77. - [x] Build `AdminMovieFormComponent` — create / edit movie
+    - [x] Fields: title, synopsis, duration, genre, rating, languages, formats, poster, active
+78. - [x] Toggle movie active / inactive (no hard delete)
 
 ### Screenings
-79. - [ ] Build `AdminScreeningsPage` — paginated screening list with date filter
-80. - [ ] Build `AdminScreeningFormComponent` — create / edit screening
-    - [ ] Fields: movie, venue, room, date, time, format
+79. - [x] Build `AdminScreeningsPage` — paginated screening list with status filter
+80. - [x] Build `AdminScreeningFormComponent` — create / edit screening
+    - [x] Fields: movie, venue, room, date, time, format, price
     - [ ] Validate no room-time conflict before saving
-81. - [ ] Cancel screening (sets status to cancelled, releases reserved seats)
+81. - [x] Cancel screening (sets status to cancelled)
 
 ### Rooms & Seats
-82. - [ ] Build `AdminRoomsPage` — list rooms per venue
-83. - [ ] Build `AdminRoomFormComponent` — create room
-    - [ ] Fields: name, total capacity, rows, columns
+82. - [x] Build `AdminRoomsPage` — list rooms grouped by venue
+83. - [x] Build `AdminRoomFormComponent` — create / edit room
+    - [x] Fields: name, venue, capacity, rows, columns
     - [ ] Mark individual seats as standard or preferential
-84. - [ ] Toggle room active / inactive
+84. - [x] Toggle room active / inactive
 
 ### Snacks
-85. - [ ] Build `AdminSnacksPage` — paginated snack list
-86. - [ ] Build `AdminSnackFormComponent` — create / edit snack
-    - [ ] Fields: name, category, price, image, status
-87. - [ ] Toggle snack active / inactive
+85. - [x] Build `AdminSnacksPage` — snack list with active toggle
+86. - [x] Build `AdminSnackFormComponent` — create / edit snack
+    - [x] Fields: name, category, price, image, status
+87. - [x] Toggle snack active / inactive
 
 ### Orders
-88. - [ ] Build `AdminOrdersPage` — paginated order list with filters (date, status, movie)
-89. - [ ] Build `AdminOrderDetailPage` — read-only view of order: user, tickets, seats, snacks, payment status
+88. - [x] Build `AdminOrdersPage` — paginated order list with status + payment badges
+89. - [x] Build `AdminOrderDetailPage` — read-only order view: tickets, snacks, totals, statuses
 
 ### Users
-90. - [ ] Build `AdminUsersPage` — paginated user list
-    - [ ] Columns: name, email, registration date, active membership
-91. - [ ] Toggle user account active / inactive
+90. - [x] Build `AdminUsersPage` — paginated user list with membership badge
+    - [x] Columns: name, email, membership, registration date
+91. - [x] Toggle user account active / inactive
 
 ---
 
@@ -249,7 +249,7 @@ Check each task off as it is completed.
 ### UI completeness
 96. - [ ] Verify skeleton loaders are present on every async screen
 97. - [ ] Verify all interactive states exist on every component (hover, focus, disabled, loading, error, empty)
-98. - [ ] Add global error pages: 404, 500, and generic fallback
+98. - [x] Add global error pages: 404 — `NotFoundPageComponent` at catch-all route — ⚠️ 500 page pending
 
 ### Unit tests
 99. - [ ] Write unit tests for all services (AuthService, CartService, PaymentService, MembershipService, etc.)

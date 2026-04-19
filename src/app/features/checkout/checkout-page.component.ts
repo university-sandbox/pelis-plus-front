@@ -2,13 +2,15 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  OnInit,
   signal,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { LucideAngularModule, ArrowLeft, CreditCard, ShieldCheck, Minus, Plus, Trash2 } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, CreditCard, ShieldCheck, Minus, Plus, Trash2, Tag } from 'lucide-angular';
 
 import { CartService } from '../../core/services/cart.service';
 import { OrderService } from '../../core/services/order.service';
+import { MembershipService } from '../../core/services/membership.service';
 import { type CartTicket, type CartSnackItem, cartSubtotal } from '../../core/models/cart.model';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 
@@ -19,6 +21,7 @@ const FORMAT_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-checkout-page',
   imports: [RouterLink, LucideAngularModule, NavbarComponent],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-navbar />
@@ -163,8 +166,11 @@ const FORMAT_LABELS: Record<string, string> = {
                     </div>
                   }
                   @if (cartService.cart().membershipDiscount > 0) {
-                    <div class="flex justify-between" style="color: var(--color-success);">
-                      <span>Descuento membresía</span>
+                    <div class="flex items-center justify-between" style="color: var(--color-success);">
+                      <span class="flex items-center gap-1">
+                        <lucide-icon [img]="Tag" [size]="12" aria-hidden="true" />
+                        Desc. membresía{{ membershipName() ? ' ' + membershipName() : '' }}
+                      </span>
                       <span>- S/ {{ cartService.cart().membershipDiscount }}</span>
                     </div>
                   }
@@ -214,13 +220,15 @@ const FORMAT_LABELS: Record<string, string> = {
     </main>
   `,
 })
-export class CheckoutPageComponent {
+export class CheckoutPageComponent implements OnInit {
   readonly cartService = inject(CartService);
   private readonly orderService = inject(OrderService);
+  private readonly membershipService = inject(MembershipService);
   private readonly router = inject(Router);
 
   readonly paying = signal(false);
   readonly paymentError = signal(false);
+  readonly membershipName = signal<string | null>(null);
 
   readonly ArrowLeft = ArrowLeft;
   readonly CreditCard = CreditCard;
@@ -228,6 +236,38 @@ export class CheckoutPageComponent {
   readonly Minus = Minus;
   readonly Plus = Plus;
   readonly Trash2 = Trash2;
+  readonly Tag = Tag;
+
+  ngOnInit(): void {
+    this.applyMembershipDiscount();
+  }
+
+  private applyMembershipDiscount(): void {
+    this.membershipService.getMyPlan().subscribe({
+      next: (membership) => {
+        if (!membership) return;
+        // Check quota hasn't been exhausted
+        if (membership.ticketsUsed >= membership.ticketsTotal) return;
+
+        const ticketSubtotal = this.cartService.cart().tickets.reduce((s, t) => s + t.price, 0);
+
+        // Fetch full plan to get discountPercentage
+        this.membershipService.getPlans().subscribe({
+          next: (plans) => {
+            const plan = plans.find((p) => p.id === membership.planId);
+            if (!plan) return;
+            const discountAmount = parseFloat(
+              (ticketSubtotal * plan.discountPercentage / 100).toFixed(2),
+            );
+            if (discountAmount > 0) {
+              this.cartService.applyMembershipDiscount(discountAmount);
+              this.membershipName.set(plan.name);
+            }
+          },
+        });
+      },
+    });
+  }
 
   ticketTotal(): number {
     return this.cartService.cart().tickets.reduce((s, t) => s + t.price, 0);

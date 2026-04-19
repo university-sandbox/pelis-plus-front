@@ -47,6 +47,37 @@ import { TMDB } from '../../core/api/endpoints';
         style="background: rgba(9,9,15,.35);"
       ></div>
 
+      <!-- Labels: premiere, upcoming, inactive -->
+      <div class="absolute left-2 top-2 flex flex-col gap-1">
+        @if (movie().active === false) {
+          <span class="rounded px-1.5 py-0.5 text-xs font-bold"
+            style="background: rgba(0,0,0,0.75); color: var(--color-text-disabled);">
+            Inactiva
+          </span>
+        } @else if (movie().status === 'upcoming') {
+          <span class="rounded px-1.5 py-0.5 text-xs font-bold"
+            style="background: rgba(99,102,241,0.85); color: #fff;">
+            Próximamente
+          </span>
+        } @else if (isNewRelease()) {
+          <span class="rounded px-1.5 py-0.5 text-xs font-bold"
+            style="background: rgba(0,201,167,0.85); color: #fff;">
+            Estreno
+          </span>
+        }
+        @if (movie().adult) {
+          <span class="rounded px-1.5 py-0.5 text-xs font-bold"
+            style="background: rgba(239,68,68,0.85); color: #fff;">
+            +18
+          </span>
+        }
+      </div>
+
+      <!-- Inactive overlay -->
+      @if (movie().active === false) {
+        <div class="absolute inset-0" style="background: rgba(0,0,0,0.5);"></div>
+      }
+
       <!-- Info overlay (always visible at bottom) -->
       <div class="absolute bottom-0 left-0 right-0 p-3">
         <p class="truncate text-sm font-semibold leading-tight" style="color: var(--color-text-primary);">
@@ -99,5 +130,14 @@ export class MovieCardComponent {
     const path = this.movie().posterPath;
     if (!path) return null;
     return TMDB.imageUrl('w342', path);
+  }
+
+  /** "Estreno" label: released within last 30 days */
+  isNewRelease(): boolean {
+    const date = this.movie().releaseDate;
+    if (!date) return false;
+    const releaseMs = new Date(date).getTime();
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    return releaseMs >= thirtyDaysAgo && releaseMs <= Date.now();
   }
 }

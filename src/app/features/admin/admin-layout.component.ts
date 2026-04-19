@@ -1,16 +1,153 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  LucideAngularModule,
+  type LucideIconData,
+  Film,
+  Calendar,
+  DoorOpen,
+  ShoppingBag,
+  ClipboardList,
+  Users,
+  Menu,
+  X,
+  Clapperboard,
+} from 'lucide-angular';
+
+interface NavItem {
+  path: string;
+  label: string;
+  icon: LucideIconData;
+}
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, LucideAngularModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="min-h-dvh" style="background: var(--color-bg);">
-      <main class="p-6">
-        <router-outlet />
-      </main>
+    <div class="flex min-h-dvh" style="background: var(--color-bg);">
+
+      <!-- Sidebar overlay (mobile) -->
+      @if (sidebarOpen()) {
+        <div
+          class="fixed inset-0 z-20 lg:hidden"
+          style="background: rgba(0,0,0,0.6);"
+          (click)="sidebarOpen.set(false)"
+          aria-hidden="true"
+        ></div>
+      }
+
+      <!-- Sidebar -->
+      <aside
+        class="fixed inset-y-0 left-0 z-30 flex w-64 flex-col transition-transform duration-300 lg:static lg:translate-x-0"
+        [style.transform]="sidebarOpen() ? 'translateX(0)' : undefined"
+        [class.translate-x-0]="sidebarOpen()"
+        [class.-translate-x-full]="!sidebarOpen()"
+        style="background: var(--color-surface); border-right: 1px solid var(--color-border);"
+      >
+        <!-- Brand -->
+        <div
+          class="flex h-16 items-center gap-3 px-5"
+          style="border-bottom: 1px solid var(--color-border);"
+        >
+          <lucide-icon [img]="Clapperboard" [size]="22" style="color: var(--color-accent);" aria-hidden="true" />
+          <div>
+            <p class="text-sm font-bold" style="color: var(--color-text-primary);">Pelis Plus</p>
+            <p class="text-xs" style="color: var(--color-text-secondary);">Admin</p>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 overflow-y-auto px-3 py-4" aria-label="Navegación del panel">
+          <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-widest" style="color: var(--color-text-disabled);">
+            Gestión
+          </p>
+          <ul class="space-y-0.5">
+            @for (item of navItems; track item.path) {
+              <li>
+                <a
+                  [routerLink]="item.path"
+                  routerLinkActive="nav-active"
+                  (click)="sidebarOpen.set(false)"
+                  class="nav-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                  style="color: var(--color-text-secondary);"
+                >
+                  <lucide-icon [img]="item.icon" [size]="17" aria-hidden="true" />
+                  {{ item.label }}
+                </a>
+              </li>
+            }
+          </ul>
+        </nav>
+
+        <!-- Back to site -->
+        <div class="px-3 py-4" style="border-top: 1px solid var(--color-border);">
+          <a
+            routerLink="/"
+            class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+            style="color: var(--color-text-secondary);"
+          >
+            ← Volver al sitio
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <div class="flex flex-1 flex-col min-w-0">
+        <!-- Top bar (mobile) -->
+        <header
+          class="sticky top-0 z-10 flex h-16 items-center gap-4 px-4 lg:hidden"
+          style="background: var(--color-surface); border-bottom: 1px solid var(--color-border);"
+        >
+          <button
+            type="button"
+            (click)="sidebarOpen.set(!sidebarOpen())"
+            class="rounded-lg p-2 transition-colors"
+            style="color: var(--color-text-secondary);"
+            aria-label="Abrir menú"
+          >
+            @if (sidebarOpen()) {
+              <lucide-icon [img]="X" [size]="20" aria-hidden="true" />
+            } @else {
+              <lucide-icon [img]="Menu" [size]="20" aria-hidden="true" />
+            }
+          </button>
+          <span class="text-sm font-bold" style="color: var(--color-text-primary);">Admin Panel</span>
+        </header>
+
+        <main class="flex-1 overflow-auto p-6">
+          <router-outlet />
+        </main>
+      </div>
     </div>
   `,
+  styles: `
+    .nav-link:hover {
+      background: var(--color-surface-raised);
+      color: var(--color-text-primary) !important;
+    }
+    .nav-active {
+      background: rgba(0, 201, 167, 0.12) !important;
+      color: var(--color-accent) !important;
+    }
+    .nav-active lucide-icon {
+      color: var(--color-accent);
+    }
+  `,
 })
-export class AdminLayoutComponent {}
+export class AdminLayoutComponent {
+  readonly sidebarOpen = signal(false);
+
+  readonly Clapperboard = Clapperboard;
+  readonly Menu = Menu;
+  readonly X = X;
+
+  readonly navItems: NavItem[] = [
+    { path: '/admin/movies', label: 'Películas', icon: Film },
+    { path: '/admin/screenings', label: 'Funciones', icon: Calendar },
+    { path: '/admin/rooms', label: 'Salas', icon: DoorOpen },
+    { path: '/admin/snacks', label: 'Confitería', icon: ShoppingBag },
+    { path: '/admin/orders', label: 'Pedidos', icon: ClipboardList },
+    { path: '/admin/users', label: 'Usuarios', icon: Users },
+  ];
+}

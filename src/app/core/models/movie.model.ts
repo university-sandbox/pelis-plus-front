@@ -15,6 +15,7 @@ export interface Movie {
   popularity: number;
   adult: boolean;
   video: boolean;
+  active?: boolean;
 }
 
 export interface Genre {

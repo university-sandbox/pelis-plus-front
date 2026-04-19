@@ -1,5 +1,17 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { LucideAngularModule, QrCode, MapPin, Clock, Calendar, Armchair, Film } from 'lucide-angular';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  input,
+  OnChanges,
+  PLATFORM_ID,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { LucideAngularModule, MapPin, Clock, Calendar, Armchair, Film, Download } from 'lucide-angular';
 
 import { type Ticket } from '../../core/models/ticket.model';
 
@@ -39,36 +51,31 @@ import { type Ticket } from '../../core/models/ticket.model';
       <div class="grid grid-cols-2 gap-4 px-5 pb-4">
         <div>
           <p class="mb-0.5 flex items-center gap-1 text-xs" style="color: var(--color-text-secondary);">
-            <lucide-icon [img]="Calendar" [size]="11" aria-hidden="true" />
-            Fecha
+            <lucide-icon [img]="Calendar" [size]="11" aria-hidden="true" />Fecha
           </p>
           <p class="text-sm font-semibold" style="color: var(--color-text-primary);">{{ ticket().date }}</p>
         </div>
         <div>
           <p class="mb-0.5 flex items-center gap-1 text-xs" style="color: var(--color-text-secondary);">
-            <lucide-icon [img]="Clock" [size]="11" aria-hidden="true" />
-            Hora
+            <lucide-icon [img]="Clock" [size]="11" aria-hidden="true" />Hora
           </p>
           <p class="text-sm font-semibold" style="color: var(--color-text-primary);">{{ ticket().time }}</p>
         </div>
         <div>
           <p class="mb-0.5 flex items-center gap-1 text-xs" style="color: var(--color-text-secondary);">
-            <lucide-icon [img]="MapPin" [size]="11" aria-hidden="true" />
-            Cine
+            <lucide-icon [img]="MapPin" [size]="11" aria-hidden="true" />Cine
           </p>
           <p class="text-sm font-semibold" style="color: var(--color-text-primary);">{{ ticket().venue }}</p>
         </div>
         <div>
           <p class="mb-0.5 flex items-center gap-1 text-xs" style="color: var(--color-text-secondary);">
-            <lucide-icon [img]="Armchair" [size]="11" aria-hidden="true" />
-            Asiento
+            <lucide-icon [img]="Armchair" [size]="11" aria-hidden="true" />Asiento
           </p>
           <p class="text-sm font-semibold" style="color: var(--color-text-primary);">{{ ticket().seat }}</p>
         </div>
         <div>
           <p class="mb-0.5 flex items-center gap-1 text-xs" style="color: var(--color-text-secondary);">
-            <lucide-icon [img]="Film" [size]="11" aria-hidden="true" />
-            Sala / Formato
+            <lucide-icon [img]="Film" [size]="11" aria-hidden="true" />Sala / Formato
           </p>
           <p class="text-sm font-semibold" style="color: var(--color-text-primary);">{{ ticket().room }} · {{ ticket().format.toUpperCase() }}</p>
         </div>
@@ -80,30 +87,96 @@ import { type Ticket } from '../../core/models/ticket.model';
 
       <!-- QR code area -->
       <div
-        class="flex flex-col items-center justify-center gap-2 border-t px-5 py-5"
+        class="flex flex-col items-center justify-center gap-3 border-t px-5 py-5"
         style="border-color: var(--color-border);"
       >
         <div
-          class="flex h-28 w-28 items-center justify-center rounded-xl"
-          style="background: var(--color-surface-raised);"
+          class="overflow-hidden rounded-xl bg-white p-3"
           role="img"
-          [attr.aria-label]="'Código QR: ' + ticket().bookingCode"
+          [attr.aria-label]="'Código QR para la entrada ' + ticket().bookingCode"
         >
-          <lucide-icon [img]="QrCode" [size]="80" style="color: var(--color-text-primary);" aria-hidden="true" />
+          @if (qrDataUrl()) {
+            <img
+              [src]="qrDataUrl()"
+              [alt]="'QR: ' + ticket().bookingCode"
+              class="h-28 w-28 block"
+            />
+          } @else {
+            <!-- Fallback skeleton while QR generates -->
+            <div class="h-28 w-28 animate-pulse rounded" style="background: #e5e7eb;"></div>
+          }
         </div>
         <p class="font-mono text-xs" style="color: var(--color-text-secondary);">{{ ticket().qrData }}</p>
         <p class="text-center text-xs" style="color: var(--color-text-disabled);">Muestra este código en el cine</p>
+
+        <!-- Download button -->
+        @if (qrDataUrl()) {
+          <button
+            type="button"
+            (click)="downloadQr()"
+            class="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-colors"
+            style="background: var(--color-surface-raised); color: var(--color-text-secondary); border: 1px solid var(--color-border);"
+          >
+            <lucide-icon [img]="Download" [size]="12" aria-hidden="true" />
+            Descargar QR
+          </button>
+        }
       </div>
     </article>
   `,
 })
-export class TicketComponent {
+export class TicketComponent implements OnChanges {
+  private readonly platformId = inject(PLATFORM_ID);
+
   readonly ticket = input.required<Ticket>();
+  readonly qrDataUrl = signal<string | null>(null);
 
   readonly Calendar = Calendar;
   readonly Clock = Clock;
   readonly MapPin = MapPin;
   readonly Armchair = Armchair;
   readonly Film = Film;
-  readonly QrCode = QrCode;
+  readonly Download = Download;
+
+  constructor() {
+    afterNextRender(() => {
+      this.generateQr();
+    });
+  }
+
+  ngOnChanges(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.generateQr();
+    }
+  }
+
+  private generateQr(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const data = this.ticket().qrData || this.ticket().bookingCode;
+    if (!data) return;
+
+    // Dynamically import qrcode to avoid SSR issues
+    import('qrcode').then(({ toDataURL }) => {
+      toDataURL(data, {
+        width: 200,
+        margin: 1,
+        color: { dark: '#000000', light: '#ffffff' },
+      }).then((url) => {
+        this.qrDataUrl.set(url);
+      }).catch(() => {
+        // QR generation failed — leave placeholder
+      });
+    }).catch(() => {
+      // qrcode not available
+    });
+  }
+
+  downloadQr(): void {
+    const url = this.qrDataUrl();
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `entrada-${this.ticket().bookingCode}.png`;
+    a.click();
+  }
 }

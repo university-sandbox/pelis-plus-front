@@ -10,6 +10,10 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'checkout', renderMode: RenderMode.Server },
   { path: 'profile', renderMode: RenderMode.Server },
 
+  // Admin routes with dynamic params: render on the server
+  { path: 'admin/orders/:id', renderMode: RenderMode.Server },
+  { path: 'admin/**', renderMode: RenderMode.Server },
+
   // Everything else: prerender
   { path: '**', renderMode: RenderMode.Prerender },
 ];

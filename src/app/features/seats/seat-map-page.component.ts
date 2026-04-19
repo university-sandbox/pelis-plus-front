@@ -13,7 +13,12 @@ import {
   ArrowLeft,
   ShoppingCart,
   Info,
+  Timer,
+  AlertCircle,
 } from 'lucide-angular';
+
+const MAX_SEATS = 6;
+const RESERVATION_SECONDS = 10 * 60; // 10 minutes
 
 import { SeatService } from '../../core/services/seat.service';
 import { CartService } from '../../core/services/cart.service';
@@ -37,6 +42,7 @@ const FORMAT_LABELS: Record<string, string> = {
     SkeletonLoaderComponent,
     ErrorStateComponent,
   ],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-navbar />
@@ -67,7 +73,39 @@ const FORMAT_LABELS: Record<string, string> = {
               </p>
             }
           </div>
+
+          <!-- Countdown timer (shown after seats reserved) -->
+          @if (reservationExpiresAt()) {
+            <div
+              class="ml-auto flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold"
+              [style.background]="countdownSeconds() < 60 ? 'rgba(239,68,68,0.15)' : 'rgba(0,201,167,0.12)'"
+              [style.color]="countdownSeconds() < 60 ? 'var(--color-error)' : 'var(--color-accent)'"
+              role="timer"
+              [attr.aria-label]="'Tiempo restante: ' + countdownDisplay()"
+            >
+              <lucide-icon [img]="Timer" [size]="14" aria-hidden="true" />
+              {{ countdownDisplay() }}
+            </div>
+          }
         </div>
+
+        <!-- Max seats warning -->
+        @if (selectedSeats().length >= maxSeats) {
+          <div class="mb-4 flex items-center gap-2 rounded-xl px-4 py-3 text-sm"
+            style="background: rgba(251,191,36,0.1); color: #f59e0b; border: 1px solid rgba(251,191,36,0.2);">
+            <lucide-icon [img]="AlertCircle" [size]="16" aria-hidden="true" />
+            Máximo {{ maxSeats }} asientos por compra.
+          </div>
+        }
+
+        <!-- Conflict error -->
+        @if (conflictError()) {
+          <div class="mb-4 flex items-center gap-2 rounded-xl px-4 py-3 text-sm"
+            style="background: rgba(239,68,68,0.1); color: var(--color-error); border: 1px solid rgba(239,68,68,0.2);">
+            <lucide-icon [img]="AlertCircle" [size]="16" aria-hidden="true" />
+            {{ conflictError() }}
+          </div>
+        }
 
         @if (loading()) {
           <app-skeleton-loader height="320px" radius="12px" />
@@ -185,12 +223,21 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly adding = signal(false);
+  readonly conflictError = signal('');
+
+  readonly reservationExpiresAt = signal<string | null>(null);
+  readonly countdownSeconds = signal(0);
+  private countdownInterval: ReturnType<typeof setInterval> | null = null;
 
   readonly selectedIds = signal<Set<string>>(new Set());
+
+  readonly maxSeats = MAX_SEATS;
 
   readonly ArrowLeft = ArrowLeft;
   readonly ShoppingCart = ShoppingCart;
   readonly Info = Info;
+  readonly Timer = Timer;
+  readonly AlertCircle = AlertCircle;
 
   readonly legend = [
     { label: 'Libre', color: 'var(--color-seat-free)' },
@@ -228,11 +275,48 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Release seats if user navigates away without completing purchase
+    this.stopCountdown();
     const sc = this.screening();
     if (sc && this.selectedSeats().length > 0) {
       this.seatService.releaseSeats(sc.id).subscribe();
     }
+  }
+
+  startCountdown(expiresAt: string): void {
+    this.reservationExpiresAt.set(expiresAt);
+    this.stopCountdown();
+    this.updateCountdown(expiresAt);
+    this.countdownInterval = setInterval(() => this.updateCountdown(expiresAt), 1000);
+  }
+
+  private updateCountdown(expiresAt: string): void {
+    const remaining = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+    this.countdownSeconds.set(remaining);
+    if (remaining === 0) {
+      this.stopCountdown();
+      this.onReservationExpired();
+    }
+  }
+
+  private stopCountdown(): void {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+  }
+
+  private onReservationExpired(): void {
+    this.conflictError.set('Tu reserva de asientos ha expirado. Selecciona de nuevo.');
+    this.reservationExpiresAt.set(null);
+    this.selectedIds.set(new Set());
+    this.loadSeatMap();
+  }
+
+  countdownDisplay(): string {
+    const s = this.countdownSeconds();
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
   }
 
   loadSeatMap(): void {
@@ -264,13 +348,14 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
         s.id === seat.id ? { ...s, status: 'free' as const } : s,
       );
     } else {
+      // Enforce max seats
+      if (ids.size >= MAX_SEATS) return;
       ids.add(seat.id);
       map.seats[rowIndex] = map.seats[rowIndex].map((s) =>
         s.id === seat.id ? { ...s, status: 'selected' as const } : s,
       );
     }
     this.selectedIds.set(ids);
-    // Trigger change detection for seatMap signal
     this.seatMap.set({ ...map });
   }
 
@@ -282,7 +367,12 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
     this.adding.set(true);
     // Reserve seats on backend
     this.seatService.reserveSeats(sc.id, this.selectedSeats().map((s) => s.id)).subscribe({
-      next: () => {
+      next: (reservation) => {
+        // Start countdown with expiry from backend
+        if (reservation.expiresAt) {
+          this.startCountdown(reservation.expiresAt);
+        }
+        this.conflictError.set('');
         this.selectedSeats().forEach((seat) => {
           const ticket: CartTicket = {
             screeningId: sc.id,
@@ -302,8 +392,15 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
         this.adding.set(false);
         void this.router.navigate(['/snacks']);
       },
-      error: () => {
+      error: (err) => {
         this.adding.set(false);
+        const msg = err?.error?.message ?? '';
+        if (msg.toLowerCase().includes('reserv') || msg.toLowerCase().includes('conflict') || err?.status === 409) {
+          this.conflictError.set('Uno o más asientos ya fueron tomados. Por favor selecciona otros.');
+          this.loadSeatMap();
+        } else {
+          this.conflictError.set('Error al reservar asientos. Intenta de nuevo.');
+        }
       },
     });
   }

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
-import { LucideAngularModule, Mail, Lock, User, Film, Eye, EyeOff, AlertCircle, Check } from 'lucide-angular';
+import { LucideAngularModule, Mail, Lock, User, Film, Eye, EyeOff, AlertCircle, Check, ArrowLeft } from 'lucide-angular';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
@@ -32,6 +32,17 @@ const passwordMatchValidator: ValidatorFn = (group: AbstractControl): Validation
         class="w-full max-w-md rounded-2xl p-8 shadow-xl"
         style="background: var(--color-surface); border: 1px solid var(--color-border);"
       >
+        <!-- Back to login -->
+        <a
+          routerLink="/login"
+          class="back-btn mb-6 flex w-fit items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium transition-colors"
+          style="color: var(--color-text-secondary);"
+          aria-label="Volver al inicio de sesión"
+        >
+          <lucide-icon [img]="ArrowLeft" [size]="16" aria-hidden="true" />
+          Volver
+        </a>
+
         <!-- Logo -->
         <div class="mb-8 flex flex-col items-center gap-2 text-center">
           <div
@@ -269,6 +280,8 @@ const passwordMatchValidator: ValidatorFn = (group: AbstractControl): Validation
     .auth-btn:hover:not(:disabled) { background: var(--color-accent-hover) !important; }
     .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .auth-btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+    .back-btn:hover { background: var(--color-surface-raised); color: var(--color-text-primary) !important; }
+    .back-btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
   `,
 })
 export class RegisterPageComponent {
@@ -288,6 +301,7 @@ export class RegisterPageComponent {
   readonly EyeOff = EyeOff;
   readonly AlertCircle = AlertCircle;
   readonly Check = Check;
+  readonly ArrowLeft = ArrowLeft;
 
   readonly registerForm = new FormGroup<RegisterForm>(
     {

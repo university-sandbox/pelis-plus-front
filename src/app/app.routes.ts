@@ -110,9 +110,11 @@ export const routes: Routes = [
       import('./features/admin/admin.routes').then((r) => r.adminRoutes),
   },
 
-  // ── Catch-all ────────────────────────────────────────
+  // ── Catch-all — 404 ─────────────────────────────────
   {
     path: '**',
-    redirectTo: '',
+    loadComponent: () =>
+      import('./features/errors/not-found-page.component').then((c) => c.NotFoundPageComponent),
+    title: '404 — Página no encontrada',
   },
 ];

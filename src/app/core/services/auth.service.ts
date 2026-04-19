@@ -29,28 +29,7 @@ export class AuthService {
   });
 
   login(email: string, password: string): Observable<boolean> {
-    // ⚠️ MOCK — remove this block when backend is ready
-    if (environment.mock.enabled) {
-      if (
-        email === environment.auth.demoEmail &&
-        password === environment.auth.demoPassword
-      ) {
-        return of(MOCK_JWT).pipe(
-          delay(600),
-          tap((jwt) => {
-            this.storage.setToken(jwt);
-            this.token.set(jwt);
-          }),
-          map(() => true),
-        );
-      }
-      return of(null).pipe(
-        delay(600),
-        map(() => {
-          throw { status: 401 };
-        }),
-      );
-    }
+
 
     return this.httpClient
       .post<LoginResponse>(BACKEND.url(BACKEND.AUTH.LOGIN), { email, password })

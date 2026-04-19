@@ -17,6 +17,8 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
 import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { SnackCardComponent } from './snack-card.component';
+import { ProductCustomizationModalComponent } from './product-customization-modal.component';
+import { type CartSnackItem } from '../../core/models/cart.model';
 
 const CATEGORY_LABELS: Record<SnackCategory, string> = {
   popcorn: 'Canchitas',
@@ -35,6 +37,7 @@ const CATEGORY_LABELS: Record<SnackCategory, string> = {
     ErrorStateComponent,
     EmptyStateComponent,
     SnackCardComponent,
+    ProductCustomizationModalComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -99,7 +102,7 @@ const CATEGORY_LABELS: Record<SnackCategory, string> = {
               <app-snack-card
                 [snack]="snack"
                 [quantity]="snackQuantity(snack.id)"
-                (increment)="addSnack($event)"
+                (increment)="onSnackIncrement($event)"
                 (decrement)="removeSnack($event)"
               />
             }
@@ -147,6 +150,15 @@ const CATEGORY_LABELS: Record<SnackCategory, string> = {
         </div>
       </div>
     </div>
+
+    <!-- Customization modal -->
+    @if (customizingSnack()) {
+      <app-product-customization-modal
+        [snack]="customizingSnack()!"
+        (added)="onCustomizationAdded($event)"
+        (cancelled)="customizingSnack.set(null)"
+      />
+    }
   `,
 })
 export class SnacksPageComponent implements OnInit {
@@ -159,6 +171,7 @@ export class SnacksPageComponent implements OnInit {
   readonly selectedCategory = signal<SnackCategory | null>(null);
   readonly loading = signal(true);
   readonly error = signal(false);
+  readonly customizingSnack = signal<Snack | null>(null);
 
   readonly ArrowLeft = ArrowLeft;
   readonly ShoppingCart = ShoppingCart;
@@ -193,6 +206,20 @@ export class SnacksPageComponent implements OnInit {
     return this.cartService.cart().snacks
       .filter((i) => i.snack.id === snackId)
       .reduce((sum, i) => sum + i.quantity, 0);
+  }
+
+  onSnackIncrement(snack: Snack): void {
+    // If snack has options, open customization modal
+    if (snack.options && snack.options.length > 0) {
+      this.customizingSnack.set(snack);
+    } else {
+      this.cartService.addSnack({ snack, quantity: 1 });
+    }
+  }
+
+  onCustomizationAdded(item: CartSnackItem): void {
+    this.cartService.addSnack(item);
+    this.customizingSnack.set(null);
   }
 
   addSnack(snack: Snack): void {
