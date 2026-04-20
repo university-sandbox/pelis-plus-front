@@ -1,0 +1,116 @@
+@startuml Proceso de Negocio - Pelis Plus
+
+skinparam defaultFontName Arial
+
+title Pelis Plus — Proceso de Negocio de Reserva de Entradas
+
+|Cliente|
+start
+
+' == FASE 1: ACCESO ==
+
+:Visita la plataforma Pelis Plus;
+
+if (¿Tiene cuenta?) then (No)
+  :Se registra con email y contraseña;
+else (Sí)
+endif
+
+:Inicia sesión en la plataforma;
+
+' == FASE 2: EXPLORACIÓN DE CATÁLOGO ==
+
+:Navega la cartelera de películas;
+:Selecciona una película de su interés;
+
+' == FASE 3: SELECCIÓN DE FUNCIÓN ==
+
+:Selecciona sede;
+:Selecciona fecha disponible;
+:Selecciona horario y formato (2D / 3D / XD);
+
+' == FASE 4: SELECCIÓN DE ASIENTOS ==
+
+:Elige asientos en el mapa de sala (máx. 6);
+
+|Plataforma Pelis Plus|
+
+:Bloquea los asientos seleccionados por 10 minutos;
+
+|Cliente|
+
+:Confirma selección de asientos;
+
+' == FASE 5: SNACKS (OPCIONAL) ==
+
+if (¿Desea agregar snacks o combos?) then (Sí)
+  :Selecciona snacks y combos del catálogo;
+  |Plataforma Pelis Plus|
+  :Incorpora snacks al pedido;
+  |Cliente|
+else (No)
+endif
+
+' == FASE 6: BENEFICIOS DE MEMBRESÍA ==
+
+|Plataforma Pelis Plus|
+
+if (¿Membresía activa?) then (Sí)
+  :Aplica descuentos y beneficios automáticamente;
+else (No)
+  :Calcula precio estándar sin descuentos;
+endif
+
+' == FASE 7: REVISIÓN DEL CARRITO ==
+
+|Cliente|
+
+:Revisa el resumen unificado del carrito;
+:Confirma pedido y procede al checkout;
+
+' == FASE 8: PAGO ==
+
+|Plataforma Pelis Plus|
+
+:Genera la orden de compra;
+
+|Cliente|
+
+if (¿Método de pago?) then (QR — Yape / Plin)
+  :Escanea código QR con la app bancaria;
+  |Pasarela de Pago - Izipay|
+  :Procesa el pago por QR;
+else (Tarjeta de crédito / débito)
+  :Ingresa datos de la tarjeta;
+  |Pasarela de Pago - Izipay|
+  :Procesa el pago con tarjeta;
+endif
+
+if (¿Pago aprobado?) then (Sí)
+  |Plataforma Pelis Plus|
+  :Confirma la transacción;
+else (No)
+  |Plataforma Pelis Plus|
+  :Notifica el rechazo del pago;
+  |Cliente|
+  :Elige reintentar o cancelar;
+  stop
+endif
+
+' == FASE 9: GENERACIÓN DE TICKET ==
+
+|Plataforma Pelis Plus|
+
+:Genera ticket digital con código QR único;
+:Envía confirmación al correo del cliente;
+
+' == FASE 10: CONFIRMACIÓN ==
+
+|Cliente|
+
+:Recibe confirmación de la reserva;
+:Descarga el ticket en PDF o visualiza el QR;
+
+stop
+
+@enduml
