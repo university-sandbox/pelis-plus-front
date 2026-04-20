@@ -1,0 +1,255 @@
+@startuml Flujo Principal - Pelis Plus
+
+skinparam backgroundColor #1a1a2e
+skinparam activityBackgroundColor #16213e
+skinparam activityBorderColor #533483
+skinparam activityFontColor #e8eaf6
+skinparam activityArrowColor #00C9A7
+skinparam activityStartColor #00C9A7
+skinparam activityEndColor #00C9A7
+skinparam swimlaneBorderColor #533483
+skinparam swimlaneBackgroundColor #0f3460
+skinparam swimlaneTitleFontColor #00C9A7
+skinparam swimlaneTitleFontSize 13
+skinparam arrowFontColor #e8eaf6
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam noteBackgroundColor #0f3460
+skinparam noteBorderColor #533483
+skinparam noteFontColor #e8eaf6
+
+title Pelis Plus — Flujo Principal de Usuario
+
+|#1e2a3a|Usuario|
+start
+
+' ===== FASE 1: AUTENTICACIÓN =====
+
+:Visita Home / Landing;
+
+|#0f2340|Frontend|
+
+:Muestra catálogo de películas;
+
+|Usuario|
+
+if (¿Autenticado?) then (No)
+  :Click en "Ingresar";
+  |Frontend|
+  :Muestra formulario de login;
+  |Usuario|
+  :Ingresa email + contraseña;
+  |#1a3050|Backend|
+  :Valida credenciales;
+  :Retorna JWT Token;
+  |Frontend|
+  :Guarda token en localStorage;
+  :Redirige a Home autenticado;
+else (Sí)
+  |Backend|
+  :Verifica sesión activa;
+  |Frontend|
+  :Muestra contenido completo;
+endif
+
+' ===== FASE 2: EXPLORAR CATÁLOGO =====
+
+|Usuario|
+
+:Navega Cartelera;
+
+|Backend|
+
+:Obtiene lista de películas (caché);
+
+|Frontend|
+
+:Muestra tarjetas de películas;
+
+|Usuario|
+
+:Click en una película;
+
+|Backend|
+
+:Obtiene detalle de película;
+
+|Frontend|
+
+:Muestra detalle de película;
+
+' ===== FASE 3: SELECCIÓN DE FUNCIÓN =====
+
+|Usuario|
+
+:Click en "Seleccionar Función";
+
+|Backend|
+
+:Obtiene funciones disponibles por película;
+
+|Frontend|
+
+:Muestra selector de sede / fecha / horario;
+
+|Usuario|
+
+:Paso 1 — Selecciona Sede;
+:Paso 2 — Selecciona Fecha;
+:Paso 3 — Selecciona Horario y Formato;
+
+|Frontend|
+
+:Muestra funciones filtradas\n(capacidad · precio · formato 2D / 3D / XD);
+
+|Usuario|
+
+:Selecciona función deseada;
+
+|Frontend|
+
+:Muestra resumen de selección;
+
+' ===== FASE 4: SELECCIÓN DE ASIENTOS =====
+
+|Backend|
+
+:Obtiene mapa de asientos de la función;
+
+|Frontend|
+
+:Muestra mapa de sala\n— disponible\n— ocupado\n— seleccionado\n— preferencial;
+
+|Usuario|
+
+:Selecciona asientos (máx. 6);
+
+|Backend|
+
+:Reserva asientos temporalmente (10 min);
+
+|Frontend|
+
+:Muestra selección + subtotal + countdown;
+
+|Usuario|
+
+:Click en "Continuar";
+
+' ===== FASE 5: SNACKS (OPCIONAL) =====
+
+if (¿Agregar snacks?) then (Sí)
+  |Frontend|
+  :Muestra catálogo de snacks por categoría;
+  |Usuario|
+  :Selecciona snack;
+  :Personaliza producto\n(tamaño · sabor · extras);
+  |Backend|
+  :Agrega snacks al carrito;
+  |Frontend|
+  :Actualiza indicador del carrito;
+else (No)
+endif
+
+' ===== FASE 6: MEMBRESÍA =====
+
+|Backend|
+
+if (¿Membresía activa?) then (Sí)
+  :Aplica descuentos y beneficios automáticamente;
+  |Frontend|
+  :Muestra beneficios aplicados al total;
+else (No)
+  |Frontend|
+  :Muestra precio estándar sin descuentos;
+endif
+
+' ===== FASE 7: RESUMEN DE CARRITO =====
+
+|Frontend|
+
+:Muestra resumen unificado del carrito\n(película · sede · sala · fecha · hora · formato\nasientos · snacks · descuentos · total final);
+
+|Usuario|
+
+:Revisa y edita carrito si es necesario;
+:Click en "Ir al Checkout";
+
+' ===== FASE 8: CHECKOUT Y PAGO =====
+
+|Backend|
+
+:Crea registro de orden;
+:Genera formToken de Izipay;
+
+|Frontend|
+
+:Muestra resumen de pago;
+
+|Usuario|
+
+if (Método de pago) then (QR — Yape / Plin)
+  |Frontend|
+  :Muestra código QR para escanear;
+  |Usuario|
+  :Escanea QR con app bancaria;
+  |Backend|
+  :Recibe webhook de confirmación de pago;
+else (Tarjeta de crédito / débito)
+  |Frontend|
+  :Inicializa formulario seguro de Izipay;
+  |Usuario|
+  :Ingresa datos de tarjeta\n(nombre · número · vencimiento · CVV);
+  |Backend|
+  :Procesa pago vía Izipay (sandbox);
+endif
+
+if (¿Pago aprobado?) then (Sí)
+else (No)
+  |Frontend|
+  :Muestra error de pago;
+  :Permite reintento;
+  stop
+endif
+
+' ===== FASE 9: GENERACIÓN DE TICKET =====
+
+|Backend|
+
+:Genera ticket digital único;
+:Genera código QR del ticket;
+:Envía email de confirmación (opcional);
+
+' ===== FASE 10: CONFIRMACIÓN =====
+
+|Frontend|
+
+:Muestra pantalla de confirmación\n(resumen de pedido · ticket QR\ncódigo de reserva · total pagado);
+
+|Usuario|
+
+:Descarga ticket (PDF / QR);
+
+if (¿Ver mis tickets?) then (Sí)
+  |Backend|
+  :Obtiene historial de tickets del usuario;
+  |Frontend|
+  :Muestra historial de tickets con QR;
+  |Usuario|
+  :Consulta ticket individual;
+else (No)
+  |Frontend|
+  :Muestra botón "Volver al Home";
+endif
+
+stop
+
+' ===== NOTAS =====
+
+note right
+  **Tecnología**
+  Angular 21 · Tailwind CSS v4
+  JWT Auth · Izipay (sandbox)
+end note
+
+@enduml
