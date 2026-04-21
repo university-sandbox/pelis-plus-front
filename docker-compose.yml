@@ -3,6 +3,7 @@ services:
     build:
       context: .
       args:
+        # Baked into the browser bundle at build time — rebuild required to change
         NG_APP_PRODUCTION: ${NG_APP_PRODUCTION:-true}
         NG_APP_NAME: ${NG_APP_NAME:-Pelis Plus}
         NG_APP_INDEX_PAGE: ${NG_APP_INDEX_PAGE:-landing}
@@ -11,13 +12,12 @@ services:
         NG_APP_TMDB_BASE_URL: ${NG_APP_TMDB_BASE_URL:-https://api.themoviedb.org/3}
         NG_APP_TMDB_IMAGE_BASE_URL: ${NG_APP_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
         NG_APP_MOCK_ENABLED: ${NG_APP_MOCK_ENABLED:-false}
+    # Passes all vars from .env to the container at runtime.
+    # Secrets (TMDB token, demo credentials) are read by the SSR server via process.env.
+    env_file: .env
     ports:
       - "${PORT:-4000}:4000"
     environment:
-      PORT: ${PORT:-4000}
+      # Override env_file values that must be fixed inside the container
+      PORT: 4000
       NODE_ENV: production
-      # Runtime-only secrets — never baked into the bundle
-      NG_APP_TMDB_TOKEN: ${NG_APP_TMDB_TOKEN}
-      NG_APP_AUTH_DEMO_EMAIL: ${NG_APP_AUTH_DEMO_EMAIL}
-      NG_APP_AUTH_DEMO_PASSWORD: ${NG_APP_AUTH_DEMO_PASSWORD}
-      NG_APP_AUTH_TOKEN_STORAGE_KEY: ${NG_APP_AUTH_TOKEN_STORAGE_KEY}
