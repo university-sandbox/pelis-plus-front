@@ -4,10 +4,9 @@ node_modules/
 # Build output — created inside the image
 dist/
 
-# Local env files — never bake secrets into the image layer
-.env
+# .env is included so generate-env-ts.mjs can read it at build time.
+# .env.* variants (e.g. .env.production, .env.local) are still excluded.
 .env.*
-!.env.example
 
 # Dev / test artifacts
 e2e/
