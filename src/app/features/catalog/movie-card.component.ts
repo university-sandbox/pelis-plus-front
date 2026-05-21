@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Star, Clock } from 'lucide-angular';
 
 import { type Movie } from '../../core/models/movie.model';
-import { TMDB } from '../../core/api/endpoints';
+import { movieImageUrl } from '../../core/api/media-url';
 
 @Component({
   selector: 'app-movie-card',
@@ -20,9 +20,7 @@ export class MovieCardComponent {
   readonly Clock = Clock;
 
   posterUrl(): string | null {
-    const path = this.movie().posterPath;
-    if (!path) return null;
-    return TMDB.imageUrl('w342', path);
+    return movieImageUrl(this.movie().posterPath, 'w342');
   }
 
   /** "Estreno" label: released within last 30 days */

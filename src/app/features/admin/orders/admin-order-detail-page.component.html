@@ -19,7 +19,7 @@
             <!-- Tickets -->
             <section class="rounded-xl p-5" style="background: var(--color-surface); border: 1px solid var(--color-border);">
               <h2 class="mb-3 text-sm font-bold" style="color: var(--color-text-secondary);">Entradas</h2>
-              @if (o.tickets?.length) {
+              @if (o.tickets.length) {
                 <div class="space-y-2">
                   @for (t of o.tickets; track $index) {
                     <div class="flex items-center justify-between gap-2 rounded-lg px-3 py-2"
@@ -27,7 +27,7 @@
                       <div>
                         <p class="text-sm font-medium" style="color: var(--color-text-primary);">{{ t.movieTitle }}</p>
                         <p class="text-xs" style="color: var(--color-text-secondary);">
-                          {{ t.venue }} · {{ t.room }} · {{ t.date }} {{ t.time }} · Butaca {{ t.seat?.row }}{{ t.seat?.col }}
+                          {{ t.venueName }} · {{ t.roomName }} · {{ t.screeningDate }} {{ t.screeningTime }} · Butaca {{ t.rowLabel }}{{ t.colNum }}
                         </p>
                       </div>
                       <span class="text-sm font-semibold" style="color: var(--color-text-primary);">S/ {{ t.price }}</span>
@@ -40,7 +40,7 @@
             </section>
 
             <!-- Snacks -->
-            @if (o.snacks?.length) {
+            @if (o.snacks.length) {
               <section class="rounded-xl p-5" style="background: var(--color-surface); border: 1px solid var(--color-border);">
                 <h2 class="mb-3 text-sm font-bold" style="color: var(--color-text-secondary);">Confitería</h2>
                 <div class="space-y-2">
@@ -48,10 +48,10 @@
                     <div class="flex items-center justify-between gap-2 rounded-lg px-3 py-2"
                       style="background: var(--color-surface-raised);">
                       <span class="text-sm" style="color: var(--color-text-primary);">
-                        {{ s.snack?.name ?? 'Producto' }} × {{ s.quantity }}
+                        {{ s.snackName }} × {{ s.quantity }}
                       </span>
                       <span class="text-sm font-semibold" style="color: var(--color-text-primary);">
-                        S/ {{ (s.snack?.price ?? 0) * s.quantity }}
+                        S/ {{ s.unitPrice * s.quantity }}
                       </span>
                     </div>
                   }

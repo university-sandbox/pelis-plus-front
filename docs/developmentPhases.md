@@ -20,11 +20,11 @@ Check each task off as it is completed.
 2. - [x] Set up Tailwind CSS v4 and Angular Material theme (define design tokens: colors, spacing, typography)
 3. - [x] Configure ESLint and Prettier — ⚠️ Husky not yet installed
 4. - [x] Set up environment files and `generate-env-ts` script (Zod-validated, SSR-safe)
-5. - [x] Create `src/app/core/api/endpoints.ts` — single source of truth for all URLs (TMDB + backend); see `docs/api.md`
+5. - [x] Create `src/app/core/api/endpoints.ts` — single source of truth for backend URLs; see `docs/api.md`
 6. - [x] Define global routing structure with lazy-loaded feature modules
 7. - [x] Create `AuthGuard` and `AdminGuard` for protected routes
 8. - [x] Create JWT interceptor (`src/app/core/interceptors/auth-interceptor.ts`) — attaches `Authorization: Bearer` to every backend request
-9. - [x] Create TMDB interceptor (`src/app/core/interceptors/tmdb.interceptor.ts`) — attaches TMDB bearer token only to requests matching `environment.tmdb.baseUrl`
+9. - [x] Configure HTTP interceptors for backend auth and error handling
 10. - [x] Create global error interceptor — handles 401 (redirect to login), 403, 500 uniformly
 11. - [x] Create shared layout components: `Navbar` — ⚠️ partially done: Footer and PageWrapper pending
 12. - [x] Create shared UI primitives: `SkeletonLoader`, `EmptyState`, `ErrorState` — ⚠️ partially done: `ConfirmDialog` pending
@@ -61,7 +61,7 @@ Check each task off as it is completed.
     - [x] Quick-preview on hover/focus: "Comprar" CTA
 21. - [x] Build `MovieDetailPage`
     - [x] Full synopsis, trailer embed, duration, genre, rating, languages, formats, schedules
-22. - [x] Implement `MovieService` — fetch catalog and movie detail (TMDB)
+22. - [x] Implement `MovieService` — fetch catalog and movie detail from backend
 23. - [x] Add search by movie title
 24. - [x] Add filters: genre pills — ⚠️ partially done: format/showtime/venue filters pending
 25. - [x] Show active vs. inactive movies distinctly — inactive overlay + badge on `MovieCardComponent`

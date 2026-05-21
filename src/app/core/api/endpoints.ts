@@ -4,33 +4,10 @@
  *
  * ## Data source strategy
  *
- * The app currently uses two data sources in parallel:
- *
- *  - **TMDB** (The Movie Database) — movie catalog, search, genres, videos.
- *    Active now because the real backend is not yet implemented.
- *    Requires `NG_APP_TMDB_ACCESS_TOKEN` in the environment.
- *
- *  - **BACKEND** — auth, screenings, seats, snacks, orders, memberships, admin.
- *    Mocked in services while the backend is being built.
- *    Will become the sole data source once the backend is ready.
- *
- * ## How to migrate from TMDB → backend (when backend is ready)
- *
- *  1. Implement the backend endpoints listed under `BACKEND.MOVIES.*`.
- *  2. Ensure the response shape matches the `Movie` model in `src/app/core/models/movie.model.ts`
- *     (or update the adapter in `MovieService` to transform the new shape).
- *  3. In `MovieService`, replace every `TMDB.MOVIES.*` reference with `BACKEND.MOVIES.*`.
- *  4. Remove the `TmdbInterceptor` from `app.config.ts` (or scope it to TMDB requests only).
- *  5. Delete the `TMDB` block below once fully migrated.
- *
  * ## Usage in services
  *
- *  import { TMDB, BACKEND } from '@core/api/endpoints';
+ *  import { BACKEND } from '@core/api/endpoints';
  *
- *  // TMDB (movie catalog — active now)
- *  const url = TMDB.url(TMDB.MOVIES.NOW_PLAYING);
- *
- *  // Backend (auth, orders, etc.)
  *  const url = BACKEND.url(BACKEND.AUTH.LOGIN);
  */
 
@@ -43,87 +20,6 @@ import { environment } from '../../../environments/environment';
 function buildUrl(base: string, path: string): string {
   return `${base}${path}`;
 }
-
-// ---------------------------------------------------------------------------
-// TMDB — The Movie Database (active during frontend-only phase)
-// Docs: https://developer.themoviedb.org/reference/getting-started
-//
-// ⚠️  Replace usages with BACKEND.MOVIES.* once the real backend is ready.
-// ---------------------------------------------------------------------------
-
-export const TMDB = {
-  /** Constructs a full TMDB API URL */
-  url: (path: string) => buildUrl(environment.tmdb.baseUrl, path),
-
-  /**
-   * Constructs a full image URL.
-   * @param size - TMDB image size (e.g. 'w500', 'w780', 'original')
-   * @param filePath - The `poster_path` or `backdrop_path` field from TMDB response
-   */
-  imageUrl: (size: TmdbImageSize, filePath: string) =>
-    `${environment.tmdb.imageBaseUrl}/${size}${filePath}`,
-
-  // --- Movie catalog ---
-
-  MOVIES: {
-    /** GET /movie/now_playing?language=es&page=1&region=PE
-     *  → backend equivalent: GET /movies?status=now_playing */
-    NOW_PLAYING: '/movie/now_playing',
-
-    /** GET /movie/upcoming?language=es&page=1&region=PE
-     *  → backend equivalent: GET /movies?status=upcoming */
-    UPCOMING: '/movie/upcoming',
-
-    /** GET /movie/popular?language=es&page=1&region=PE
-     *  → backend equivalent: GET /movies?sort=popular */
-    POPULAR: '/movie/popular',
-
-    /** GET /movie/{id}?language=es&append_to_response=videos,credits
-     *  → backend equivalent: GET /movies/:id */
-    DETAIL: (id: number) => `/movie/${id}`,
-
-    /** GET /movie/{id}/videos?language=es
-     *  → backend equivalent: included in GET /movies/:id (via append_to_response) */
-    VIDEOS: (id: number) => `/movie/${id}/videos`,
-  },
-
-  // --- Search ---
-
-  SEARCH: {
-    /** GET /search/movie?query=&language=es&page=1
-     *  → backend equivalent: GET /movies?search= */
-    MOVIES: '/search/movie',
-  },
-
-  // --- Genres ---
-
-  GENRES: {
-    /** GET /genre/movie/list?language=es
-     *  → backend equivalent: GET /movies/genres */
-    LIST: '/genre/movie/list',
-  },
-
-  // --- Discover (filtered queries) ---
-
-  DISCOVER: {
-    /** GET /discover/movie?with_genres=&sort_by=&page=
-     *  → backend equivalent: GET /movies?genre=&sort= */
-    MOVIES: '/discover/movie',
-  },
-} as const;
-
-/**
- * TMDB poster/backdrop image sizes.
- * Use 'w342' for cards, 'w780' for detail page, 'original' for hero backdrop.
- */
-export type TmdbImageSize =
-  | 'w92' | 'w154' | 'w185' | 'w342' | 'w500' | 'w780' | 'original'  // poster
-  | 'w300' | 'w780' | 'w1280';                                          // backdrop
-
-// ---------------------------------------------------------------------------
-// BACKEND — Pelis Plus API
-// Mocked in services now; will be the real endpoints once backend is live.
-// ---------------------------------------------------------------------------
 
 export const BACKEND = {
   /** Constructs a full backend API URL */
@@ -145,7 +41,7 @@ export const BACKEND = {
     ME: '/auth/me',
   },
 
-  // --- Movies (backend version — mirrors TMDB shape but served from our DB) ---
+  // --- Movies ---
   MOVIES: {
     /** GET /movies?genre=&format=&search=&status=&page= */
     LIST: '/movies',

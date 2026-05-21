@@ -27,7 +27,7 @@ import { ScreeningService } from '../../core/services/screening.service';
 import { CartService } from '../../core/services/cart.service';
 import { type Movie } from '../../core/models/movie.model';
 import { type Screening, type ScreeningFormat, type Venue } from '../../core/models/screening.model';
-import { TMDB } from '../../core/api/endpoints';
+import { movieImageUrl } from '../../core/api/media-url';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
@@ -180,11 +180,11 @@ export class MovieDetailPageComponent implements OnInit {
   }
 
   backdropUrl(path: string): string {
-    return TMDB.imageUrl('w1280', path);
+    return movieImageUrl(path, 'w1280') ?? '';
   }
 
   posterUrl(path: string | null): string | null {
-    return path ? TMDB.imageUrl('w500', path) : null;
+    return movieImageUrl(path, 'w500');
   }
 
   safeTrailerUrl(): SafeResourceUrl {

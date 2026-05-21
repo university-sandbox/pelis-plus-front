@@ -1,15 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
-import { TMDB } from '../api/endpoints';
+import { BACKEND } from '../api/endpoints';
 import {
-  adaptTmdbMovie,
   type Genre,
   type Movie,
   type MovieListResponse,
-  type TmdbListRaw,
-  type TmdbMovieRaw,
 } from '../models/movie.model';
 
 export interface MovieFilters {
@@ -26,82 +23,54 @@ export class MovieService {
 
   /** Películas en cartelera */
   getNowPlaying(filters: MovieFilters = {}): Observable<MovieListResponse> {
-    const params = buildTmdbParams(filters);
-    return this.http
-      .get<TmdbListRaw>(TMDB.url(TMDB.MOVIES.NOW_PLAYING), { params })
-      .pipe(map(adaptList));
+    const params = buildBackendParams({ ...filters, status: 'now_playing' });
+    return this.http.get<MovieListResponse>(BACKEND.url(BACKEND.MOVIES.LIST), { params });
   }
 
   /** Próximos estrenos */
   getUpcoming(filters: MovieFilters = {}): Observable<MovieListResponse> {
-    const params = buildTmdbParams(filters);
-    return this.http
-      .get<TmdbListRaw>(TMDB.url(TMDB.MOVIES.UPCOMING), { params })
-      .pipe(map(adaptList));
+    const params = buildBackendParams({ ...filters, status: 'upcoming' });
+    return this.http.get<MovieListResponse>(BACKEND.url(BACKEND.MOVIES.LIST), { params });
   }
 
   /** Populares */
   getPopular(filters: MovieFilters = {}): Observable<MovieListResponse> {
-    const params = buildTmdbParams(filters);
-    return this.http
-      .get<TmdbListRaw>(TMDB.url(TMDB.MOVIES.POPULAR), { params })
-      .pipe(map(adaptList));
+    const params = buildBackendParams({ ...filters, status: 'popular' });
+    return this.http.get<MovieListResponse>(BACKEND.url(BACKEND.MOVIES.LIST), { params });
   }
 
   /** Detalle de película */
   getDetail(id: number): Observable<Movie> {
-    return this.http
-      .get<TmdbMovieRaw>(TMDB.url(TMDB.MOVIES.DETAIL(id)), {
-        params: { language: 'es', append_to_response: 'videos,credits' },
-      })
-      .pipe(map(adaptTmdbMovie));
+    return this.http.get<Movie>(BACKEND.url(BACKEND.MOVIES.DETAIL(id)));
   }
 
   /** Búsqueda por título */
   search(query: string, page = 1): Observable<MovieListResponse> {
-    return this.http
-      .get<TmdbListRaw>(TMDB.url(TMDB.SEARCH.MOVIES), {
-        params: { query, language: 'es', page },
-      })
-      .pipe(map(adaptList));
+    const params = buildBackendParams({ query, page });
+    return this.http.get<MovieListResponse>(BACKEND.url(BACKEND.MOVIES.LIST), { params });
   }
 
   /** Lista de géneros */
   getGenres(): Observable<Genre[]> {
-    return this.http
-      .get<{ genres: Array<{ id: number; name: string }> }>(TMDB.url(TMDB.GENRES.LIST), {
-        params: { language: 'es' },
-      })
-      .pipe(map((r) => r.genres));
+    return this.http.get<Genre[]>(BACKEND.url(BACKEND.MOVIES.GENRES));
   }
 
   /** Discover por género */
   discover(filters: MovieFilters & { genreId?: number } = {}): Observable<MovieListResponse> {
-    let params = buildTmdbParams(filters);
-    if (filters.genreId) {
-      params = params.set('with_genres', filters.genreId.toString());
-    }
-    return this.http
-      .get<TmdbListRaw>(TMDB.url(TMDB.DISCOVER.MOVIES), { params })
-      .pipe(map(adaptList));
+    const params = buildBackendParams({
+      ...filters,
+      genre: filters.genreId ?? filters.genre ?? null,
+    });
+    return this.http.get<MovieListResponse>(BACKEND.url(BACKEND.MOVIES.LIST), { params });
   }
 }
 
-function buildTmdbParams(filters: MovieFilters): HttpParams {
-  let params = new HttpParams()
-    .set('language', filters.language ?? 'es')
-    .set('page', (filters.page ?? 1).toString());
+function buildBackendParams(filters: MovieFilters & { status?: string }): HttpParams {
+  let params = new HttpParams().set('page', (filters.page ?? 1).toString());
 
-  if (filters.region) params = params.set('region', filters.region);
+  if (filters.status) params = params.set('status', filters.status);
+  if (filters.genre) params = params.set('genre', filters.genre.toString());
+  if (filters.query?.trim()) params = params.set('search', filters.query.trim());
 
   return params;
-}
-
-function adaptList(raw: TmdbListRaw): MovieListResponse {
-  return {
-    page: raw.page,
-    results: raw.results.map(adaptTmdbMovie),
-    totalPages: raw.total_pages,
-    totalResults: raw.total_results,
-  };
 }

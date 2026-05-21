@@ -112,8 +112,7 @@ export class CheckoutPageComponent implements OnInit {
       membershipDiscount: cart.membershipDiscount,
     }).subscribe({
       next: (res) => {
-        // In mock mode: skip real Izipay and confirm immediately
-        this.orderService.confirmOrder(res.orderId, { mock: true }).subscribe({
+        this.orderService.confirmOrder(res.orderId, { formToken: res.formToken }).subscribe({
           next: (order) => {
             this.cartService.clear();
             this.paying.set(false);

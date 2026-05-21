@@ -50,8 +50,7 @@ export class MembershipsPageComponent implements OnInit {
     this.subscribing.set(plan.id);
     this.membershipService.subscribe(plan.id).subscribe({
       next: (res) => {
-        // Mock: confirm immediately, then redirect to profile
-        this.membershipService.confirmSubscription({ mock: true }).subscribe({
+        this.membershipService.confirmSubscription(res.planId).subscribe({
           next: () => {
             this.subscribing.set(null);
             void this.router.navigate(['/profile'], { queryParams: { tab: 'membership' } });

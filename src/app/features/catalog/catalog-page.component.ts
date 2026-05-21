@@ -13,7 +13,7 @@ import { LucideAngularModule, Search, X, Star, Clock, Play, Info, ChevronRight }
 
 import { MovieService } from '../../core/services/movie.service';
 import { type Movie } from '../../core/models/movie.model';
-import { TMDB } from '../../core/api/endpoints';
+import { movieImageUrl } from '../../core/api/media-url';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { MovieCardComponent } from './movie-card.component';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
@@ -163,7 +163,7 @@ export class CatalogPageComponent implements OnInit {
   }
 
   backdropUrl(path: string): string {
-    return TMDB.imageUrl('w1280', path);
+    return movieImageUrl(path, 'w1280') ?? '';
   }
 
   private startHeroTimer(): void {

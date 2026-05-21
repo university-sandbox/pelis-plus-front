@@ -22,13 +22,10 @@ ARG NG_APP_NAME="Pelis Plus"
 ARG NG_APP_INDEX_PAGE=landing
 ARG NG_APP_POST_LOGIN_ROUTE=/landing
 ARG NG_APP_BACKEND_BASE_URL=http://localhost:8080/api
-ARG NG_APP_TMDB_BASE_URL=https://api.themoviedb.org/3
-ARG NG_APP_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p
-# Sensitive vars (TMDB token, demo credentials, storage key) are NOT baked in
-# at build time. Inject them as runtime env vars in Dokploy / docker run -e.
+# Sensitive vars (demo credentials, storage key) are NOT baked in at build time.
+# Inject them as runtime env vars in Dokploy / docker run -e.
 # The SSR server reads process.env on each request, so no rebuild is needed
 # when rotating secrets.
-ARG NG_APP_MOCK_ENABLED=false
 
 # ARGs above are available as process.env during RUN steps.
 # generate-env-ts.mjs reads them and writes src/environments/env-vars.ts,

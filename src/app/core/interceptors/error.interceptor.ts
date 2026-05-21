@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
  * Global error interceptor.
  * - 401 from the backend → redirect to /login (session expired or invalid token)
  * - 403 from the backend → redirect to /catalog (forbidden)
- * - Errors from third-party APIs (TMDB, etc.) are re-thrown without redirecting.
+ * - Errors from third-party APIs are re-thrown without redirecting.
  * - All other errors are re-thrown for the caller to handle.
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {

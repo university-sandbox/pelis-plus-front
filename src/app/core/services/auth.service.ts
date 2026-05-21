@@ -1,12 +1,11 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
-import { Observable, delay, of, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { BACKEND } from '../api/endpoints';
-import { MOCK_JWT } from '../mocks/auth.mock';
 
 @Injectable({
   providedIn: 'root',
@@ -29,8 +28,6 @@ export class AuthService {
   });
 
   login(email: string, password: string): Observable<boolean> {
-
-
     return this.httpClient
       .post<LoginResponse>(BACKEND.url(BACKEND.AUTH.LOGIN), { email, password })
       .pipe(
@@ -44,18 +41,6 @@ export class AuthService {
   }
 
   register(name: string, email: string, password: string): Observable<boolean> {
-    // ⚠️ MOCK — remove this block when backend is ready
-    if (environment.mock.enabled) {
-      return of(MOCK_JWT).pipe(
-        delay(800),
-        tap((jwt) => {
-          this.storage.setToken(jwt);
-          this.token.set(jwt);
-        }),
-        map(() => true),
-      );
-    }
-
     return this.httpClient
       .post<LoginResponse>(BACKEND.url(BACKEND.AUTH.REGISTER), { name, email, password })
       .pipe(
@@ -69,25 +54,12 @@ export class AuthService {
   }
 
   forgotPassword(email: string): Observable<void> {
-    // ⚠️ MOCK — remove this block when backend is ready
-    if (environment.mock.enabled) {
-      void email;
-      return of(undefined).pipe(delay(600));
-    }
-
     return this.httpClient
       .post<void>(BACKEND.url(BACKEND.AUTH.FORGOT_PASSWORD), { email })
       .pipe(map(() => undefined));
   }
 
   resetPassword(token: string, newPassword: string): Observable<void> {
-    // ⚠️ MOCK — remove this block when backend is ready
-    if (environment.mock.enabled) {
-      void token;
-      void newPassword;
-      return of(undefined).pipe(delay(600));
-    }
-
     return this.httpClient
       .post<void>(BACKEND.url(BACKEND.AUTH.RESET_PASSWORD), { token, newPassword })
       .pipe(map(() => undefined));

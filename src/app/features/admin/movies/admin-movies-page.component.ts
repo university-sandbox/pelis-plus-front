@@ -9,6 +9,7 @@ import { LucideAngularModule, Plus, Pencil, ToggleLeft, ToggleRight, RefreshCw }
 
 import { AdminService } from '../../../core/services/admin.service';
 import { type Movie } from '../../../core/models/movie.model';
+import { movieImageUrl } from '../../../core/api/media-url';
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader.component';
 import { AdminMovieFormComponent } from './admin-movie-form.component';
 
@@ -95,5 +96,9 @@ export class AdminMoviesPageComponent implements OnInit {
     if (status === 'now_playing') return 'var(--color-accent)';
     if (status === 'upcoming') return '#818cf8';
     return 'var(--color-text-secondary)';
+  }
+
+  posterUrl(path: string | null): string | null {
+    return movieImageUrl(path, 'w92');
   }
 }

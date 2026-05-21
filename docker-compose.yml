@@ -9,11 +9,8 @@ services:
         NG_APP_INDEX_PAGE: ${NG_APP_INDEX_PAGE:-landing}
         NG_APP_POST_LOGIN_ROUTE: ${NG_APP_POST_LOGIN_ROUTE:-/landing}
         NG_APP_BACKEND_BASE_URL: ${NG_APP_BACKEND_BASE_URL:-http://localhost:8080/api}
-        NG_APP_TMDB_BASE_URL: ${NG_APP_TMDB_BASE_URL:-https://api.themoviedb.org/3}
-        NG_APP_TMDB_IMAGE_BASE_URL: ${NG_APP_TMDB_IMAGE_BASE_URL:-https://image.tmdb.org/t/p}
-        NG_APP_MOCK_ENABLED: ${NG_APP_MOCK_ENABLED:-false}
     # Passes all vars from .env to the container at runtime.
-    # Secrets (TMDB token, demo credentials) are read by the SSR server via process.env.
+    # Secrets (demo credentials, storage key) are read by the SSR server via process.env.
     env_file: .env
     ports:
       - "${PORT:-4000}:4000"
