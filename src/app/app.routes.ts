@@ -8,8 +8,7 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    loadComponent: () =>
-      import('./features/catalog/catalog-page.component').then((c) => c.CatalogPageComponent),
+    redirectTo: 'catalog',
   },
 
   // ── Auth ────────────────────────────────────────────
