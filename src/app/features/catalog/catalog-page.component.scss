@@ -18,11 +18,3 @@
       border-color: var(--color-accent);
       box-shadow: var(--ring);
     }
-
-    .genre-pill:hover {
-      border-color: rgba(255, 46, 120, 0.45);
-      transform: translateY(-1px);
-    }
-    .genre-pill:focus-visible {
-      box-shadow: var(--ring);
-    }

@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Search, X, Star, Clock, Play, Info, ChevronRight } from 'lucide-angular';
 
 import { MovieService } from '../../core/services/movie.service';
-import { type Genre, type Movie } from '../../core/models/movie.model';
+import { type Movie } from '../../core/models/movie.model';
 import { TMDB } from '../../core/api/endpoints';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { MovieCardComponent } from './movie-card.component';
@@ -45,7 +45,6 @@ export class CatalogPageComponent implements OnInit {
   readonly nowPlaying = signal<Movie[]>([]);
   readonly upcoming = signal<Movie[]>([]);
   readonly popular = signal<Movie[]>([]);
-  readonly genres = signal<Genre[]>([]);
   readonly searchResults = signal<Movie[]>([]);
 
   readonly nowPlayingLoading = signal(true);
@@ -57,7 +56,6 @@ export class CatalogPageComponent implements OnInit {
   readonly upcomingError = signal(false);
   readonly popularError = signal(false);
 
-  readonly selectedGenreId = signal<number | null>(null);
   readonly heroIndex = signal(0);
 
   searchQuery = '';
@@ -80,9 +78,6 @@ export class CatalogPageComponent implements OnInit {
     return movies[this.heroIndex()] ?? null;
   });
 
-  readonly filteredNowPlaying = computed(() => filterByGenre(this.nowPlaying(), this.selectedGenreId()));
-  readonly filteredUpcoming = computed(() => filterByGenre(this.upcoming(), this.selectedGenreId()));
-  readonly filteredPopular = computed(() => filterByGenre(this.popular(), this.selectedGenreId()));
   get noResultsDescription(): string {
     return `No encontramos películas para "${this.searchQuery}". Intenta con otro término.`;
   }
@@ -91,7 +86,6 @@ export class CatalogPageComponent implements OnInit {
     this.loadNowPlaying();
     this.loadUpcoming();
     this.loadPopular();
-    this.loadGenres();
     this.startHeroTimer();
   }
 
@@ -140,13 +134,6 @@ export class CatalogPageComponent implements OnInit {
     });
   }
 
-  private loadGenres(): void {
-    this.movieService.getGenres().subscribe({
-      next: (g) => this.genres.set(g),
-      error: () => {},
-    });
-  }
-
   onSearchChange(query: string): void {
     if (!query.trim()) {
       this.searchResults.set([]);
@@ -168,10 +155,6 @@ export class CatalogPageComponent implements OnInit {
   clearSearch(): void {
     this.searchQuery = '';
     this.searchResults.set([]);
-  }
-
-  selectGenre(id: number | null): void {
-    this.selectedGenreId.set(id);
   }
 
   setHeroIndex(i: number): void {
@@ -196,9 +179,4 @@ export class CatalogPageComponent implements OnInit {
     if (this.heroTimer) clearInterval(this.heroTimer);
     this.startHeroTimer();
   }
-}
-
-function filterByGenre(movies: Movie[], genreId: number | null): Movie[] {
-  if (!genreId) return movies;
-  return movies.filter((m) => m.genreIds.includes(genreId));
 }

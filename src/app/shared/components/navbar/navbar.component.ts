@@ -8,7 +8,6 @@ import {
   ShoppingCart,
   User,
   LogOut,
-  Film,
   Popcorn,
   Star,
   Home,
@@ -259,12 +258,10 @@ export class NavbarComponent {
   readonly ShoppingCart = ShoppingCart;
   readonly User = User;
   readonly LogOut = LogOut;
-  readonly Film = Film;
   readonly Aperture = Aperture;
 
   readonly navLinks = [
     { label: 'Inicio', path: '/catalog', icon: Home },
-    { label: 'Cartelera', path: '/catalog', icon: Film },
     { label: 'Snacks', path: '/snacks', icon: Popcorn },
     { label: 'Membresías', path: '/memberships', icon: Star },
   ];

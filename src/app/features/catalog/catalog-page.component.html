@@ -98,8 +98,8 @@
 
       <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
 
-        <!-- ── Search & Filter ──────────────────────────────── -->
-        <section aria-label="Filtros">
+        <!-- ── Search ──────────────────────────────── -->
+        <section aria-label="Buscar película">
           <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p class="pelis-overline mb-2">Cartelera</p>
@@ -132,40 +132,6 @@
             </div>
           </div>
 
-          <!-- Genre pills -->
-          @if (genres().length > 0) {
-            <div
-              class="flex gap-2 overflow-x-auto pb-2"
-              style="scroll-snap-type: x mandatory; scrollbar-width: none;"
-              role="listbox"
-              aria-label="Filtrar por género"
-            >
-              <button
-                type="button"
-                role="option"
-                [attr.aria-selected]="selectedGenreId() === null"
-                (click)="selectGenre(null)"
-                class="genre-pill flex-none rounded px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors"
-                [style.background]="selectedGenreId() === null ? 'var(--color-accent)' : 'var(--color-surface-raised)'"
-                [style.color]="selectedGenreId() === null ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'"
-              >
-                Todos
-              </button>
-              @for (genre of genres(); track genre.id) {
-                <button
-                  type="button"
-                  role="option"
-                  [attr.aria-selected]="selectedGenreId() === genre.id"
-                  (click)="selectGenre(genre.id)"
-                  class="genre-pill flex-none rounded px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors"
-                  [style.background]="selectedGenreId() === genre.id ? 'var(--color-accent)' : 'var(--color-surface-raised)'"
-                  [style.color]="selectedGenreId() === genre.id ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'"
-                >
-                  {{ genre.name }}
-                </button>
-              }
-            </div>
-          }
         </section>
 
         <!-- ── Search results ───────────────────────────────── -->
@@ -225,17 +191,17 @@
                 description="Verifica tu conexión e inténtalo de nuevo."
                 (retry)="loadNowPlaying()"
               />
-            } @else if (filteredNowPlaying().length === 0) {
+            } @else if (nowPlaying().length === 0) {
               <app-empty-state
                 title="Sin películas disponibles"
-                description="No hay películas en cartelera con el filtro seleccionado."
+                description="No hay películas en cartelera por ahora."
               />
             } @else {
               <div
                 class="movie-scroll flex gap-4 overflow-x-auto pb-4"
                 style="scroll-snap-type: x mandatory;"
               >
-                @for (movie of filteredNowPlaying(); track movie.id) {
+                @for (movie of nowPlaying(); track movie.id) {
                   <div class="flex-none" style="width: 160px; scroll-snap-align: start;">
                     <app-movie-card [movie]="movie" />
                   </div>
@@ -274,7 +240,7 @@
                 class="movie-scroll flex gap-4 overflow-x-auto pb-4"
                 style="scroll-snap-type: x mandatory;"
               >
-                @for (movie of filteredUpcoming(); track movie.id) {
+                @for (movie of upcoming(); track movie.id) {
                   <div class="flex-none relative" style="width: 160px; scroll-snap-align: start;">
                     <app-movie-card [movie]="movie" />
                     <!-- Próximamente badge -->
@@ -312,7 +278,7 @@
                 class="movie-scroll flex gap-4 overflow-x-auto pb-4"
                 style="scroll-snap-type: x mandatory;"
               >
-                @for (movie of filteredPopular(); track movie.id) {
+                @for (movie of popular(); track movie.id) {
                   <div class="flex-none" style="width: 160px; scroll-snap-align: start;">
                     <app-movie-card [movie]="movie" />
                   </div>
