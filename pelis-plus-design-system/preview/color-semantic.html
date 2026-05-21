@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="card.css"><title>Semantic</title></head>
+<body style="height:230px;">
+  <div class="col">
+    <div class="overline">Functional colors</div>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr); gap:14px;">
+      <div style="border:1px solid rgba(74,222,128,0.4); background:rgba(74,222,128,0.10); border-radius:var(--r-3); padding:14px;">
+        <div style="display:flex; gap:8px; align-items:center;"><span style="width:10px; height:10px; border-radius:50%; background:#4ADE80;"></span><strong>Confirmada</strong></div>
+        <div class="caption" style="margin-top:6px;">--success · #4ADE80</div>
+        <div class="caption muted">Reserva pagada, ticket emitido</div>
+      </div>
+      <div style="border:1px solid rgba(245,165,36,0.45); background:rgba(245,165,36,0.10); border-radius:var(--r-3); padding:14px;">
+        <div style="display:flex; gap:8px; align-items:center;"><span style="width:10px; height:10px; border-radius:50%; background:#F5A524;"></span><strong>Quedan 3 butacas</strong></div>
+        <div class="caption" style="margin-top:6px;">--warning · #F5A524</div>
+        <div class="caption muted">Aviso, no bloquea</div>
+      </div>
+      <div style="border:1px solid rgba(255,90,90,0.45); background:rgba(255,90,90,0.10); border-radius:var(--r-3); padding:14px;">
+        <div style="display:flex; gap:8px; align-items:center;"><span style="width:10px; height:10px; border-radius:50%; background:#FF5A5A;"></span><strong>Función agotada</strong></div>
+        <div class="caption" style="margin-top:6px;">--danger · #FF5A5A</div>
+        <div class="caption muted">Error o estado bloqueante</div>
+      </div>
+    </div>
+    <div class="tag muted">Translucent fills over ink-1. Borders carry the hue; never use a saturated solid block for semantic state on dark.</div>
+  </div>
+</body></html>

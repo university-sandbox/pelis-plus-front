@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="card.css"><title>Inputs</title></head>
+<body style="height:300px;">
+  <style>
+    .field { display:flex; flex-direction:column; gap:6px; }
+    .field label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ivory-3); }
+    .input, .select {
+      background: var(--ink-3); color: var(--ivory-1);
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 12px 14px; font: inherit; outline: 0;
+      transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast);
+    }
+    .input::placeholder { color: var(--ivory-4); }
+    .input:focus { border-color: var(--marquee-400); box-shadow: 0 0 0 3px rgba(255,46,120,0.18); }
+    .input.search { padding-left: 40px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239C988D' stroke-width='2'><circle cx='11' cy='11' r='8'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>"); background-repeat:no-repeat; background-position: 14px center; }
+    .checkbox-row { display: flex; align-items:center; gap:10px; }
+    .checkbox {
+      width:18px; height:18px; border-radius: 4px; background: var(--ink-3);
+      border: 1px solid var(--border-strong); position: relative; flex-shrink: 0;
+    }
+    .checkbox.checked { background: var(--marquee-400); border-color: var(--marquee-400); }
+    .checkbox.checked::after { content:""; position:absolute; left:4px; top:1px; width:5px; height:10px; border:solid var(--ivory-1); border-width:0 2px 2px 0; transform: rotate(45deg); }
+    .toggle { width: 36px; height: 20px; border-radius: 999px; background: var(--ink-4); position:relative; }
+    .toggle::after { content:""; position:absolute; left:2px; top:2px; width:16px; height:16px; border-radius:50%; background: var(--ivory-1); transition: transform var(--dur-fast); }
+    .toggle.on { background: var(--marquee-400); }
+    .toggle.on::after { transform: translateX(16px); }
+  </style>
+  <div class="col" style="gap:14px;">
+    <div class="overline">Form controls</div>
+    <div class="grid" style="grid-template-columns:1fr 1fr; gap:14px;">
+      <div class="field">
+        <label>Buscar película</label>
+        <input class="input search" placeholder="Título, género o director"/>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input class="input" value="ana.morales@pelisplus.cines" style="border-color: var(--marquee-400); box-shadow: 0 0 0 3px rgba(255,46,120,0.18);"/>
+      </div>
+    </div>
+    <div class="row" style="gap:24px;">
+      <div class="checkbox-row"><span class="checkbox checked"></span><span>Aceptar promociones</span></div>
+      <div class="checkbox-row"><span class="checkbox"></span><span>Reservar acompañante</span></div>
+      <div class="checkbox-row"><span class="toggle on"></span><span>Modo cine</span></div>
+      <div class="checkbox-row"><span class="toggle"></span><span>Subtítulos</span></div>
+    </div>
+    <div class="tag muted">Inputs sit on ink-3 (not ink-2) so they read as interactive against cards. Focus ring is the brand magenta at 18% over a 1px border.</div>
+  </div>
+</body></html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="card.css"><title>Tags & badges</title></head>
+<body style="height:240px;">
+  <style>
+    .chip {
+      display: inline-flex; align-items:center; gap:6px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 5px 10px; border-radius: 2px;
+      border: 1px solid var(--border-strong);
+      background: var(--ink-2); color: var(--ivory-2);
+    }
+    .chip-accent { border-color: var(--marquee-400); color: var(--marquee-300); background: rgba(255,46,120,0.08); }
+    .chip-amber  { border-color: var(--amber-400); color: var(--amber-300); background: rgba(245,165,36,0.08); }
+    .chip-cyan   { border-color: var(--cyan-400); color: var(--cyan-300); background: rgba(0,214,245,0.08); }
+    .chip-solid  { background: var(--marquee-400); border-color: var(--marquee-400); color: var(--ivory-1); }
+    .badge-age {
+      width: 28px; height: 28px; display:inline-flex; align-items:center; justify-content:center;
+      font-family: var(--font-display); font-size: 16px;
+      background: var(--ivory-1); color: var(--ink-0); border-radius: 4px;
+    }
+    .badge-format {
+      display: inline-flex; align-items:center;
+      padding: 6px 10px; border: 1px solid var(--ivory-2); color: var(--ivory-1);
+      font-family: var(--font-display); font-size: 14px; letter-spacing: 0.1em;
+    }
+  </style>
+  <div class="col" style="gap:14px;">
+    <div class="overline">Tags &amp; badges</div>
+    <div class="row" style="gap:8px; flex-wrap:wrap;">
+      <span class="chip">Cartelera</span>
+      <span class="chip chip-accent">Estreno</span>
+      <span class="chip chip-amber">Quedan pocas</span>
+      <span class="chip chip-cyan">Reposición</span>
+      <span class="chip chip-solid">Preventa VIP</span>
+    </div>
+    <div class="row" style="gap:10px; flex-wrap:wrap; align-items:center;">
+      <span class="badge-age">14</span>
+      <span class="badge-format">IMAX</span>
+      <span class="badge-format">4DX</span>
+      <span class="badge-format">DOLBY</span>
+      <span class="badge-format" style="border-color: var(--marquee-400); color: var(--marquee-300);">SALA PREMIUM</span>
+      <span class="badge-format" style="border-color: var(--cyan-400); color: var(--cyan-300);">VOSE</span>
+    </div>
+    <div class="tag muted">Chips are r-1 (2px) — sharp, like ticket stubs. Format badges borrow the marquee letterforms.</div>
+  </div>
+</body></html>

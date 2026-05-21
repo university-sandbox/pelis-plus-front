@@ -1,0 +1,63 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="card.css"><title>Film card</title></head>
+<body style="height:380px;">
+  <style>
+    .film-card {
+      width: 200px; background: var(--ink-2); border-radius: 8px; overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base);
+    }
+    .film-card:hover { transform: translateY(-4px); border-color: var(--marquee-400); }
+    .film-card .poster { position: relative; aspect-ratio: 2 / 3; overflow:hidden; background: linear-gradient(135deg,#FF2E78,#7A0830,#00A4BF); }
+    .film-card .poster::after {
+      content:""; position:absolute; inset:0;
+      background: linear-gradient(180deg, transparent 50%, rgba(5,5,6,0.95));
+    }
+    .film-card .meta { padding: 12px; }
+    .film-card .title { font-family: var(--font-display); font-size: 22px; line-height: 1; letter-spacing: -0.01em; text-transform: uppercase; }
+    .film-card .row2 { display:flex; gap:6px; margin-top:8px; align-items:center; }
+    .film-card .badge-age { width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; font-family: var(--font-display); font-size: 12px; background: var(--ivory-1); color: var(--ink-0); border-radius: 2px; }
+    .film-card .dur { font-family: var(--font-mono); font-size: 11px; color: var(--ivory-3); }
+    .film-card .format { font-family: var(--font-display); font-size: 11px; color: var(--marquee-300); letter-spacing: 0.1em; }
+    .film-card .chip-top { position: absolute; top: 10px; left: 10px;
+      font-family: var(--font-display); font-size:11px; letter-spacing:0.1em; padding: 4px 8px;
+      background: var(--ink-0); color: var(--ivory-1); border-radius: 2px; z-index:2; }
+    .film-card .rating { position:absolute; top:10px; right:10px; z-index:2; display:flex; align-items:center; gap:4px;
+      background: rgba(5,5,6,0.6); padding: 4px 8px; border-radius: 999px; backdrop-filter: blur(8px);
+      font-family: var(--font-mono); font-size: 11px; color: var(--amber-300); }
+  </style>
+  <div class="col" style="gap:14px;">
+    <div class="overline">Film card</div>
+    <div class="row" style="gap:14px; align-items:flex-start;">
+      <div class="film-card">
+        <div class="poster">
+          <span class="chip-top">ESTRENO</span>
+          <span class="rating">★ 4.7</span>
+        </div>
+        <div class="meta">
+          <div class="title">Ciudad<br/>Eléctrica</div>
+          <div class="row2"><span class="badge-age">14</span><span class="dur">02:18</span><span class="format">IMAX</span></div>
+        </div>
+      </div>
+      <div class="film-card">
+        <div class="poster" style="background: linear-gradient(135deg,#F5A524,#7A0830,#1C1C20);">
+          <span class="rating">★ 4.2</span>
+        </div>
+        <div class="meta">
+          <div class="title">El<br/>Último Acto</div>
+          <div class="row2"><span class="badge-age">12</span><span class="dur">01:54</span><span class="format">DOLBY</span></div>
+        </div>
+      </div>
+      <div class="film-card">
+        <div class="poster" style="background: linear-gradient(135deg,#00A4BF,#1C1C20,#0B0B0D);">
+          <span class="chip-top" style="background: var(--marquee-400);">PREVENTA</span>
+        </div>
+        <div class="meta">
+          <div class="title">La Hora<br/>Azul</div>
+          <div class="row2"><span class="badge-age">14</span><span class="dur">02:04</span><span class="format">VOSE</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tag muted">Posters are 2:3 with a bottom scrim. Hover lifts -4px and tints the border magenta.</div>
+  </div>
+</body></html>

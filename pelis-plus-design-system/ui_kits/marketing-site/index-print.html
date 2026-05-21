@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>PelisPlus — Cartelera (print)</title>
+  <link rel="stylesheet" href="../../colors_and_type.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* ----- Print-specific overrides ----- */
+    @page { size: A4 landscape; margin: 0; }
+
+    @media print {
+      html, body {
+        background: #050506 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      body { width: 1280px; }
+
+      /* Nav: drop sticky + blur, paint a flat dark band */
+      .ms-nav {
+        position: static !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: #050506 !important;
+        page-break-after: avoid;
+        break-after: avoid;
+      }
+
+      /* Hero — keep at design size, full bleed; fits one A4 landscape page */
+      .ms-hero {
+        height: 720px !important;
+        page-break-after: always;
+        break-after: page;
+      }
+      .ms-hero .grain-overlay { display: none; } /* SVG noise looks muddy in print */
+
+      /* Each top-level section becomes its own page */
+      .ms-section,
+      .ms-footer {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        page-break-after: always;
+        break-after: page;
+        padding-top: 48px !important;
+        padding-bottom: 48px !important;
+      }
+      .ms-footer { margin-top: 0 !important; }
+
+      /* Strip overflow scrollers so all posters render */
+      .ms-strip {
+        overflow: visible !important;
+      }
+
+      /* Disable hover lift / transitions so the printed state is the resting state */
+      *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+      .ms-fcard:hover { transform: none !important; }
+      .ms-fcard:hover .poster {
+        border-color: var(--border) !important;
+        box-shadow: none !important;
+      }
+
+      /* Force backgrounds and gradients to render */
+      .ms-fcard .poster,
+      .ms-hero .poster,
+      .ms-hero .bg,
+      .ms-strip .item .poster,
+      .ms-footer,
+      .bf-stickybar { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
+
+    /* Make sure screen view also works while we wait for print dialog */
+    @media screen {
+      body { min-height: 100vh; }
+    }
+  </style>
+</head>
+<body data-screen-label="Marketing site (print)">
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="data.js"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
+
+  <!-- Auto-print: wait for fonts + Babel-rendered React + a safety delay -->
+  <script type="text/babel" data-presets="env,react">
+    (async function autoPrint() {
+      // Wait for the root to have content (Babel + React mount)
+      const ready = () => new Promise(resolve => {
+        const check = () => {
+          if (document.getElementById('root')?.children?.length) resolve();
+          else requestAnimationFrame(check);
+        };
+        check();
+      });
+      await ready();
+      // Wait for web fonts (Anton, Manrope, Instrument Serif, JetBrains Mono)
+      if (document.fonts && document.fonts.ready) {
+        try { await document.fonts.ready; } catch (_) {}
+      }
+      // Safety delay so the hero gradient and any deferred styles settle
+      await new Promise(r => setTimeout(r, 800));
+      window.print();
+    })();
+  </script>
+</body>
+</html>

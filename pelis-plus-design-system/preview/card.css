@@ -1,0 +1,51 @@
+/* Shared chrome for design-system preview cards.
+   Cards are sized via their HTML width/height; this just paints them. */
+@import url('../colors_and_type.css');
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ink-1);
+  color: var(--ivory-1);
+  font-family: var(--font-body);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  padding: 20px 24px;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+.row { display: flex; gap: 12px; align-items: center; }
+.col { display: flex; flex-direction: column; gap: 12px; }
+.grid { display: grid; gap: 12px; }
+.muted { color: var(--fg-subtle); }
+.tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-subtle);
+  letter-spacing: 0.06em;
+}
+.swatch {
+  border-radius: var(--r-3);
+  border: 1px solid var(--border);
+  height: 88px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.swatch .label {
+  font-size: 11px;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+}
+.swatch .hex {
+  font-size: 11px;
+  color: var(--fg-faint);
+  font-family: var(--font-mono);
+}
+.swatch.on-light .label,
+.swatch.on-light .hex { color: rgba(0,0,0,0.7); }

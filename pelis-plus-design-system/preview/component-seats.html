@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="card.css"><title>Seats</title></head>
+<body style="height:300px;">
+  <style>
+    .legend { display:flex; gap:16px; flex-wrap:wrap; }
+    .legend span { display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--ivory-3); }
+    .sw { width: 14px; height: 14px; border-radius: 3px 3px 6px 6px; display:inline-block; }
+    .seat-grid { display:grid; gap:6px; grid-template-columns: repeat(14, 24px); }
+    .seat {
+      width: 24px; height: 22px; border-radius: 4px 4px 8px 8px;
+      background: var(--ink-3); border: 1px solid var(--border-strong);
+    }
+    .seat.taken { background: var(--ink-5); border-color: var(--ink-5); }
+    .seat.sel   { background: var(--marquee-400); border-color: var(--marquee-400); box-shadow: 0 0 0 2px rgba(255,46,120,0.18); }
+    .seat.vip   { background: var(--ink-2); border-color: var(--amber-400); }
+    .seat.gap   { visibility:hidden; }
+    .screen {
+      height: 6px; width: 100%; max-width: 360px; margin: 4px auto 14px;
+      background: linear-gradient(90deg, transparent, var(--ivory-2), transparent);
+      border-radius: 2px; box-shadow: 0 14px 30px -8px rgba(246,241,231,0.18);
+    }
+  </style>
+  <div class="col" style="gap:10px;">
+    <div class="row" style="justify-content:space-between; align-items:baseline;">
+      <div class="overline">Seat picker</div>
+      <div class="tag">SALA 04 · 8 filas × 14 col</div>
+    </div>
+    <div class="screen"></div>
+    <div style="display:flex; justify-content:center;">
+      <div class="seat-grid">
+        <!-- row A -->
+        <div class="seat"></div><div class="seat"></div><div class="seat taken"></div><div class="seat taken"></div><div class="seat"></div><div class="seat"></div><div class="seat gap"></div><div class="seat gap"></div><div class="seat"></div><div class="seat"></div><div class="seat taken"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+        <!-- row B -->
+        <div class="seat"></div><div class="seat taken"></div><div class="seat taken"></div><div class="seat"></div><div class="seat sel"></div><div class="seat sel"></div><div class="seat gap"></div><div class="seat gap"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat taken"></div><div class="seat"></div><div class="seat"></div>
+        <!-- row C VIP -->
+        <div class="seat vip"></div><div class="seat vip"></div><div class="seat vip"></div><div class="seat vip"></div><div class="seat vip taken"></div><div class="seat vip"></div><div class="seat gap"></div><div class="seat gap"></div><div class="seat vip"></div><div class="seat vip taken"></div><div class="seat vip"></div><div class="seat vip"></div><div class="seat vip"></div><div class="seat vip"></div>
+        <!-- row D -->
+        <div class="seat"></div><div class="seat"></div><div class="seat taken"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat gap"></div><div class="seat gap"></div><div class="seat taken"></div><div class="seat taken"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+      </div>
+    </div>
+    <div class="legend" style="justify-content:center; margin-top:6px;">
+      <span><i class="sw" style="background:var(--ink-3); border:1px solid var(--border-strong);"></i>Libre</span>
+      <span><i class="sw" style="background:var(--ink-5);"></i>Ocupada</span>
+      <span><i class="sw" style="background:var(--marquee-400);"></i>Tu selección</span>
+      <span><i class="sw" style="background:var(--ink-2); border:1px solid var(--amber-400);"></i>VIP</span>
+    </div>
+  </div>
+</body></html>

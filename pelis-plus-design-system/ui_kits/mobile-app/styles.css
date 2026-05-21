@@ -1,0 +1,192 @@
+/* Mobile app UI kit — namespaced with .m-* */
+* { box-sizing: border-box; }
+
+.m-stage {
+  background: radial-gradient(ellipse at center, #1a1a1a, #050506 70%);
+  min-height: 100vh; padding: 60px 40px; color: var(--ivory-1);
+  font-family: var(--font-body);
+}
+.m-stage-head { max-width: 1600px; margin: 0 auto 48px; }
+.m-stage-head h1 {
+  font-family: var(--font-display); font-size: 56px; line-height: 0.92;
+  letter-spacing: -0.02em; text-transform: uppercase; margin: 0;
+}
+.m-stage-head p { font-family: var(--font-serif); font-style: italic; color: var(--ivory-3); margin: 8px 0 0; font-size: 18px; }
+.m-row { display: flex; gap: 36px; justify-content: center; flex-wrap: wrap; max-width: 1800px; margin: 0 auto; }
+.m-phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.m-phone-caption {
+  font-family: var(--font-display); font-size: 16px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ivory-2);
+}
+
+/* ---------- App-internal: dark cinema theme inside the phone ---------- */
+.m-app {
+  background: #050506; color: var(--ivory-1);
+  height: 100%; font-family: var(--font-body);
+  overflow-y: auto;
+  /* leave space at top for dynamic island + status bar, bottom for tab bar */
+  padding: 60px 0 96px;
+  position: relative;
+}
+.m-app::-webkit-scrollbar { display: none; }
+
+/* ---------- Top brand bar ---------- */
+.m-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px 14px;
+}
+.m-topbar .brand { font-family: var(--font-display); font-size: 22px; letter-spacing: -0.01em; }
+.m-topbar .city {
+  display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--ivory-3);
+  background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.m-topbar .icons { display: flex; gap: 10px; }
+.m-topbar .icons button {
+  width: 36px; height: 36px; background: rgba(255,255,255,0.04); border-radius: 50%;
+  border: 1px solid var(--border); color: var(--ivory-1); display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* ---------- Tab bar (bottom) ---------- */
+.m-tabbar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 96px; padding: 10px 16px 28px;
+  background: linear-gradient(180deg, rgba(5,5,6,0) 0%, rgba(5,5,6,0.85) 40%, #050506 100%);
+  backdrop-filter: blur(20px);
+  display: flex; justify-content: space-around; align-items: flex-end;
+  z-index: 5;
+}
+.m-tabbar button {
+  background: none; border: 0; color: var(--ivory-4); padding: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-family: var(--font-body); font-size: 10px; font-weight: 500; letter-spacing: 0.05em;
+}
+.m-tabbar button.active { color: var(--marquee-300); }
+.m-tabbar button svg { display: block; }
+
+/* ---------- Cartelera (home) ---------- */
+.m-hero-card {
+  margin: 0 16px 24px; border-radius: 16px; overflow: hidden;
+  position: relative; height: 380px;
+}
+.m-hero-card .poster { position: absolute; inset: 0; }
+.m-hero-card .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,0.85)); }
+.m-hero-card .content { position: absolute; left: 16px; right: 16px; bottom: 16px; }
+.m-hero-card .chip {
+  font-family: var(--font-display); font-size: 10px; letter-spacing: 0.16em;
+  padding: 4px 8px; border: 1px solid var(--marquee-400); color: var(--marquee-300);
+  display: inline-block; margin-bottom: 10px;
+}
+.m-hero-card h2 {
+  font-family: var(--font-display); font-size: 36px; line-height: 0.92;
+  letter-spacing: -0.01em; text-transform: uppercase; margin: 0;
+}
+.m-hero-card .meta { font-family: var(--font-mono); font-size: 11px; color: var(--ivory-2); letter-spacing: 0.04em; margin-top: 8px; }
+.m-hero-card .play-cta {
+  margin-top: 12px;
+  width: 100%; background: var(--marquee-400); color: var(--ivory-1); border: 0;
+  padding: 14px; font-family: var(--font-display); font-size: 14px; letter-spacing: 0.06em;
+  text-transform: uppercase; border-radius: 4px;
+}
+
+.m-section-head {
+  padding: 0 20px; margin: 28px 0 12px;
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.m-section-head h3 { font-family: var(--font-display); font-size: 18px; letter-spacing: 0.04em; text-transform: uppercase; margin: 0; }
+.m-section-head a { color: var(--marquee-300); font-size: 12px; font-weight: 600; }
+
+.m-poster-strip {
+  display: flex; gap: 12px; padding: 0 20px 8px; overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+.m-poster-strip::-webkit-scrollbar { display: none; }
+.m-poster-strip .item { flex: 0 0 140px; scroll-snap-align: start; }
+.m-poster-strip .item .poster { aspect-ratio: 2/3; border-radius: 8px; overflow: hidden; position: relative; }
+.m-poster-strip .item .poster .ttl {
+  position: absolute; left: 8px; right: 8px; bottom: 8px;
+  font-family: var(--font-display); font-size: 16px; line-height: 0.92; text-transform: uppercase; letter-spacing: -0.005em;
+}
+.m-poster-strip .item .poster::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.85)); }
+.m-poster-strip .item .meta { font-size: 11px; color: var(--ivory-3); margin-top: 6px; font-family: var(--font-mono); letter-spacing: 0.04em; }
+
+/* ---------- Tickets ---------- */
+.m-page-title {
+  font-family: var(--font-display); font-size: 44px; line-height: 0.92;
+  letter-spacing: -0.02em; text-transform: uppercase; padding: 0 20px; margin: 0 0 16px;
+}
+.m-ticket {
+  margin: 0 16px 16px; border-radius: 14px; overflow: hidden;
+  background: var(--ink-2); border: 1px solid var(--border);
+  position: relative;
+}
+.m-ticket .top {
+  padding: 16px; display: grid; grid-template-columns: 64px 1fr; gap: 14px;
+  border-bottom: 1px dashed var(--border-strong);
+}
+.m-ticket .poster {
+  width: 64px; height: 92px; border-radius: 6px; flex-shrink: 0;
+}
+.m-ticket h4 { font-family: var(--font-display); font-size: 22px; line-height: 0.95; letter-spacing: -0.01em; text-transform: uppercase; margin: 0 0 8px; }
+.m-ticket .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; font-size: 12px; }
+.m-ticket .meta-grid .lab { color: var(--ivory-4); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
+.m-ticket .meta-grid .val { color: var(--ivory-1); font-family: var(--font-display); font-size: 16px; letter-spacing: 0.04em; }
+.m-ticket .bottom {
+  padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(135deg, rgba(255,46,120,0.1), rgba(0,164,191,0.05));
+}
+.m-ticket .bottom .id { font-family: var(--font-mono); font-size: 11px; color: var(--ivory-3); letter-spacing: 0.06em; }
+.m-ticket .bottom .id b { color: var(--ivory-1); display: block; margin-top: 2px; font-size: 12px; }
+.m-ticket .qr { width: 48px; height: 48px; background: var(--ivory-1); border-radius: 4px; padding: 4px; }
+.m-ticket.past { opacity: 0.55; }
+
+/* ---------- PelisPlus Club ---------- */
+.m-loyalty-card {
+  margin: 0 16px 20px; border-radius: 16px; overflow: hidden;
+  background: linear-gradient(135deg, #FF2E78 0%, #7A0830 60%, #00A4BF 100%);
+  padding: 24px; position: relative;
+}
+.m-loyalty-card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.12; mix-blend-mode: overlay;
+}
+.m-loyalty-card .label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; opacity: 0.7; }
+.m-loyalty-card .name { font-family: var(--font-display); font-size: 28px; letter-spacing: -0.01em; text-transform: uppercase; margin-top: 2px; }
+.m-loyalty-card .num { font-family: var(--font-display); font-size: 56px; line-height: 1; letter-spacing: 0.02em; margin-top: 16px; }
+.m-loyalty-card .small { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+.m-loyalty-card .bar { height: 6px; background: rgba(255,255,255,0.2); border-radius: 999px; margin-top: 18px; overflow: hidden; }
+.m-loyalty-card .bar .fill { height: 100%; background: var(--ivory-1); border-radius: 999px; width: 72%; }
+.m-loyalty-card .next { font-size: 12px; margin-top: 8px; opacity: 0.9; }
+
+.m-perks { padding: 0 16px; }
+.m-perk {
+  display: flex; gap: 14px; align-items: center;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.m-perk .icon { width: 40px; height: 40px; background: var(--ink-3); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: var(--marquee-300); }
+.m-perk h4 { margin: 0; font-size: 14px; font-weight: 600; }
+.m-perk p { margin: 2px 0 0; font-size: 12px; color: var(--ivory-3); }
+
+/* ---------- Profile ---------- */
+.m-profile-head { display: flex; flex-direction: column; align-items: center; padding: 8px 20px 24px; gap: 12px; }
+.m-avatar {
+  width: 92px; height: 92px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF2E78, #7A0830, #00A4BF);
+  display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 36px;
+}
+.m-profile-head h2 { font-family: var(--font-display); font-size: 28px; letter-spacing: -0.01em; text-transform: uppercase; margin: 0; }
+.m-profile-head .sub { font-family: var(--font-serif); font-style: italic; color: var(--ivory-3); font-size: 14px; margin: 0; }
+
+.m-list { padding: 0 16px; }
+.m-list .group { background: var(--ink-2); border-radius: 12px; overflow: hidden; margin-bottom: 14px; border: 1px solid var(--border); }
+.m-list .group h5 { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ivory-4); margin: 16px 4px 8px; }
+.m-list .row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+}
+.m-list .row:last-child { border-bottom: 0; }
+.m-list .row .icon { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; color: var(--ivory-2); }
+.m-list .row .label { flex: 1; font-size: 14px; }
+.m-list .row .meta { color: var(--ivory-3); font-size: 13px; font-family: var(--font-mono); }
+.m-list .row .chev { color: var(--ivory-4); }

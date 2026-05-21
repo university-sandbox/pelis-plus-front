@@ -1,0 +1,295 @@
+/* ============================================================
+   PELIS+ — Design Tokens
+   Import this file in any artifact built against the brand.
+   ============================================================ */
+
+/* ---------- Fonts (Google Fonts substitutes — see README) ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ============================================================
+     COLOR — Core palette
+     ============================================================ */
+  /* Ink scale — the canvas. Near-black with a hint of warm brown,
+     the color of a cinema house after the lights drop. */
+  --ink-0:   #050506;   /* deepest — page background, behind everything */
+  --ink-1:   #0B0B0D;   /* default background */
+  --ink-2:   #131316;   /* raised surface (cards, sheets) */
+  --ink-3:   #1C1C20;   /* hover surface, input fields */
+  --ink-4:   #26262B;   /* borders, dividers */
+  --ink-5:   #34343A;   /* strong border / disabled fg */
+
+  /* Ivory scale — the projector light. Warm whites, never pure. */
+  --ivory-0: #FFFFFF;   /* hardly used — only on photographs */
+  --ivory-1: #F6F1E7;   /* primary foreground on dark */
+  --ivory-2: #D9D3C5;   /* secondary text */
+  --ivory-3: #9C988D;   /* tertiary, captions */
+  --ivory-4: #6B6862;   /* muted, metadata */
+  --ivory-5: #45433F;   /* deeply muted, divider on light */
+
+  /* Marquee — the primary accent. Hot magenta, like a neon sign
+     in rain. Use sparingly: CTAs, active states, brand moments. */
+  --marquee-50:  #FFE6F0;
+  --marquee-100: #FFB8D5;
+  --marquee-200: #FF7AAE;
+  --marquee-300: #FF4A8F;
+  --marquee-400: #FF2E78;  /* primary */
+  --marquee-500: #E51862;  /* pressed */
+  --marquee-600: #B30E4A;
+  --marquee-700: #7A0830;
+
+  /* Amber — secondary accent. Marquee bulbs, ratings, warnings. */
+  --amber-50:  #FFF4DC;
+  --amber-100: #FFE0A1;
+  --amber-300: #FFC047;
+  --amber-400: #F5A524;   /* primary */
+  --amber-500: #C77F0C;
+  --amber-700: #7A4D00;
+
+  /* Cyan — the "vice" cool. Used in pairs with magenta for posters
+     and big moments; almost never as a standalone UI accent. */
+  --cyan-300:  #5CEEFF;
+  --cyan-400:  #00D6F5;   /* primary */
+  --cyan-500:  #00A4BF;
+  --cyan-700:  #006A7D;
+
+  /* Functional */
+  --success:   #4ADE80;
+  --success-bg: rgba(74,222,128,0.10);
+  --danger:    #FF5A5A;
+  --danger-bg: rgba(255,90,90,0.10);
+  --warning:   var(--amber-400);
+
+  /* ============================================================
+     SEMANTIC COLOR — use these, not the raw scales
+     ============================================================ */
+  --bg:           var(--ink-1);
+  --bg-deep:      var(--ink-0);
+  --bg-raised:    var(--ink-2);
+  --bg-hover:     var(--ink-3);
+  --bg-input:     var(--ink-3);
+
+  --fg:           var(--ivory-1);
+  --fg-muted:     var(--ivory-2);
+  --fg-subtle:    var(--ivory-3);
+  --fg-faint:     var(--ivory-4);
+
+  --border:       var(--ink-4);
+  --border-strong: var(--ink-5);
+  --border-focus: var(--marquee-400);
+
+  --accent:       var(--marquee-400);
+  --accent-hover: var(--marquee-300);
+  --accent-press: var(--marquee-500);
+  --accent-fg:    var(--ivory-1);  /* text on accent */
+
+  /* Gradients — used in hero / poster moments, never on small UI */
+  --grad-vice: linear-gradient(135deg, #FF2E78 0%, #7A0830 45%, #00A4BF 100%);
+  --grad-marquee: linear-gradient(180deg, rgba(255,46,120,0) 0%, rgba(255,46,120,0.18) 100%);
+  --grad-scrim-bottom: linear-gradient(180deg, rgba(5,5,6,0) 0%, rgba(5,5,6,0.85) 70%, var(--ink-0) 100%);
+  --grad-scrim-top:    linear-gradient(180deg, rgba(5,5,6,0.85) 0%, rgba(5,5,6,0) 100%);
+  --grad-grain: radial-gradient(ellipse at top, rgba(255,46,120,0.08), transparent 60%);
+
+  /* ============================================================
+     TYPE
+     ============================================================ */
+  --font-display: 'Anton', 'Bebas Neue', 'Oswald', Impact, sans-serif;
+  --font-serif:   'Instrument Serif', 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  /* Type scale — modular, slight perfect-fourth. Mobile-first;
+     hero sizes go larger on desktop via clamp(). */
+  --t-display-xl: clamp(72px, 12vw, 220px); /* hero film titles */
+  --t-display-l:  clamp(56px, 8vw, 128px);
+  --t-display-m:  clamp(40px, 5vw, 80px);
+  --t-h1: clamp(36px, 4vw, 56px);
+  --t-h2: clamp(28px, 3vw, 40px);
+  --t-h3: 24px;
+  --t-h4: 18px;
+  --t-body-lg: 18px;
+  --t-body:    16px;
+  --t-body-sm: 14px;
+  --t-caption: 12px;
+  --t-overline: 11px;
+
+  --lh-display: 0.92;   /* tight, theatrical */
+  --lh-heading: 1.08;
+  --lh-body:    1.55;
+  --lh-tight:   1.25;
+
+  --ls-display: -0.02em;
+  --ls-heading: -0.01em;
+  --ls-overline: 0.18em;
+  --ls-tracked:  0.04em;
+
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+  --fw-black:    800;
+
+  /* ============================================================
+     SPACING — 4px base, fibonacci-ish for big moments
+     ============================================================ */
+  --s-0:  0;
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-8:  32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
+  --s-24: 96px;
+  --s-32: 128px;
+  --s-40: 160px;
+
+  /* Container widths */
+  --w-prose:    640px;
+  --w-content:  1080px;
+  --w-wide:     1280px;
+  --w-bleed:    1600px;
+
+  /* ============================================================
+     RADII — restrained. Big rounding feels app-store-y, not cinema.
+     ============================================================ */
+  --r-1: 2px;    /* tags, ticker chips */
+  --r-2: 4px;    /* inputs, small buttons */
+  --r-3: 8px;    /* cards */
+  --r-4: 12px;   /* large cards, sheets */
+  --r-5: 20px;   /* hero modules */
+  --r-pill: 999px;
+
+  /* ============================================================
+     ELEVATION — soft, downward, slightly warm.
+     We mostly elevate with surface color shifts, not shadow.
+     ============================================================ */
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-2: 0 4px 16px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-3: 0 12px 40px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 0 1px rgba(255,46,120,0.35), 0 8px 32px rgba(255,46,120,0.25);
+  --shadow-inset: inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.4);
+
+  /* Focus ring */
+  --ring: 0 0 0 2px var(--ink-0), 0 0 0 4px var(--marquee-400);
+
+  /* ============================================================
+     MOTION
+     ============================================================ */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);     /* dolly out */
+  --ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);    /* cinematic */
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1); /* small bounce, rare */
+  --ease-linear:   linear;
+
+  --dur-fast:  120ms;
+  --dur-base:  220ms;
+  --dur-slow:  420ms;
+  --dur-scene: 800ms;   /* full-screen transitions */
+
+  /* ============================================================
+     Z-INDEX
+     ============================================================ */
+  --z-base:    1;
+  --z-raised:  10;
+  --z-overlay: 100;
+  --z-modal:   1000;
+  --z-toast:   2000;
+}
+
+/* ============================================================
+   ROOT DEFAULTS — apply these to <html> or <body>
+   ============================================================ */
+.pelisplus-root {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  font-weight: var(--fw-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "ss02", "cv11";
+}
+
+/* ============================================================
+   SEMANTIC TEXT CLASSES
+   ============================================================ */
+.display-xl, .display-l, .display-m {
+  font-family: var(--font-display);
+  font-weight: var(--fw-regular); /* Anton ships single weight */
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
+  text-transform: uppercase;
+}
+.display-xl { font-size: var(--t-display-xl); }
+.display-l  { font-size: var(--t-display-l); }
+.display-m  { font-size: var(--t-display-m); }
+
+.h1, .h2, .h3, .h4 {
+  font-family: var(--font-body);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-heading);
+  letter-spacing: var(--ls-heading);
+}
+.h1 { font-size: var(--t-h1); }
+.h2 { font-size: var(--t-h2); }
+.h3 { font-size: var(--t-h3); }
+.h4 { font-size: var(--t-h4); }
+
+.serif-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-tight);
+  letter-spacing: 0;
+}
+
+.body-lg { font-size: var(--t-body-lg); line-height: var(--lh-body); }
+.body    { font-size: var(--t-body);    line-height: var(--lh-body); }
+.body-sm { font-size: var(--t-body-sm); line-height: var(--lh-body); }
+.caption {
+  font-size: var(--t-caption);
+  line-height: var(--lh-tight);
+  color: var(--fg-subtle);
+}
+.overline {
+  font-size: var(--t-overline);
+  letter-spacing: var(--ls-overline);
+  text-transform: uppercase;
+  font-weight: var(--fw-semibold);
+  color: var(--fg-subtle);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--t-body-sm);
+  letter-spacing: var(--ls-tracked);
+}
+
+/* Marquee number — for showtimes, dates, prices. Tabular, condensed. */
+.marquee-num {
+  font-family: var(--font-display);
+  font-feature-settings: "tnum";
+  letter-spacing: 0.04em;
+}
+
+/* ============================================================
+   UTILITY — grain overlay (place inside any container)
+   ============================================================ */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Scrim utility — for image overlays */
+.scrim-bottom { background: var(--grad-scrim-bottom); }
+.scrim-top    { background: var(--grad-scrim-top); }

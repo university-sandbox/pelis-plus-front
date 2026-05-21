@@ -1,0 +1,43 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="card.css"><title>Buttons</title></head>
+<body style="height:280px;">
+  <style>
+    .btn { font-family: var(--font-body); font-weight: 600; font-size: 14px;
+      letter-spacing: 0.02em; border-radius: 999px; padding: 12px 22px;
+      border: 1px solid transparent; cursor: pointer;
+      transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast); }
+    .btn:active { transform: translateY(1px) scale(0.99); }
+    .btn-primary { background: var(--marquee-400); color: var(--ivory-1); }
+    .btn-primary:hover { background: var(--marquee-300); }
+    .btn-secondary { background: transparent; color: var(--ivory-1); border-color: var(--ivory-1); }
+    .btn-secondary:hover { background: rgba(246,241,231,0.08); }
+    .btn-ghost { background: var(--ink-3); color: var(--ivory-1); }
+    .btn-ghost:hover { background: var(--ink-4); }
+    .btn-link { background: transparent; color: var(--marquee-300); border:0; padding: 12px 4px; text-decoration: none; }
+    .btn-link::after { content:" →"; }
+    .btn-icon { width:40px; height:40px; padding:0; display:inline-flex; align-items:center; justify-content:center; background:var(--ink-3); border-radius:50%; }
+    .btn-marquee { background: var(--marquee-400); color: var(--ivory-1); font-family: var(--font-display); font-size: 18px; letter-spacing: 0.06em; padding: 14px 28px; border-radius: 4px; text-transform: uppercase; }
+    .btn-marquee:hover { background: var(--marquee-300); box-shadow: 0 0 0 1px rgba(255,46,120,0.35), 0 8px 32px rgba(255,46,120,0.25); }
+    .btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+  </style>
+  <div class="col" style="gap:14px;">
+    <div class="overline">Buttons</div>
+    <div class="row" style="gap:10px; flex-wrap:wrap;">
+      <button class="btn btn-primary">Reservar ahora</button>
+      <button class="btn btn-secondary">Ver tráiler</button>
+      <button class="btn btn-ghost">Cancelar</button>
+      <button class="btn btn-primary" disabled>Sold out</button>
+      <a class="btn btn-link">Ver cartelera completa</a>
+    </div>
+    <div class="row" style="gap:10px; align-items:center;">
+      <button class="btn btn-marquee">Comprar entradas</button>
+      <button class="btn btn-icon" title="play">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 22,12 6,20"/></svg>
+      </button>
+      <button class="btn btn-icon" title="favorite">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+    </div>
+    <div class="tag muted">Pill radius for round buttons (999px); marquee variant uses r-2 + Anton + uppercase for hero CTAs.</div>
+  </div>
+</body></html>
