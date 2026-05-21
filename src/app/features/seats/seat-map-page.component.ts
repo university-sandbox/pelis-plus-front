@@ -76,7 +76,7 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
 
   readonly legend = [
     { label: 'Libre', color: 'var(--color-seat-free)' },
-    { label: 'Seleccionado', color: 'var(--color-seat-selected)' },
+    { label: 'Seleccionada', color: 'var(--color-seat-selected)' },
     { label: 'Ocupado', color: 'var(--color-seat-occupied)' },
     { label: 'Preferencial', color: 'var(--color-seat-preferential)' },
   ];
@@ -141,7 +141,7 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
   }
 
   private onReservationExpired(): void {
-    this.conflictError.set('Tu reserva de asientos ha expirado. Selecciona de nuevo.');
+    this.conflictError.set('Tu reserva de butacas ha expirado. Selecciona de nuevo.');
     this.reservationExpiresAt.set(null);
     this.selectedIds.set(new Set());
     this.loadSeatMap();
@@ -231,10 +231,10 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
         this.adding.set(false);
         const msg = err?.error?.message ?? '';
         if (msg.toLowerCase().includes('reserv') || msg.toLowerCase().includes('conflict') || err?.status === 409) {
-          this.conflictError.set('Uno o más asientos ya fueron tomados. Por favor selecciona otros.');
+          this.conflictError.set('Una o más butacas ya fueron tomadas. Selecciona otras.');
           this.loadSeatMap();
         } else {
-          this.conflictError.set('Error al reservar asientos. Intenta de nuevo.');
+          this.conflictError.set('Error al reservar butacas. Intenta de nuevo.');
         }
       },
     });

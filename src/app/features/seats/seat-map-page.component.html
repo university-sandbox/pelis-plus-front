@@ -17,7 +17,7 @@
           </button>
           <div>
             <h1 class="text-xl font-bold" style="color: var(--color-text-primary);">
-              Elige tus asientos
+              Elige tus butacas
             </h1>
             @if (screening()) {
               <p class="text-sm" style="color: var(--color-text-secondary);">
@@ -48,7 +48,7 @@
           <div class="mb-4 flex items-center gap-2 rounded-xl px-4 py-3 text-sm"
             style="background: rgba(251,191,36,0.1); color: #f59e0b; border: 1px solid rgba(251,191,36,0.2);">
             <lucide-icon [img]="AlertCircle" [size]="16" aria-hidden="true" />
-            Máximo {{ maxSeats }} asientos por compra.
+            Máximo {{ maxSeats }} butacas por compra.
           </div>
         }
 
@@ -64,16 +64,16 @@
         @if (loading()) {
           <app-skeleton-loader height="320px" radius="12px" />
         } @else if (error()) {
-          <app-error-state title="No pudimos cargar el mapa de asientos" (retry)="loadSeatMap()" />
+          <app-error-state title="No pudimos cargar el mapa de butacas" (retry)="loadSeatMap()" />
         } @else if (seatMap(); as map) {
 
           <!-- Screen indicator -->
           <div class="mb-8 text-center">
             <div
               class="mx-auto mb-2 h-2 rounded-full"
-              style="width: 60%; max-width: 360px; background: linear-gradient(to bottom, var(--color-accent), transparent);"
+              style="width: 60%; max-width: 360px; background: linear-gradient(to bottom, var(--color-accent), transparent); box-shadow: var(--shadow-glow);"
             ></div>
-            <p class="text-xs font-semibold uppercase tracking-widest" style="color: var(--color-text-disabled);">Pantalla</p>
+            <p class="pelis-overline">Pantalla</p>
           </div>
 
           <!-- Seat grid — horizontally scrollable on mobile -->
@@ -85,11 +85,11 @@
                   @for (seat of map.seats[ri]; track seat.id) {
                     <button
                       type="button"
-                      [attr.aria-label]="'Asiento ' + seat.row + seat.col + ' — ' + seatStatusLabel(seat)"
+                      [attr.aria-label]="'Fila ' + seat.row + ', butaca ' + seat.col + ', ' + seatStatusLabel(seat)"
                       [attr.aria-pressed]="seat.status === 'selected'"
                       [disabled]="seat.status === 'occupied' || seat.status === 'reserved'"
                       (click)="toggleSeat(seat, ri)"
-                      class="seat-btn h-7 w-7 rounded-md text-xs font-bold transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-1"
+                      class="seat-btn h-7 w-7 rounded text-xs font-bold transition-all duration-150"
                       [style.background]="seatBg(seat)"
                       [style.cursor]="seat.status === 'occupied' || seat.status === 'reserved' ? 'not-allowed' : 'pointer'"
                       style="focus-visible:outline-color: var(--color-accent);"
@@ -128,7 +128,7 @@
         <div class="mx-auto flex max-w-4xl items-center justify-between gap-4">
           <div>
             <p class="text-sm font-semibold" style="color: var(--color-text-primary);">
-              {{ selectedSeats().length }} asiento{{ selectedSeats().length !== 1 ? 's' : '' }} seleccionado{{ selectedSeats().length !== 1 ? 's' : '' }}
+              {{ selectedSeats().length }} butaca{{ selectedSeats().length !== 1 ? 's' : '' }} seleccionada{{ selectedSeats().length !== 1 ? 's' : '' }}
             </p>
             <p class="text-xs mt-0.5" style="color: var(--color-text-secondary);">
               {{ selectedSeatLabels() }}
@@ -145,11 +145,10 @@
               type="button"
               (click)="addToCartAndContinue()"
               [disabled]="adding()"
-              class="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
-              style="background: var(--color-accent); color: var(--color-text-inverse);"
+              class="pelis-button flex items-center gap-2 px-5 py-2.5 text-sm"
             >
               <lucide-icon [img]="ShoppingCart" [size]="16" aria-hidden="true" />
-              {{ adding() ? 'Agregando...' : 'Agregar al carrito' }}
+              {{ adding() ? 'Agregando…' : 'Agregar al carrito' }}
             </button>
           </div>
         </div>

@@ -6,8 +6,8 @@
       <!-- ── Hero Banner ─────────────────────────────────────── -->
       @if (heroMovies().length > 0) {
         <section
-          class="relative w-full overflow-hidden"
-          style="height: 55vh; min-height: 320px; max-height: 600px;"
+          class="grain relative w-full overflow-hidden"
+          style="height: 62vh; min-height: 420px; max-height: 720px; background: var(--ink-0);"
           aria-label="Película destacada"
         >
           @for (movie of heroMovies(); track movie.id; let i = $index) {
@@ -27,25 +27,25 @@
               <!-- Gradient overlays -->
               <div
                 class="absolute inset-0"
-                style="background: linear-gradient(to right, #09090F 25%, transparent 70%);"
+                style="background: linear-gradient(to right, var(--ink-0) 18%, rgba(5,5,6,.72) 42%, transparent 76%);"
               ></div>
               <div
                 class="absolute inset-0"
-                style="background: linear-gradient(to top, #09090F 0%, transparent 40%);"
+                style="background: linear-gradient(to top, var(--ink-0) 0%, rgba(5,5,6,.62) 38%, transparent 72%);"
               ></div>
             </div>
           }
 
           <!-- Hero content -->
           @if (currentHeroMovie(); as hero) {
-            <div class="absolute bottom-0 left-0 p-6 sm:p-10 lg:p-16 max-w-2xl">
-              <p class="mb-2 text-xs font-semibold uppercase tracking-widest" style="color: var(--color-accent);">
+            <div class="absolute bottom-0 left-0 max-w-4xl p-6 sm:p-10 lg:p-16">
+              <p class="pelis-overline mb-3">
                 En cartelera
               </p>
-              <h1 class="mb-3 text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl" style="color: var(--color-text-primary);">
+              <h1 class="display-m mb-4 max-w-3xl" style="color: var(--color-text-primary);">
                 {{ hero.title }}
               </h1>
-              <div class="mb-3 flex flex-wrap items-center gap-3 text-sm" style="color: var(--color-text-secondary);">
+              <div class="mb-4 flex flex-wrap items-center gap-3 text-sm" style="color: var(--color-text-secondary);">
                 <span class="flex items-center gap-1">
                   <lucide-icon [img]="Star" [size]="14" style="color: var(--color-warning);" aria-hidden="true" />
                   {{ hero.voteAverage | number:'1.1-1' }}
@@ -54,25 +54,23 @@
                   <span>{{ hero.releaseDate | slice:0:4 }}</span>
                 }
               </div>
-              <p class="mb-5 hidden text-sm leading-relaxed sm:line-clamp-2" style="color: var(--color-text-secondary);">
+              <p class="mb-6 hidden max-w-xl text-sm leading-relaxed sm:line-clamp-2" style="color: var(--color-text-secondary);">
                 {{ hero.overview }}
               </p>
               <div class="flex flex-wrap gap-3">
                 <a
                   [routerLink]="['/movie', hero.id]"
-                  class="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
-                  style="background: var(--color-accent); color: var(--color-text-inverse);"
+                  class="pelis-button flex items-center gap-2 px-5 py-2.5 text-sm"
                 >
                   <lucide-icon [img]="Play" [size]="16" aria-hidden="true" />
-                  Comprar entradas
+                  Reservar entradas
                 </a>
                 <a
                   [routerLink]="['/movie', hero.id]"
-                  class="flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors"
-                  style="border-color: rgba(255,255,255,.25); color: var(--color-text-primary);"
+                  class="pelis-button-secondary flex items-center gap-2 px-5 py-2.5 text-sm font-semibold"
                 >
                   <lucide-icon [img]="Info" [size]="16" aria-hidden="true" />
-                  Más info
+                  Ver detalle
                 </a>
               </div>
             </div>
@@ -102,7 +100,11 @@
 
         <!-- ── Search & Filter ──────────────────────────────── -->
         <section aria-label="Filtros">
-          <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="pelis-overline mb-2">Cartelera</p>
+              <h2 class="display-m text-4xl" style="color: var(--color-text-primary);">Función exacta. Butaca exacta.</h2>
+            </div>
             <!-- Search input -->
             <div class="relative flex-1 max-w-sm">
               <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
@@ -112,8 +114,8 @@
                 type="search"
                 [(ngModel)]="searchQuery"
                 (ngModelChange)="onSearchChange($event)"
-                placeholder="Buscar película..."
-                class="search-input w-full rounded-full py-2.5 pl-9 pr-4 text-sm"
+                placeholder="Buscar película…"
+                class="search-input w-full rounded py-2.5 pl-9 pr-4 text-sm"
                 aria-label="Buscar película"
               />
               @if (searchQuery) {
@@ -143,9 +145,9 @@
                 role="option"
                 [attr.aria-selected]="selectedGenreId() === null"
                 (click)="selectGenre(null)"
-                class="genre-pill flex-none rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors"
+                class="genre-pill flex-none rounded px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors"
                 [style.background]="selectedGenreId() === null ? 'var(--color-accent)' : 'var(--color-surface-raised)'"
-                [style.color]="selectedGenreId() === null ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)'"
+                [style.color]="selectedGenreId() === null ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'"
               >
                 Todos
               </button>
@@ -155,9 +157,9 @@
                   role="option"
                   [attr.aria-selected]="selectedGenreId() === genre.id"
                   (click)="selectGenre(genre.id)"
-                  class="genre-pill flex-none rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors"
+                  class="genre-pill flex-none rounded px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors"
                   [style.background]="selectedGenreId() === genre.id ? 'var(--color-accent)' : 'var(--color-surface-raised)'"
-                  [style.color]="selectedGenreId() === genre.id ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)'"
+                  [style.color]="selectedGenreId() === genre.id ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'"
                 >
                   {{ genre.name }}
                 </button>
@@ -200,7 +202,7 @@
           <!-- ── En cartelera ───────────────────────────────── -->
           <section aria-label="En cartelera">
             <div class="mb-4 flex items-center justify-between">
-              <h2 class="text-xl font-bold" style="color: var(--color-text-primary);">En cartelera</h2>
+              <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary);">En cartelera</h2>
               <a
                 routerLink="/catalog"
                 class="flex items-center gap-1 text-sm font-medium transition-colors"
@@ -245,7 +247,7 @@
           <!-- ── Próximos estrenos ──────────────────────────── -->
           <section aria-label="Próximos estrenos">
             <div class="mb-4 flex items-center justify-between">
-              <h2 class="text-xl font-bold" style="color: var(--color-text-primary);">Próximos estrenos</h2>
+              <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary);">Próximos estrenos</h2>
               <a
                 routerLink="/catalog"
                 class="flex items-center gap-1 text-sm font-medium transition-colors"
@@ -278,7 +280,7 @@
                     <!-- Próximamente badge -->
                     <span
                       class="absolute left-2 top-2 rounded-full px-2 py-0.5 text-xs font-semibold"
-                      style="background: var(--color-warning); color: var(--color-text-inverse);"
+                      style="background: var(--color-warning); color: var(--ink-0);"
                     >
                       Pronto
                     </span>
@@ -291,7 +293,7 @@
           <!-- ── Populares ──────────────────────────────────── -->
           <section aria-label="Populares esta semana">
             <div class="mb-4 flex items-center justify-between">
-              <h2 class="text-xl font-bold" style="color: var(--color-text-primary);">Populares esta semana</h2>
+              <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary);">Populares esta semana</h2>
             </div>
 
             @if (popularLoading()) {

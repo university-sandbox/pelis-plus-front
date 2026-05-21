@@ -5,7 +5,7 @@
     >
       <!-- Card -->
       <div
-        class="w-full max-w-md rounded-2xl p-8 shadow-xl"
+        class="w-full max-w-md rounded-lg p-8 shadow-xl"
         style="background: var(--color-surface); border: 1px solid var(--color-border);"
       >
         <!-- Back to catalog -->
@@ -22,12 +22,12 @@
         <!-- Logo -->
         <div class="mb-8 flex flex-col items-center gap-2 text-center">
           <div
-            class="flex h-14 w-14 items-center justify-center rounded-2xl"
-            style="background: var(--color-accent-muted);"
+            class="flex h-14 w-14 items-center justify-center rounded-lg"
+            style="background: var(--color-accent-muted); border: 1px solid rgba(255,46,120,.28);"
           >
             <lucide-icon [img]="Film" [size]="28" style="color: var(--color-accent);" aria-hidden="true" />
           </div>
-          <h1 class="text-2xl font-bold" style="color: var(--color-text-primary);">
+          <h1 class="pelis-display text-4xl" style="color: var(--color-text-primary);">
             Bienvenido de vuelta
           </h1>
           <p class="text-sm" style="color: var(--color-text-secondary);">
@@ -57,7 +57,7 @@
                 formControlName="email"
                 autocomplete="email"
                 placeholder="tu@correo.com"
-                class="auth-input w-full rounded-xl py-3 pl-9 pr-4 text-sm"
+                class="auth-input w-full rounded py-3 pl-9 pr-4 text-sm"
                 [class.auth-input-error]="emailCtrl.touched && emailCtrl.invalid"
                 [attr.aria-describedby]="emailCtrl.touched && emailCtrl.invalid ? 'login-email-error' : null"
                 [attr.aria-invalid]="emailCtrl.touched && emailCtrl.invalid ? 'true' : null"
@@ -99,7 +99,7 @@
                 formControlName="password"
                 autocomplete="current-password"
                 placeholder="••••••••"
-                class="auth-input w-full rounded-xl py-3 pl-9 pr-10 text-sm"
+                class="auth-input w-full rounded py-3 pl-9 pr-10 text-sm"
                 [class.auth-input-error]="passwordCtrl.touched && passwordCtrl.invalid"
                 [attr.aria-describedby]="passwordCtrl.touched && passwordCtrl.invalid ? 'login-password-error' : null"
                 [attr.aria-invalid]="passwordCtrl.touched && passwordCtrl.invalid ? 'true' : null"
@@ -129,7 +129,7 @@
           <!-- Global error -->
           @if (formError()) {
             <div
-              class="flex items-center gap-2 rounded-xl p-3 text-sm"
+              class="flex items-center gap-2 rounded-lg p-3 text-sm"
               style="background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.25); color: var(--color-error);"
               role="alert"
               aria-live="polite"
@@ -143,10 +143,10 @@
           <button
             type="submit"
             [disabled]="isSubmitting()"
-            class="auth-btn w-full rounded-full py-3 text-sm font-semibold transition-colors"
+            class="auth-btn w-full rounded py-3 text-sm font-bold transition-colors"
             style="background: var(--color-accent); color: var(--color-text-inverse);"
           >
-            {{ isSubmitting() ? 'Ingresando...' : 'Ingresar' }}
+            {{ isSubmitting() ? 'Ingresando…' : 'Ingresar' }}
           </button>
         </form>
 

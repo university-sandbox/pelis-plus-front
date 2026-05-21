@@ -12,6 +12,7 @@ import {
   Popcorn,
   Star,
   Home,
+  Aperture,
 } from 'lucide-angular';
 
 import { AuthService } from '../../../core/services/auth.service';
@@ -28,19 +29,20 @@ import { CartService } from '../../../core/services/cart.service';
   template: `
     <header
       class="fixed top-0 left-0 right-0 z-50 border-b"
-      style="background: rgba(9,9,15,.88); backdrop-filter: blur(12px); border-color: var(--color-border);"
+      style="background: rgba(5,5,6,.88); backdrop-filter: blur(14px); border-color: var(--color-border);"
     >
       <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
-        <!-- Logo -->
         <a
           routerLink="/catalog"
-          class="flex items-center gap-2 text-xl font-extrabold tracking-tight"
-          style="color: var(--color-accent);"
+          class="brand-link flex items-center gap-2"
+          style="color: var(--color-text-primary);"
           aria-label="Pelis Plus — inicio"
         >
-          <lucide-icon [img]="Film" [size]="22" aria-hidden="true" />
-          PELIS<span style="color: var(--color-text-primary);">+</span>
+          <span class="brand-mark flex h-8 w-8 items-center justify-center rounded-full" aria-hidden="true">
+            <lucide-icon [img]="Aperture" [size]="18" />
+          </span>
+          <span class="brand-word">PELIS<span>PLUS</span></span>
         </a>
 
         <!-- Desktop nav -->
@@ -49,7 +51,7 @@ import { CartService } from '../../../core/services/cart.service';
             <a
               [routerLink]="link.path"
               routerLinkActive="nav-active"
-              class="nav-link flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+              class="nav-link flex items-center gap-1.5 rounded px-3 py-2 text-sm font-semibold transition-colors"
               style="color: var(--color-text-secondary);"
             >
               <lucide-icon [img]="link.icon" [size]="16" aria-hidden="true" />
@@ -80,7 +82,7 @@ import { CartService } from '../../../core/services/cart.service';
             @if (cartService.itemCount() > 0) {
               <span
                 class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold"
-                style="background: var(--color-accent); color: var(--color-text-inverse);"
+                style="background: var(--color-accent); color: var(--color-text-primary);"
                 aria-hidden="true"
               >{{ cartService.itemCount() }}</span>
             }
@@ -108,7 +110,7 @@ import { CartService } from '../../../core/services/cart.service';
             <a
               routerLink="/login"
               class="hidden rounded-full px-4 py-1.5 text-sm font-semibold transition-colors sm:inline-flex items-center"
-              style="background: var(--color-accent); color: var(--color-text-inverse);"
+              style="background: var(--color-accent); color: var(--color-text-primary); box-shadow: var(--shadow-glow);"
             >
               Ingresar
             </a>
@@ -147,7 +149,7 @@ import { CartService } from '../../../core/services/cart.service';
                   [routerLink]="link.path"
                   routerLinkActive="nav-active"
                   (click)="closeMobileMenu()"
-                  class="nav-link flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                  class="nav-link flex items-center gap-3 rounded px-3 py-2.5 text-sm font-semibold transition-colors"
                   style="color: var(--color-text-secondary);"
                 >
                   <lucide-icon [img]="link.icon" [size]="18" aria-hidden="true" />
@@ -160,7 +162,7 @@ import { CartService } from '../../../core/services/cart.service';
                 <button
                   type="button"
                   (click)="logout()"
-                  class="nav-link flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                  class="nav-link flex w-full items-center gap-3 rounded px-3 py-2.5 text-sm font-semibold transition-colors"
                   style="color: var(--color-text-secondary);"
                 >
                   <lucide-icon [img]="LogOut" [size]="18" aria-hidden="true" />
@@ -170,8 +172,8 @@ import { CartService } from '../../../core/services/cart.service';
                 <a
                   routerLink="/login"
                   (click)="closeMobileMenu()"
-                  class="flex items-center justify-center rounded-full py-2.5 text-sm font-semibold"
-                  style="background: var(--color-accent); color: var(--color-text-inverse);"
+                  class="flex items-center justify-center rounded py-2.5 text-sm font-bold"
+                  style="background: var(--color-accent); color: var(--color-text-primary);"
                 >
                   Ingresar
                 </a>
@@ -186,6 +188,24 @@ import { CartService } from '../../../core/services/cart.service';
     <div class="h-16" aria-hidden="true"></div>
   `,
   styles: `
+    .brand-mark {
+      border: 1px solid rgba(255, 46, 120, 0.45);
+      background: rgba(255, 46, 120, 0.13);
+      color: var(--color-accent);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .brand-word {
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-word span {
+      color: var(--color-accent);
+    }
+
     .nav-link:hover,
     .nav-link:focus-visible {
       color: var(--color-text-primary) !important;
@@ -240,6 +260,7 @@ export class NavbarComponent {
   readonly User = User;
   readonly LogOut = LogOut;
   readonly Film = Film;
+  readonly Aperture = Aperture;
 
   readonly navLinks = [
     { label: 'Inicio', path: '/catalog', icon: Home },

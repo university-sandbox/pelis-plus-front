@@ -1,8 +1,8 @@
 
     <a
       [routerLink]="['/movie', movie().id]"
-      class="movie-card group relative block overflow-hidden rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2"
-      style="aspect-ratio: 2/3; focus-visible:outline-color: var(--color-accent);"
+      class="movie-card group grain relative block overflow-hidden rounded-lg"
+      style="aspect-ratio: 2/3;"
       [attr.aria-label]="movie().title"
     >
       <!-- Poster -->
@@ -19,20 +19,20 @@
           class="flex h-full w-full items-center justify-center"
           style="background: var(--color-surface-raised);"
         >
-          <span class="text-xs" style="color: var(--color-text-disabled);">Sin imagen</span>
+          <img src="/pelisplus/poster-placeholder.svg" alt="" class="h-full w-full object-cover" />
         </div>
       }
 
       <!-- Gradient overlay -->
       <div
         class="absolute inset-0 transition-opacity duration-300"
-        style="background: linear-gradient(to top, rgba(9,9,15,.95) 0%, rgba(9,9,15,.4) 50%, transparent 75%);"
+        style="background: linear-gradient(to top, rgba(5,5,6,.96) 0%, rgba(5,5,6,.42) 48%, transparent 75%);"
       ></div>
 
       <!-- Hover overlay -->
       <div
         class="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
-        style="background: rgba(9,9,15,.35);"
+        style="background: rgba(5,5,6,.35);"
       ></div>
 
       <!-- Labels: premiere, upcoming, inactive -->
@@ -44,12 +44,12 @@
           </span>
         } @else if (movie().status === 'upcoming') {
           <span class="rounded px-1.5 py-0.5 text-xs font-bold"
-            style="background: rgba(99,102,241,0.85); color: #fff;">
+            style="background: rgba(245,165,36,0.92); color: var(--ink-0);">
             Próximamente
           </span>
         } @else if (isNewRelease()) {
           <span class="rounded px-1.5 py-0.5 text-xs font-bold"
-            style="background: rgba(0,201,167,0.85); color: #fff;">
+            style="background: rgba(255,46,120,0.9); color: var(--color-text-primary);">
             Estreno
           </span>
         }
@@ -87,10 +87,10 @@
         class="absolute inset-x-0 bottom-12 flex justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
       >
         <span
-          class="rounded-full px-4 py-1.5 text-xs font-semibold"
-          style="background: var(--color-accent); color: var(--color-text-inverse);"
+          class="rounded px-4 py-1.5 text-xs font-bold"
+          style="background: var(--color-accent); color: var(--color-text-primary); box-shadow: var(--shadow-glow);"
         >
-          Comprar
+          Reservar
         </span>
       </div>
     </a>

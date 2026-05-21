@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Hero backdrop">
+  <defs>
+    <radialGradient id="bg1" cx="80%" cy="20%" r="80%">
+      <stop offset="0%" stop-color="#FF2E78" stop-opacity="0.55"></stop>
+      <stop offset="40%" stop-color="#7A0830" stop-opacity="0.35"></stop>
+      <stop offset="100%" stop-color="#0B0B0D" stop-opacity="1"></stop>
+    </radialGradient>
+    <radialGradient id="bg2" cx="15%" cy="85%" r="60%">
+      <stop offset="0%" stop-color="#00A4BF" stop-opacity="0.45"></stop>
+      <stop offset="100%" stop-color="#0B0B0D" stop-opacity="0"></stop>
+    </radialGradient>
+    <linearGradient id="bg3" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#050506"></stop>
+      <stop offset="60%" stop-color="#050506" stop-opacity="0"></stop>
+    </linearGradient>
+    <filter id="grain2">
+      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"></feTurbulence>
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.10 0"></feColorMatrix>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="#0B0B0D"></rect>
+  <rect width="1600" height="900" fill="url(#bg1)"></rect>
+  <rect width="1600" height="900" fill="url(#bg2)"></rect>
+  <rect width="1600" height="900" fill="url(#bg3)"></rect>
+  <rect width="1600" height="900" filter="url(#grain2)"></rect>
+</svg>

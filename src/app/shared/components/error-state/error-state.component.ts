@@ -8,7 +8,7 @@ import { LucideAngularModule, AlertCircle } from 'lucide-angular';
   template: `
     <div class="flex flex-col items-center justify-center gap-4 py-16 text-center">
       <div
-        class="flex h-16 w-16 items-center justify-center rounded-full"
+        class="flex h-16 w-16 items-center justify-center rounded-lg"
         style="background: rgba(239,68,68,.12);"
         aria-hidden="true"
       >
@@ -30,8 +30,7 @@ import { LucideAngularModule, AlertCircle } from 'lucide-angular';
         <button
           type="button"
           (click)="retry.emit()"
-          class="mt-2 rounded-full border px-5 py-2 text-sm font-semibold transition-colors"
-          style="border-color: var(--color-accent); color: var(--color-accent);"
+          class="pelis-button-secondary mt-2 px-5 py-2 text-sm font-semibold"
         >
           {{ retryLabel() }}
         </button>

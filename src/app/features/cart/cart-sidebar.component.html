@@ -47,13 +47,13 @@
           <!-- Empty state -->
           <div class="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
             <lucide-icon [img]="ShoppingCart" [size]="40" style="color: var(--color-text-disabled);" aria-hidden="true" />
-            <p class="font-semibold" style="color: var(--color-text-secondary);">Tu carrito está vacío</p>
+            <p class="font-semibold" style="color: var(--color-text-secondary);">Aún no has elegido butacas.</p>
             <a
               routerLink="/"
               (click)="cartService.closeSidebar()"
               class="rounded-full px-4 py-2 text-sm font-semibold transition-colors"
               style="background: var(--color-accent); color: var(--color-text-inverse);"
-            >Explorar películas</a>
+            >Ver cartelera</a>
           </div>
         } @else {
           <div class="divide-y" style="border-color: var(--color-border);">
@@ -71,7 +71,7 @@
                           {{ ticket.date }} · {{ ticket.time }} · {{ formatLabel(ticket.format) }}
                         </p>
                         <p class="text-xs" style="color: var(--color-text-secondary);">
-                          Asiento {{ ticket.seat.row }}{{ ticket.seat.col }} · {{ ticket.venue }}
+                          Butaca {{ ticket.seat.row }}{{ ticket.seat.col }} · {{ ticket.venue }}
                         </p>
                       </div>
                       <div class="flex items-start gap-2">
@@ -81,7 +81,7 @@
                           (click)="removeTicket(ticket)"
                           class="rounded p-0.5 transition-colors"
                           style="color: var(--color-text-disabled);"
-                          [attr.aria-label]="'Eliminar entrada asiento ' + ticket.seat.row + ticket.seat.col"
+                          [attr.aria-label]="'Eliminar entrada butaca ' + ticket.seat.row + ticket.seat.col"
                         >
                           <lucide-icon [img]="Trash2" [size]="13" aria-hidden="true" />
                         </button>

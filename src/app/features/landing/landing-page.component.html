@@ -1,21 +1,49 @@
-<app-page-shell
-  [brandName]="appName"
-  title="Landing"
-  subtitle="This is a reusable blank page shell for your future modules and sections."
->
-  <div class="grid gap-4">
-    <p class="text-base text-slate-800">Start building your feature pages here.</p>
+<app-navbar />
 
-    @if (isAuthenticated()) {
-      <p class="text-sm font-medium text-emerald-700">Current auth state: logged in.</p>
-      <div class="flex flex-wrap items-center gap-3">
-        <button type="button" mat-stroked-button (click)="logout()">Log out</button>
+<main class="landing min-h-dvh overflow-hidden">
+  <section class="hero relative mx-auto grid max-w-7xl gap-8 px-5 pb-20 pt-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:pt-24">
+    <div class="relative z-10 max-w-3xl">
+      <p class="pelis-overline mb-4">{{ appName }}</p>
+      <h1 class="display-l mb-5">El cine, como debe verse.</h1>
+      <p class="max-w-xl text-lg leading-8" style="color: var(--color-text-secondary);">
+        Cartelera precisa, butacas sin fricción y una compra pensada para llegar a la sala antes
+        de que bajen las luces.
+      </p>
+
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a
+          routerLink="/catalog"
+          class="pelis-button inline-flex items-center gap-2 px-5 py-3 text-sm"
+        >
+          <lucide-icon [img]="Ticket" [size]="18" aria-hidden="true" />
+          Reservar entradas
+        </a>
+        <a
+          routerLink="/catalog"
+          class="pelis-button-secondary inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold"
+        >
+          <lucide-icon [img]="Play" [size]="18" aria-hidden="true" />
+          Ver cartelera
+        </a>
+        @if (isAuthenticated()) {
+          <button
+            type="button"
+            class="pelis-button-secondary inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold"
+            (click)="logout()"
+          >
+            <lucide-icon [img]="LogOut" [size]="18" aria-hidden="true" />
+            Cerrar sesión
+          </button>
+        }
       </div>
-    } @else {
-      <p class="text-sm font-medium text-amber-700">Current auth state: anonymous.</p>
-      <div class="flex flex-wrap items-center gap-3">
-        <a routerLink="/login" mat-flat-button color="primary">Go to login</a>
+    </div>
+
+    <div class="hero-panel grain relative min-h-[320px] overflow-hidden rounded-[20px] lg:min-h-[520px]" aria-hidden="true">
+      <img src="/pelisplus/hero-backdrop.svg" alt="" class="absolute inset-0 h-full w-full object-cover" />
+      <div class="absolute inset-x-8 bottom-8">
+        <p class="pelis-overline mb-2">Función exacta. Butaca exacta.</p>
+        <p class="display-m">20:30</p>
       </div>
-    }
-  </div>
-</app-page-shell>
+    </div>
+  </section>
+</main>

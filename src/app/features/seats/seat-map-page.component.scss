@@ -1,8 +1,9 @@
 
     .seat-btn:focus-visible {
-      outline: 2px solid var(--color-accent);
-      outline-offset: 1px;
+      outline: none;
+      box-shadow: var(--ring);
     }
     .seat-btn:not(:disabled):hover {
-      transform: scale(1.15);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow);
     }

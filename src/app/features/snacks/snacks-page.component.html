@@ -16,8 +16,9 @@
             <lucide-icon [img]="ArrowLeft" [size]="18" aria-hidden="true" />
           </button>
           <div>
-            <h1 class="text-xl font-bold" style="color: var(--color-text-primary);">Confitería</h1>
-            <p class="text-sm" style="color: var(--color-text-secondary);">Agrega snacks a tu pedido (opcional)</p>
+            <p class="pelis-overline mb-1">Confitería</p>
+            <h1 class="pelis-display text-3xl" style="color: var(--color-text-primary);">Snacks para la función</h1>
+            <p class="text-sm" style="color: var(--color-text-secondary);">Agrega algo a tu pedido. Este paso es opcional.</p>
           </div>
         </div>
 
@@ -27,17 +28,17 @@
             <button
               type="button"
               (click)="selectedCategory.set(null)"
-              class="flex-none rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors"
+              class="flex-none rounded px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors"
               [style.background]="selectedCategory() === null ? 'var(--color-accent)' : 'var(--color-surface-raised)'"
-              [style.color]="selectedCategory() === null ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)'"
+              [style.color]="selectedCategory() === null ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'"
             >Todos</button>
             @for (cat of categories(); track cat) {
               <button
                 type="button"
                 (click)="selectedCategory.set(cat)"
-                class="flex-none rounded-full px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors"
+                class="flex-none rounded px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors"
                 [style.background]="selectedCategory() === cat ? 'var(--color-accent)' : 'var(--color-surface-raised)'"
-                [style.color]="selectedCategory() === cat ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)'"
+                [style.color]="selectedCategory() === cat ? 'var(--color-text-primary)' : 'var(--color-text-secondary)'"
               >{{ categoryLabel(cat) }}</button>
             }
           </div>
@@ -84,14 +85,14 @@
             </p>
             <p class="text-xs" style="color: var(--color-text-secondary);">Total: S/ {{ cartService.total() }}</p>
           } @else {
-            <p class="text-sm" style="color: var(--color-text-secondary);">Tu carrito está vacío</p>
+            <p class="text-sm" style="color: var(--color-text-secondary);">Aún no has elegido snacks.</p>
           }
         </div>
         <div class="flex gap-3">
           <button
             type="button"
             (click)="skipAndCheckout()"
-            class="rounded-full border px-4 py-2 text-sm font-medium transition-colors"
+            class="pelis-button-secondary px-4 py-2 text-sm font-semibold"
             style="border-color: var(--color-border-strong); color: var(--color-text-secondary);"
           >
             Omitir
@@ -99,8 +100,7 @@
           <button
             type="button"
             (click)="goToCheckout()"
-            class="flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
-            style="background: var(--color-accent); color: var(--color-text-inverse);"
+            class="pelis-button flex items-center gap-2 px-5 py-2.5 text-sm"
           >
             Ir al pago
             <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />

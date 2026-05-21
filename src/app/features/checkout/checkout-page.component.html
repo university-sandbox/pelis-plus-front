@@ -20,12 +20,12 @@
         @if (cartService.cart().tickets.length === 0) {
           <!-- Empty cart -->
           <div class="rounded-xl p-12 text-center" style="background: var(--color-surface); border: 1px solid var(--color-border);">
-            <p class="mb-4 text-lg font-semibold" style="color: var(--color-text-primary);">Tu carrito está vacío</p>
+            <p class="mb-4 text-lg font-semibold" style="color: var(--color-text-primary);">Aún no has elegido butacas.</p>
             <a
               routerLink="/"
               class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors"
               style="background: var(--color-accent); color: var(--color-text-inverse);"
-            >Explorar películas</a>
+            >Ver cartelera</a>
           </div>
         } @else {
           <div class="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -45,7 +45,7 @@
                           {{ ticket.date }} · {{ ticket.time }} · {{ formatLabel(ticket.format) }}
                         </p>
                         <p class="text-xs mt-0.5" style="color: var(--color-text-secondary);">
-                          {{ ticket.venue }} · {{ ticket.room }} · Asiento {{ ticket.seat.row }}{{ ticket.seat.col }}
+                          {{ ticket.venue }} · {{ ticket.room }} · Butaca {{ ticket.seat.row }}{{ ticket.seat.col }}
                         </p>
                         @if (ticket.seat.type === 'preferential') {
                           <span

@@ -8,8 +8,8 @@ import { LucideAngularModule, SearchX } from 'lucide-angular';
   template: `
     <div class="flex flex-col items-center justify-center gap-4 py-16 text-center">
       <div
-        class="flex h-16 w-16 items-center justify-center rounded-full"
-        style="background: var(--color-surface-raised);"
+        class="flex h-16 w-16 items-center justify-center rounded-lg"
+        style="background: var(--color-surface-raised); border: 1px solid var(--color-border);"
         aria-hidden="true"
       >
         <lucide-icon [img]="SearchX" [size]="28" style="color: var(--color-text-secondary);" />
@@ -30,8 +30,7 @@ import { LucideAngularModule, SearchX } from 'lucide-angular';
         <button
           type="button"
           (click)="action.emit()"
-          class="mt-2 rounded-full px-5 py-2 text-sm font-semibold transition-colors"
-          style="background: var(--color-accent); color: var(--color-text-inverse);"
+          class="pelis-button mt-2 px-5 py-2 text-sm"
         >
           {{ actionLabel() }}
         </button>

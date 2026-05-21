@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
-import { LucideAngularModule, Plus, Minus, ShoppingCart } from 'lucide-angular';
+import { LucideAngularModule, Plus, Minus, Popcorn, CupSoda, Candy, Utensils, PackagePlus } from 'lucide-angular';
 
 import { type Snack } from '../../core/models/snack.model';
-import { type CartSnackItem } from '../../core/models/cart.model';
 
 @Component({
   selector: 'app-snack-card',
@@ -19,12 +18,9 @@ export class SnackCardComponent {
 
   readonly Plus = Plus;
   readonly Minus = Minus;
-  readonly ShoppingCart = ShoppingCart;
-
-  categoryEmoji(cat: string): string {
-    const map: Record<string, string> = {
-      popcorn: '🍿', drinks: '🥤', combos: '🎬', sweets: '🍬', extras: '🌮',
-    };
-    return map[cat] ?? '🍽️';
-  }
+  readonly Popcorn = Popcorn;
+  readonly CupSoda = CupSoda;
+  readonly Candy = Candy;
+  readonly Utensils = Utensils;
+  readonly PackagePlus = PackagePlus;
 }
