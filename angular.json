@@ -34,7 +34,7 @@
             "outputMode": "server",
             "prerender": false,
             "security": {
-              "allowedHosts": ["localhost", "127.0.0.1"]
+              "allowedHosts": ["localhost", "127.0.0.1", "pelisplus.nexoralabs.com"]
             },
             "ssr": {
               "entry": "src/server.ts"
