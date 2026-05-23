@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   Clapperboard,
+  Home,
 } from 'lucide-angular';
 
 interface NavItem {
@@ -33,6 +34,7 @@ export class AdminLayoutComponent {
   readonly Clapperboard = Clapperboard;
   readonly Menu = Menu;
   readonly X = X;
+  readonly Home = Home;
 
   readonly navItems: NavItem[] = [
     { path: '/admin/movies', label: 'Películas', icon: Film },

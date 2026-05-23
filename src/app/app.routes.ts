@@ -2,6 +2,7 @@ import { type Routes } from '@angular/router';
 
 import { adminGuard } from './core/guards/admin.guard';
 import { authGuard } from './core/guards/auth.guard';
+import { clientGuard } from './core/guards/client.guard';
 
 export const routes: Routes = [
   // ── Root — public catalog ────────────────────────────
@@ -59,6 +60,7 @@ export const routes: Routes = [
   },
   {
     path: 'seats/:screeningId',
+    canActivate: [clientGuard],
     loadComponent: () =>
       import('./features/seats/seat-map-page.component').then((c) => c.SeatMapPageComponent),
   },
@@ -71,7 +73,7 @@ export const routes: Routes = [
   // ── Checkout (auth required) ─────────────────────────
   {
     path: 'checkout',
-    canActivate: [authGuard],
+    canActivate: [clientGuard],
     loadComponent: () =>
       import('./features/checkout/checkout-page.component').then((c) => c.CheckoutPageComponent),
   },

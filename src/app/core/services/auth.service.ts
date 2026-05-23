@@ -1,7 +1,7 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
@@ -16,16 +16,9 @@ export class AuthService {
   private readonly token = signal(this.storage.getToken());
 
   readonly isAuthenticated = computed(() => this.token() !== null);
-  readonly isAdmin = computed(() => {
-    const t = this.token();
-    if (!t) return false;
-    try {
-      const payload = JSON.parse(atob(t.split('.')[1])) as { role?: string };
-      return payload.role === 'admin';
-    } catch {
-      return false;
-    }
-  });
+  readonly currentRole = computed(() => getRoleFromToken(this.token()));
+  readonly isAdmin = computed(() => this.currentRole() === 'admin');
+  readonly isClient = computed(() => this.isAuthenticated() && !this.isAdmin());
 
   login(email: string, password: string): Observable<boolean> {
     return this.httpClient
@@ -113,6 +106,12 @@ interface LoginResponse {
   };
 }
 
+interface JwtPayload {
+  role?: unknown;
+  roles?: unknown;
+  authorities?: unknown;
+}
+
 function getTokenFromResponse(response: LoginResponse): string {
   const token = response.token ?? response.accessToken ?? response.jwt;
   const nestedToken = response.data?.token ?? response.data?.accessToken ?? response.data?.jwt;
@@ -123,4 +122,46 @@ function getTokenFromResponse(response: LoginResponse): string {
   }
 
   return resolvedToken;
+}
+
+function getRoleFromToken(token: string | null): 'admin' | 'client' | null {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payloadPart = token.split('.')[1];
+    if (!payloadPart) {
+      return null;
+    }
+
+    const payload = JSON.parse(decodeBase64Url(payloadPart)) as JwtPayload;
+    const roles = [
+      payload.role,
+      ...(Array.isArray(payload.roles) ? payload.roles : []),
+      ...(Array.isArray(payload.authorities) ? payload.authorities : []),
+    ];
+
+    const normalizedRoles = roles
+      .filter((role): role is string => typeof role === 'string')
+      .map((role) => role.toLowerCase());
+
+    if (normalizedRoles.some((role) => role === 'admin' || role === 'role_admin')) {
+      return 'admin';
+    }
+
+    if (normalizedRoles.some((role) => role === 'client' || role === 'role_client' || role === 'user')) {
+      return 'client';
+    }
+
+    return 'client';
+  } catch {
+    return null;
+  }
+}
+
+function decodeBase64Url(value: string): string {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized.padEnd(normalized.length + ((4 - normalized.length % 4) % 4), '=');
+  return atob(padded);
 }

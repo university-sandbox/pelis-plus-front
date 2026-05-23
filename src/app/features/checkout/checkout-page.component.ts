@@ -2,16 +2,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
-  OnInit,
   signal,
 } from '@angular/core';
+import type { OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule, ArrowLeft, CreditCard, ShieldCheck, Minus, Plus, Trash2, Tag } from 'lucide-angular';
 
 import { CartService } from '../../core/services/cart.service';
 import { OrderService } from '../../core/services/order.service';
 import { MembershipService } from '../../core/services/membership.service';
-import { type CartTicket, type CartSnackItem, cartSubtotal } from '../../core/models/cart.model';
+import { AuthService } from '../../core/services/auth.service';
+import { type CartTicket, type CartSnackItem } from '../../core/models/cart.model';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 
 const FORMAT_LABELS: Record<string, string> = {
@@ -29,6 +30,7 @@ export class CheckoutPageComponent implements OnInit {
   readonly cartService = inject(CartService);
   private readonly orderService = inject(OrderService);
   private readonly membershipService = inject(MembershipService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   readonly paying = signal(false);
@@ -44,6 +46,11 @@ export class CheckoutPageComponent implements OnInit {
   readonly Tag = Tag;
 
   ngOnInit(): void {
+    if (!this.authService.isClient()) {
+      void this.router.navigate(['/catalog']);
+      return;
+    }
+
     this.applyMembershipDiscount();
   }
 
@@ -103,6 +110,11 @@ export class CheckoutPageComponent implements OnInit {
   }
 
   pay(): void {
+    if (!this.authService.isClient()) {
+      void this.router.navigate(['/catalog']);
+      return;
+    }
+
     this.paying.set(true);
     this.paymentError.set(false);
     const cart = this.cartService.cart();

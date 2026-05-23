@@ -149,15 +149,21 @@
             <span>Total</span>
             <span>S/ {{ cartService.total() }}</span>
           </div>
-          <a
-            routerLink="/checkout"
-            (click)="cartService.closeSidebar()"
-            class="flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-bold transition-colors"
-            style="background: var(--color-accent); color: var(--color-text-inverse);"
-          >
-            Ir al pago
-            <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
-          </a>
+          @if (canBuy()) {
+            <a
+              routerLink="/checkout"
+              (click)="cartService.closeSidebar()"
+              class="flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-bold transition-colors"
+              style="background: var(--color-accent); color: var(--color-text-inverse);"
+            >
+              Ir al pago
+              <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
+            </a>
+          } @else {
+            <p class="rounded-xl px-4 py-3 text-center text-sm font-semibold" style="background: var(--color-surface-raised); color: var(--color-text-secondary);">
+              Solo las cuentas cliente pueden comprar.
+            </p>
+          }
         </div>
       }
     </aside>

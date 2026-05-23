@@ -71,7 +71,8 @@ export class LoginPageComponent {
     this.authService.login(email, password).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        void this.router.navigateByUrl(environment.app.postLoginRoute);
+        const nextRoute = this.authService.isAdmin() ? '/admin' : environment.app.postLoginRoute;
+        void this.router.navigateByUrl(nextRoute);
       },
       error: (error: unknown) => {
         this.isSubmitting.set(false);

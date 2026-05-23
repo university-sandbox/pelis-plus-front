@@ -3,9 +3,9 @@ import {
   Component,
   computed,
   inject,
-  OnInit,
   signal,
 } from '@angular/core';
+import type { OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecimalPipe, NgOptimizedImage, SlicePipe } from '@angular/common';
 import {
@@ -20,11 +20,13 @@ import {
   MapPin,
   ChevronRight,
 } from 'lucide-angular';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
+import type { SafeResourceUrl } from '@angular/platform-browser';
 
 import { MovieService } from '../../core/services/movie.service';
 import { ScreeningService } from '../../core/services/screening.service';
 import { CartService } from '../../core/services/cart.service';
+import { AuthService } from '../../core/services/auth.service';
 import { type Movie } from '../../core/models/movie.model';
 import { type Screening, type ScreeningFormat, type Venue } from '../../core/models/screening.model';
 import { movieImageUrl } from '../../core/api/media-url';
@@ -68,6 +70,7 @@ export class MovieDetailPageComponent implements OnInit {
   private readonly movieService = inject(MovieService);
   private readonly screeningService = inject(ScreeningService);
   private readonly cartService = inject(CartService);
+  private readonly authService = inject(AuthService);
   private readonly sanitizer = inject(DomSanitizer);
 
   readonly movie = signal<Movie | null>(null);
@@ -81,6 +84,7 @@ export class MovieDetailPageComponent implements OnInit {
   readonly selectedVenueId = signal<string | null>(null);
   readonly selectedDate = signal<string | null>(null);
   readonly showTrailer = signal(false);
+  readonly canBuyTickets = this.authService.isClient;
 
   readonly Star = Star;
   readonly Clock = Clock;

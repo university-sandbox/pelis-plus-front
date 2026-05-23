@@ -3,10 +3,9 @@ import {
   Component,
   computed,
   inject,
-  OnDestroy,
-  OnInit,
   signal,
 } from '@angular/core';
+import type { OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   LucideAngularModule,
@@ -18,10 +17,9 @@ import {
 } from 'lucide-angular';
 
 const MAX_SEATS = 6;
-const RESERVATION_SECONDS = 10 * 60; // 10 minutes
-
 import { SeatService } from '../../core/services/seat.service';
 import { CartService } from '../../core/services/cart.service';
+import { AuthService } from '../../core/services/auth.service';
 import { type Seat, type SeatMap } from '../../core/models/seat.model';
 import { type Screening } from '../../core/models/screening.model';
 import { type Movie } from '../../core/models/movie.model';
@@ -51,6 +49,7 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly seatService = inject(SeatService);
   private readonly cartService = inject(CartService);
+  private readonly authService = inject(AuthService);
 
   readonly screening = signal<Screening | null>(null);
   readonly movie = signal<Movie | null>(null);
@@ -99,6 +98,11 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
+    if (!this.authService.isClient()) {
+      void this.router.navigate(['/catalog']);
+      return;
+    }
+
     const nav = history.state as { screening?: Screening; movie?: Movie };
     if (!nav?.screening) {
       void this.router.navigate(['/']);
@@ -195,6 +199,11 @@ export class SeatMapPageComponent implements OnInit, OnDestroy {
   }
 
   addToCartAndContinue(): void {
+    if (!this.authService.isClient()) {
+      void this.router.navigate(['/catalog']);
+      return;
+    }
+
     const sc = this.screening();
     const m = this.movie();
     if (!sc || this.selectedSeats().length === 0) return;

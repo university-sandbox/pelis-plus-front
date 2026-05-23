@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { LucideAngularModule, X, Trash2, Minus, Plus, ShoppingCart, ChevronRight } from 'lucide-angular';
 
 import { CartService } from '../../core/services/cart.service';
+import { AuthService } from '../../core/services/auth.service';
 import { type CartTicket, type CartSnackItem } from '../../core/models/cart.model';
 
 const FORMAT_LABELS: Record<string, string> = {
@@ -17,6 +18,8 @@ const FORMAT_LABELS: Record<string, string> = {
 })
 export class CartSidebarComponent {
   readonly cartService = inject(CartService);
+  private readonly authService = inject(AuthService);
+  readonly canBuy = this.authService.isClient;
 
   readonly X = X;
   readonly Trash2 = Trash2;

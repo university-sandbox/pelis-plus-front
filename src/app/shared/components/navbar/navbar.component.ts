@@ -12,6 +12,7 @@ import {
   Star,
   Home,
   Aperture,
+  Clapperboard,
 } from 'lucide-angular';
 
 import { AuthService } from '../../../core/services/auth.service';
@@ -71,24 +72,37 @@ import { CartService } from '../../../core/services/cart.service';
           </button>
 
           <!-- Cart -->
-          <button
-            type="button"
-            (click)="cartService.openSidebar()"
-            class="icon-btn relative rounded-full p-2 transition-colors"
-            [attr.aria-label]="cartService.itemCount() + ' artículos en el carrito'"
-          >
-            <lucide-icon [img]="ShoppingCart" [size]="20" aria-hidden="true" />
-            @if (cartService.itemCount() > 0) {
-              <span
-                class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold"
-                style="background: var(--color-accent); color: var(--color-text-primary);"
-                aria-hidden="true"
-              >{{ cartService.itemCount() }}</span>
-            }
-          </button>
+          @if (!isAdmin()) {
+            <button
+              type="button"
+              (click)="cartService.openSidebar()"
+              class="icon-btn relative rounded-full p-2 transition-colors"
+              [attr.aria-label]="cartService.itemCount() + ' artículos en el carrito'"
+            >
+              <lucide-icon [img]="ShoppingCart" [size]="20" aria-hidden="true" />
+              @if (cartService.itemCount() > 0) {
+                <span
+                  class="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full text-xs font-bold"
+                  style="background: var(--color-accent); color: var(--color-text-primary);"
+                  aria-hidden="true"
+                >{{ cartService.itemCount() }}</span>
+              }
+            </button>
+          }
 
           <!-- Auth -->
           @if (isAuthenticated()) {
+            @if (isAdmin()) {
+              <a
+                routerLink="/admin"
+                class="icon-btn hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors sm:flex"
+                style="background: var(--color-surface-raised); border: 1.5px solid var(--color-border-strong); color: var(--color-text-secondary);"
+                aria-label="Ir al panel de administración"
+              >
+                <lucide-icon [img]="Clapperboard" [size]="16" aria-hidden="true" />
+                Admin
+              </a>
+            }
             <a
               routerLink="/profile"
               class="icon-btn hidden h-8 w-8 items-center justify-center rounded-full sm:flex"
@@ -158,6 +172,17 @@ import { CartService } from '../../../core/services/cart.service';
             }
             <li class="mt-2 border-t pt-2" style="border-color: var(--color-border);">
               @if (isAuthenticated()) {
+                @if (isAdmin()) {
+                  <a
+                    routerLink="/admin"
+                    (click)="closeMobileMenu()"
+                    class="nav-link mb-1 flex w-full items-center gap-3 rounded px-3 py-2.5 text-sm font-semibold transition-colors"
+                    style="color: var(--color-text-secondary);"
+                  >
+                    <lucide-icon [img]="Clapperboard" [size]="18" aria-hidden="true" />
+                    Panel admin
+                  </a>
+                }
                 <button
                   type="button"
                   (click)="logout()"
@@ -250,6 +275,7 @@ export class NavbarComponent {
   readonly cartService = inject(CartService);
 
   readonly isAuthenticated = this.authService.isAuthenticated;
+  readonly isAdmin = this.authService.isAdmin;
   readonly mobileMenuOpen = signal(false);
 
   readonly Menu = Menu;
@@ -259,6 +285,7 @@ export class NavbarComponent {
   readonly User = User;
   readonly LogOut = LogOut;
   readonly Aperture = Aperture;
+  readonly Clapperboard = Clapperboard;
 
   readonly navLinks = [
     { label: 'Inicio', path: '/catalog', icon: Home },
