@@ -6,7 +6,7 @@
   tabindex="-1"
   role="dialog"
   aria-modal="true"
-  [attr.aria-label]="room() ? 'Editar sala' : 'Nueva sala'"
+  [attr.aria-label]="roomType() ? 'Editar tipo de sala' : 'Nuevo tipo de sala'"
 >
   <div
     class="relative w-full max-w-lg rounded-2xl"
@@ -21,9 +21,9 @@
       style="border-bottom: 1px solid var(--color-border)"
     >
       <div>
-        <p class="pelis-overline">Sala física</p>
+        <p class="pelis-overline">Catálogo</p>
         <h2 class="text-base font-bold" style="color: var(--color-text-primary)">
-          {{ room() ? 'Editar sala' : 'Nueva sala' }}
+          {{ roomType() ? 'Editar tipo de sala' : 'Nuevo tipo de sala' }}
         </h2>
       </div>
       <button
@@ -37,123 +37,84 @@
     </div>
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4 p-6">
-      <div>
-        <label
-          class="mb-1 block text-xs font-semibold"
-          style="color: var(--color-text-secondary)"
-          for="room-venue"
-        >
-          Sede *
-        </label>
-        <select
-          id="room-venue"
-          formControlName="venueId"
-          class="form-input w-full rounded-lg px-3 py-2 text-sm"
-          style="
-            background: var(--color-surface-raised);
-            border: 1px solid var(--color-border);
-            color: var(--color-text-primary);
-          "
-        >
-          <option value="">Seleccionar sede</option>
-          @for (v of venues(); track v.id) {
-            <option [value]="v.id">{{ v.name }}</option>
-          }
-        </select>
+      <div class="grid gap-4 sm:grid-cols-[0.85fr_1fr]">
+        <div>
+          <label
+            class="mb-1 block text-xs font-semibold"
+            style="color: var(--color-text-secondary)"
+            for="room-type-code"
+          >
+            Código *
+          </label>
+          <input
+            id="room-type-code"
+            formControlName="code"
+            type="text"
+            class="form-input w-full rounded-lg px-3 py-2 text-sm"
+            style="
+              background: var(--color-surface-raised);
+              border: 1px solid var(--color-border);
+              color: var(--color-text-primary);
+            "
+            placeholder="imax"
+          />
+        </div>
+        <div>
+          <label
+            class="mb-1 block text-xs font-semibold"
+            style="color: var(--color-text-secondary)"
+            for="room-type-name"
+          >
+            Nombre *
+          </label>
+          <input
+            id="room-type-name"
+            formControlName="name"
+            type="text"
+            class="form-input w-full rounded-lg px-3 py-2 text-sm"
+            style="
+              background: var(--color-surface-raised);
+              border: 1px solid var(--color-border);
+              color: var(--color-text-primary);
+            "
+            placeholder="IMAX"
+          />
+        </div>
       </div>
 
       <div>
         <label
           class="mb-1 block text-xs font-semibold"
           style="color: var(--color-text-secondary)"
-          for="room-name"
+          for="room-type-description"
         >
-          Nombre *
+          Descripción *
         </label>
+        <textarea
+          id="room-type-description"
+          formControlName="description"
+          rows="3"
+          class="form-input w-full rounded-lg px-3 py-2 text-sm"
+          style="
+            background: var(--color-surface-raised);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+          "
+          placeholder="Pantalla de gran formato y audio inmersivo."
+        ></textarea>
+      </div>
+
+      <label
+        class="flex items-center gap-3 rounded-lg px-3 py-2"
+        style="background: var(--color-surface-raised); color: var(--color-text-secondary)"
+      >
         <input
-          id="room-name"
-          formControlName="name"
-          type="text"
-          class="form-input w-full rounded-lg px-3 py-2 text-sm"
-          style="
-            background: var(--color-surface-raised);
-            border: 1px solid var(--color-border);
-            color: var(--color-text-primary);
-          "
-          placeholder="Sala 1 - IMAX"
+          formControlName="active"
+          type="checkbox"
+          class="size-4 accent-[var(--color-accent)]"
         />
-      </div>
-
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label
-            class="mb-1 block text-xs font-semibold"
-            style="color: var(--color-text-secondary)"
-            for="room-type"
-          >
-            Tipo de sala *
-          </label>
-          <select
-            id="room-type"
-            formControlName="roomTypeId"
-            class="form-input w-full rounded-lg px-3 py-2 text-sm"
-            style="
-              background: var(--color-surface-raised);
-              border: 1px solid var(--color-border);
-              color: var(--color-text-primary);
-            "
-          >
-            <option value="">Seleccionar tipo</option>
-            @for (type of roomTypes(); track type.id) {
-              <option [value]="type.id">{{ type.name }} · {{ type.code }}</option>
-            }
-          </select>
-        </div>
-        <div>
-          <label
-            class="mb-1 block text-xs font-semibold"
-            style="color: var(--color-text-secondary)"
-            for="room-layout"
-          >
-            Distribución *
-          </label>
-          <select
-            id="room-layout"
-            formControlName="roomLayoutId"
-            (change)="onLayoutChange($event)"
-            class="form-input w-full rounded-lg px-3 py-2 text-sm"
-            style="
-              background: var(--color-surface-raised);
-              border: 1px solid var(--color-border);
-              color: var(--color-text-primary);
-            "
-          >
-            <option value="">Seleccionar distribución</option>
-            @for (layout of roomLayouts(); track layout.id) {
-              <option [value]="layout.id">
-                {{ layout.name }} · {{ layout.rows }}×{{ layout.cols }}
-              </option>
-            }
-          </select>
-        </div>
-      </div>
-
-      @if (selectedLayout(); as layout) {
-        <div
-          class="rounded-lg p-3"
-          style="background: rgba(255, 46, 120, 0.1); border: 1px solid rgba(255, 46, 120, 0.24)"
-        >
-          <p
-            class="text-xs font-semibold uppercase tracking-widest"
-            style="color: var(--color-accent)"
-          >
-            Aforo de la sala
-          </p>
-          <p class="mt-1 text-sm" style="color: var(--color-text-secondary)">
-            {{ layout.capacity }} butacas · {{ layout.rows }} filas × {{ layout.cols }} columnas
-          </p>
-        </div>
-      }
+        <span class="text-sm font-medium">Disponible para nuevas salas y funciones</span>
+      </label>
 
       @if (serverError()) {
         <p

@@ -6,7 +6,7 @@
   tabindex="-1"
   role="dialog"
   aria-modal="true"
-  [attr.aria-label]="room() ? 'Editar sala' : 'Nueva sala'"
+  [attr.aria-label]="layout() ? 'Editar distribución de sala' : 'Nueva distribución de sala'"
 >
   <div
     class="relative w-full max-w-lg rounded-2xl"
@@ -21,9 +21,9 @@
       style="border-bottom: 1px solid var(--color-border)"
     >
       <div>
-        <p class="pelis-overline">Sala física</p>
+        <p class="pelis-overline">Butacas</p>
         <h2 class="text-base font-bold" style="color: var(--color-text-primary)">
-          {{ room() ? 'Editar sala' : 'Nueva sala' }}
+          {{ layout() ? 'Editar distribución' : 'Nueva distribución' }}
         </h2>
       </div>
       <button
@@ -41,37 +41,12 @@
         <label
           class="mb-1 block text-xs font-semibold"
           style="color: var(--color-text-secondary)"
-          for="room-venue"
-        >
-          Sede *
-        </label>
-        <select
-          id="room-venue"
-          formControlName="venueId"
-          class="form-input w-full rounded-lg px-3 py-2 text-sm"
-          style="
-            background: var(--color-surface-raised);
-            border: 1px solid var(--color-border);
-            color: var(--color-text-primary);
-          "
-        >
-          <option value="">Seleccionar sede</option>
-          @for (v of venues(); track v.id) {
-            <option [value]="v.id">{{ v.name }}</option>
-          }
-        </select>
-      </div>
-
-      <div>
-        <label
-          class="mb-1 block text-xs font-semibold"
-          style="color: var(--color-text-secondary)"
-          for="room-name"
+          for="layout-name"
         >
           Nombre *
         </label>
         <input
-          id="room-name"
+          id="layout-name"
           formControlName="name"
           type="text"
           class="form-input w-full rounded-lg px-3 py-2 text-sm"
@@ -80,80 +55,105 @@
             border: 1px solid var(--color-border);
             color: var(--color-text-primary);
           "
-          placeholder="Sala 1 - IMAX"
+          placeholder="Distribución VIP 6x8"
         />
       </div>
 
-      <div class="grid gap-4 sm:grid-cols-2">
+      <div class="grid grid-cols-3 gap-3">
         <div>
           <label
             class="mb-1 block text-xs font-semibold"
             style="color: var(--color-text-secondary)"
-            for="room-type"
+            for="layout-rows"
           >
-            Tipo de sala *
+            Filas *
           </label>
-          <select
-            id="room-type"
-            formControlName="roomTypeId"
+          <input
+            id="layout-rows"
+            formControlName="rows"
+            type="number"
+            min="1"
+            max="40"
             class="form-input w-full rounded-lg px-3 py-2 text-sm"
             style="
               background: var(--color-surface-raised);
               border: 1px solid var(--color-border);
               color: var(--color-text-primary);
             "
-          >
-            <option value="">Seleccionar tipo</option>
-            @for (type of roomTypes(); track type.id) {
-              <option [value]="type.id">{{ type.name }} · {{ type.code }}</option>
-            }
-          </select>
+          />
         </div>
         <div>
           <label
             class="mb-1 block text-xs font-semibold"
             style="color: var(--color-text-secondary)"
-            for="room-layout"
+            for="layout-cols"
           >
-            Distribución *
+            Columnas *
           </label>
-          <select
-            id="room-layout"
-            formControlName="roomLayoutId"
-            (change)="onLayoutChange($event)"
+          <input
+            id="layout-cols"
+            formControlName="cols"
+            type="number"
+            min="1"
+            max="40"
             class="form-input w-full rounded-lg px-3 py-2 text-sm"
             style="
               background: var(--color-surface-raised);
               border: 1px solid var(--color-border);
               color: var(--color-text-primary);
             "
+          />
+        </div>
+        <div>
+          <label
+            class="mb-1 block text-xs font-semibold"
+            style="color: var(--color-text-secondary)"
+            for="layout-capacity"
           >
-            <option value="">Seleccionar distribución</option>
-            @for (layout of roomLayouts(); track layout.id) {
-              <option [value]="layout.id">
-                {{ layout.name }} · {{ layout.rows }}×{{ layout.cols }}
-              </option>
-            }
-          </select>
+            Aforo *
+          </label>
+          <input
+            id="layout-capacity"
+            formControlName="capacity"
+            type="number"
+            min="1"
+            class="form-input w-full rounded-lg px-3 py-2 text-sm"
+            style="
+              background: var(--color-surface-raised);
+              border: 1px solid var(--color-border);
+              color: var(--color-text-primary);
+            "
+          />
         </div>
       </div>
 
-      @if (selectedLayout(); as layout) {
-        <div
-          class="rounded-lg p-3"
-          style="background: rgba(255, 46, 120, 0.1); border: 1px solid rgba(255, 46, 120, 0.24)"
+      <div
+        class="rounded-lg p-3"
+        style="background: rgba(255, 46, 120, 0.1); border: 1px solid rgba(255, 46, 120, 0.24)"
+      >
+        <p
+          class="text-xs font-semibold uppercase tracking-widest"
+          style="color: var(--color-accent)"
         >
-          <p
-            class="text-xs font-semibold uppercase tracking-widest"
-            style="color: var(--color-accent)"
-          >
-            Aforo de la sala
-          </p>
-          <p class="mt-1 text-sm" style="color: var(--color-text-secondary)">
-            {{ layout.capacity }} butacas · {{ layout.rows }} filas × {{ layout.cols }} columnas
-          </p>
-        </div>
-      }
+          Mapa generado
+        </p>
+        <p class="mt-1 text-sm" style="color: var(--color-text-secondary)">
+          {{ rows() }} filas por {{ cols() }} columnas. El backend generará las butacas de cada
+          función con esta matriz.
+        </p>
+      </div>
+
+      <label
+        class="flex items-center gap-3 rounded-lg px-3 py-2"
+        style="background: var(--color-surface-raised); color: var(--color-text-secondary)"
+      >
+        <input
+          formControlName="active"
+          type="checkbox"
+          class="size-4 accent-[var(--color-accent)]"
+        />
+        <span class="text-sm font-medium">Disponible para nuevas salas</span>
+      </label>
 
       @if (serverError()) {
         <p

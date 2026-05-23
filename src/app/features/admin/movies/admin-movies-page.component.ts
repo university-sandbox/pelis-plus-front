@@ -1,11 +1,12 @@
+import { ChangeDetectionStrategy, Component, inject, signal, type OnInit } from '@angular/core';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnInit,
-  signal,
-} from '@angular/core';
-import { LucideAngularModule, Plus, Pencil, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-angular';
+  LucideAngularModule,
+  Plus,
+  Pencil,
+  ToggleLeft,
+  ToggleRight,
+  RefreshCw,
+} from 'lucide-angular';
 
 import { AdminService } from '../../../core/services/admin.service';
 import { type Movie } from '../../../core/models/movie.model';
@@ -28,6 +29,7 @@ export class AdminMoviesPageComponent implements OnInit {
   readonly showForm = signal(false);
   readonly editingMovie = signal<Movie | null>(null);
   readonly toggling = signal<number | null>(null);
+  readonly statusNotice = signal('');
 
   readonly Plus = Plus;
   readonly Pencil = Pencil;
@@ -43,8 +45,14 @@ export class AdminMoviesPageComponent implements OnInit {
     this.loading.set(true);
     this.error.set(false);
     this.adminService.getMovies().subscribe({
-      next: (list) => { this.movies.set(list); this.loading.set(false); },
-      error: () => { this.error.set(true); this.loading.set(false); },
+      next: (list) => {
+        this.movies.set(list);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set(true);
+        this.loading.set(false);
+      },
     });
   }
 
@@ -60,10 +68,17 @@ export class AdminMoviesPageComponent implements OnInit {
 
   toggleStatus(movie: Movie): void {
     this.toggling.set(movie.id);
+    this.statusNotice.set('');
     this.adminService.toggleMovieStatus(movie.id).subscribe({
       next: (updated) => {
         this.movies.update((list) => list.map((m) => (m.id === updated.id ? updated : m)));
         this.toggling.set(null);
+        this.statusNotice.set(
+          updated.active === false
+            ? 'Película desactivada. El backend canceló las funciones sin tickets vendidos y mantuvo válidas las que ya tenían tickets.'
+            : 'Película activada para cartelera y nuevas funciones.',
+        );
+        this.load();
       },
       error: () => this.toggling.set(null),
     });

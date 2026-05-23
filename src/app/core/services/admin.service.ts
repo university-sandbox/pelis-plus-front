@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { BACKEND } from '../api/endpoints';
 import { type Movie, type Genre } from '../models/movie.model';
@@ -32,16 +32,34 @@ export interface AdminScreeningPayload {
   roomId: string;
   date: string;
   time: string;
-  format: string;
+  format?: string;
   price: number;
 }
 
 export interface AdminRoomPayload {
   venueId: string;
+  roomTypeId: string;
+  roomLayoutId: string;
   name: string;
-  capacity: number;
+  capacity?: number;
+  rows?: number;
+  cols?: number;
+}
+
+export interface AdminRoomTypePayload {
+  code: string;
+  name: string;
+  description: string;
+  active: boolean;
+}
+
+export interface AdminRoomLayoutPayload {
+  name: string;
   rows: number;
   cols: number;
+  capacity: number;
+  seatMap: unknown | null;
+  active: boolean;
 }
 
 export interface AdminSnackPayload {
@@ -70,6 +88,26 @@ export interface AdminRoom {
   rows: number;
   cols: number;
   active?: boolean;
+  roomType?: AdminRoomType;
+  roomLayout?: AdminRoomLayout;
+}
+
+export interface AdminRoomType {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  active: boolean;
+}
+
+export interface AdminRoomLayout {
+  id: string;
+  name: string;
+  rows: number;
+  cols: number;
+  capacity: number;
+  seatMap: unknown | null;
+  active: boolean;
 }
 
 export interface PageResponse<T> {
@@ -108,12 +146,18 @@ export class AdminService {
 
   // ── Screenings ──────────────────────────────────────────────────────────
 
-  getScreenings(params?: { status?: string; movieId?: number; page?: number }): Observable<PageResponse<Screening>> {
+  getScreenings(params?: {
+    status?: string;
+    movieId?: number;
+    page?: number;
+  }): Observable<PageResponse<Screening>> {
     let httpParams = new HttpParams();
     if (params?.status) httpParams = httpParams.set('status', params.status);
     if (params?.movieId) httpParams = httpParams.set('movieId', params.movieId.toString());
     if (params?.page) httpParams = httpParams.set('page', params.page.toString());
-    return this.http.get<PageResponse<Screening>>(BACKEND.url(BACKEND.ADMIN.SCREENINGS.LIST), { params: httpParams });
+    return this.http.get<PageResponse<Screening>>(BACKEND.url(BACKEND.ADMIN.SCREENINGS.LIST), {
+      params: httpParams,
+    });
   }
 
   createScreening(payload: AdminScreeningPayload): Observable<Screening> {
@@ -144,6 +188,47 @@ export class AdminService {
 
   toggleRoomStatus(id: string): Observable<AdminRoom> {
     return this.http.patch<AdminRoom>(BACKEND.url(BACKEND.ADMIN.ROOMS.TOGGLE_STATUS(id)), {});
+  }
+
+  getRoomTypes(): Observable<AdminRoomType[]> {
+    return this.http.get<AdminRoomType[]>(BACKEND.url(BACKEND.ADMIN.ROOM_TYPES.LIST));
+  }
+
+  createRoomType(payload: AdminRoomTypePayload): Observable<AdminRoomType> {
+    return this.http.post<AdminRoomType>(BACKEND.url(BACKEND.ADMIN.ROOM_TYPES.CREATE), payload);
+  }
+
+  updateRoomType(id: string, payload: AdminRoomTypePayload): Observable<AdminRoomType> {
+    return this.http.put<AdminRoomType>(BACKEND.url(BACKEND.ADMIN.ROOM_TYPES.UPDATE(id)), payload);
+  }
+
+  toggleRoomTypeStatus(id: string): Observable<AdminRoomType> {
+    return this.http.patch<AdminRoomType>(
+      BACKEND.url(BACKEND.ADMIN.ROOM_TYPES.TOGGLE_STATUS(id)),
+      {},
+    );
+  }
+
+  getRoomLayouts(): Observable<AdminRoomLayout[]> {
+    return this.http.get<AdminRoomLayout[]>(BACKEND.url(BACKEND.ADMIN.ROOM_LAYOUTS.LIST));
+  }
+
+  createRoomLayout(payload: AdminRoomLayoutPayload): Observable<AdminRoomLayout> {
+    return this.http.post<AdminRoomLayout>(BACKEND.url(BACKEND.ADMIN.ROOM_LAYOUTS.CREATE), payload);
+  }
+
+  updateRoomLayout(id: string, payload: AdminRoomLayoutPayload): Observable<AdminRoomLayout> {
+    return this.http.put<AdminRoomLayout>(
+      BACKEND.url(BACKEND.ADMIN.ROOM_LAYOUTS.UPDATE(id)),
+      payload,
+    );
+  }
+
+  toggleRoomLayoutStatus(id: string): Observable<AdminRoomLayout> {
+    return this.http.patch<AdminRoomLayout>(
+      BACKEND.url(BACKEND.ADMIN.ROOM_LAYOUTS.TOGGLE_STATUS(id)),
+      {},
+    );
   }
 
   getVenues(): Observable<Array<{ id: string; name: string; address: string; city: string }>> {

@@ -12,9 +12,15 @@ export interface Room {
   capacity: number;
   rows: number;
   cols: number;
+  roomType?: {
+    id: string;
+    code: string;
+    name: string;
+    active: boolean;
+  };
 }
 
-export type ScreeningFormat = 'standard' | '3d' | 'imax' | 'dbox';
+export type ScreeningFormat = string;
 export type ScreeningStatus = 'active' | 'cancelled' | 'sold_out';
 
 export interface Screening {

@@ -147,6 +147,26 @@ export const BACKEND = {
       /** PATCH /admin/rooms/:id/status */
       TOGGLE_STATUS: (id: number | string) => `/admin/rooms/${id}/status`,
     },
+    ROOM_TYPES: {
+      /** GET /admin/room-types */
+      LIST: '/admin/room-types',
+      /** POST /admin/room-types */
+      CREATE: '/admin/room-types',
+      /** PUT /admin/room-types/:id */
+      UPDATE: (id: number | string) => `/admin/room-types/${id}`,
+      /** PATCH /admin/room-types/:id/status */
+      TOGGLE_STATUS: (id: number | string) => `/admin/room-types/${id}/status`,
+    },
+    ROOM_LAYOUTS: {
+      /** GET /admin/room-layouts */
+      LIST: '/admin/room-layouts',
+      /** POST /admin/room-layouts */
+      CREATE: '/admin/room-layouts',
+      /** PUT /admin/room-layouts/:id */
+      UPDATE: (id: number | string) => `/admin/room-layouts/${id}`,
+      /** PATCH /admin/room-layouts/:id/status */
+      TOGGLE_STATUS: (id: number | string) => `/admin/room-layouts/${id}/status`,
+    },
     SCREENINGS: {
       /** GET /admin/screenings?date=&status=&movieId= */
       LIST: '/admin/screenings',
