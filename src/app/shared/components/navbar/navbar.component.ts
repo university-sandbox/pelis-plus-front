@@ -1,5 +1,6 @@
+import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import {
   LucideAngularModule,
   Menu,
@@ -66,6 +67,7 @@ import { CartService } from '../../../core/services/cart.service';
           <button
             type="button"
             class="icon-btn hidden rounded-full p-2 transition-colors sm:flex"
+            (click)="focusCatalogSearch()"
             aria-label="Buscar"
           >
             <lucide-icon [img]="Search" [size]="20" aria-hidden="true" />
@@ -271,6 +273,8 @@ import { CartService } from '../../../core/services/cart.service';
   `,
 })
 export class NavbarComponent {
+  private readonly document = inject(DOCUMENT);
+  private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   readonly cartService = inject(CartService);
 
@@ -306,4 +310,25 @@ export class NavbarComponent {
     this.closeMobileMenu();
   }
 
+  focusCatalogSearch(): void {
+    this.closeMobileMenu();
+
+    const focusSearchInput = () => {
+      const input = this.document.getElementById('catalog-search-input');
+      if (!(input instanceof HTMLInputElement)) return;
+
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      input.focus({ preventScroll: true });
+    };
+
+    if (this.router.url.startsWith('/catalog')) {
+      focusSearchInput();
+      return;
+    }
+
+    void this.router.navigate(['/catalog']).then((navigated) => {
+      if (!navigated) return;
+      setTimeout(focusSearchInput);
+    });
+  }
 }
