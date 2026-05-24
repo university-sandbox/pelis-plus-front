@@ -3,8 +3,8 @@ import {
   Component,
   computed,
   inject,
-  OnInit,
   signal,
+  type OnInit,
 } from '@angular/core';
 import {
   ChevronLeft,

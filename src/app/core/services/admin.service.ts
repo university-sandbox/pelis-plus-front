@@ -268,7 +268,7 @@ export class AdminService {
   // ── Snacks ──────────────────────────────────────────────────────────────
 
   getAdminSnacks(): Observable<Snack[]> {
-    return this.http.get<Snack[]>(BACKEND.url(BACKEND.ADMIN.SNACKS.LIST));
+    return this.getAllPages((page) => this.getAdminSnacksPage(page));
   }
 
   createSnack(payload: AdminSnackPayload): Observable<Snack> {
@@ -351,6 +351,13 @@ export class AdminService {
       page !== undefined ? { params: new HttpParams().set('page', page.toString()) } : {};
 
     return this.http.get<AdminListResponse<AdminVenue>>(BACKEND.url(BACKEND.VENUES.LIST), params);
+  }
+
+  private getAdminSnacksPage(page?: number): Observable<AdminListResponse<Snack>> {
+    const params =
+      page !== undefined ? { params: new HttpParams().set('page', page.toString()) } : {};
+
+    return this.http.get<AdminListResponse<Snack>>(BACKEND.url(BACKEND.ADMIN.SNACKS.LIST), params);
   }
 
   private getAllPages<T>(
