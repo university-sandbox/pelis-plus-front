@@ -1,5 +1,6 @@
+import { isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse, type HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { PLATFORM_ID, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 
@@ -14,10 +15,11 @@ import { environment } from '../../../environments/environment';
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
+  const platformId = inject(PLATFORM_ID);
 
   return next(req).pipe(
     catchError((error: unknown) => {
-      if (error instanceof HttpErrorResponse) {
+      if (isPlatformBrowser(platformId) && error instanceof HttpErrorResponse) {
         const isBackendRequest = req.url.startsWith(environment.backend.baseUrl);
         if (isBackendRequest) {
           if (error.status === 401) {
