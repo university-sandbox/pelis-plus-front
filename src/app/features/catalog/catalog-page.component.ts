@@ -75,6 +75,7 @@ export class CatalogPageComponent implements OnInit {
   readonly heroIndex = signal(0);
 
   searchQuery = '';
+  private heroTouchStartX: number | null = null;
   private heroTimer?: ReturnType<typeof setInterval>;
 
   readonly skeletonArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -179,6 +180,39 @@ export class CatalogPageComponent implements OnInit {
     this.resetHeroTimer();
   }
 
+  showPreviousHero(): void {
+    this.moveHero(-1);
+  }
+
+  showNextHero(): void {
+    this.moveHero(1);
+  }
+
+  onHeroTouchStart(event: TouchEvent): void {
+    this.heroTouchStartX = event.changedTouches[0]?.clientX ?? null;
+  }
+
+  onHeroTouchEnd(event: TouchEvent): void {
+    if (this.heroTouchStartX === null) return;
+
+    const endX = event.changedTouches[0]?.clientX;
+    if (endX === undefined) {
+      this.heroTouchStartX = null;
+      return;
+    }
+
+    const deltaX = endX - this.heroTouchStartX;
+    this.heroTouchStartX = null;
+
+    if (Math.abs(deltaX) < 48) return;
+
+    if (deltaX > 0) {
+      this.showPreviousHero();
+    } else {
+      this.showNextHero();
+    }
+  }
+
   backdropUrl(path: string): string {
     return movieImageUrl(path, 'w1280') ?? '';
   }
@@ -206,6 +240,14 @@ export class CatalogPageComponent implements OnInit {
       case 'popular':
         return this.popularCarousel();
     }
+  }
+
+  private moveHero(offset: number): void {
+    const total = this.heroMovies().length;
+    if (total <= 1) return;
+
+    this.heroIndex.update((index) => (index + offset + total) % total);
+    this.resetHeroTimer();
   }
 
   private startHeroTimer(): void {

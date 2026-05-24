@@ -6,9 +6,11 @@
       <!-- ── Hero Banner ─────────────────────────────────────── -->
       @if (heroMovies().length > 0) {
         <section
-          class="grain relative w-full overflow-hidden"
+          class="grain hero-carousel relative w-full overflow-hidden"
           style="height: 62vh; min-height: 420px; max-height: 720px; background: var(--ink-0);"
           aria-label="Película destacada"
+          (touchstart)="onHeroTouchStart($event)"
+          (touchend)="onHeroTouchEnd($event)"
         >
           @for (movie of heroMovies(); track movie.id; let i = $index) {
             <div
@@ -83,6 +85,26 @@
                 </a>
               </div>
             </div>
+          }
+
+          <!-- Hero arrows -->
+          @if (heroMovies().length > 1) {
+            <button
+              type="button"
+              class="hero-arrow hero-arrow-left"
+              (click)="showPreviousHero()"
+              aria-label="Ver película destacada anterior"
+            >
+              <lucide-icon [img]="ChevronLeft" [size]="24" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="hero-arrow hero-arrow-right"
+              (click)="showNextHero()"
+              aria-label="Ver siguiente película destacada"
+            >
+              <lucide-icon [img]="ChevronRight" [size]="24" aria-hidden="true" />
+            </button>
           }
 
           <!-- Hero dots -->

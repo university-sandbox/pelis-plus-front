@@ -1,4 +1,68 @@
 
+    .hero-carousel {
+      touch-action: pan-y;
+    }
+
+    .hero-arrow {
+      position: absolute;
+      top: 50%;
+      z-index: 2;
+      display: inline-flex;
+      height: 2.75rem;
+      width: 2.75rem;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(5, 5, 6, 0.55);
+      color: var(--color-text-primary);
+      outline: none;
+      transform: translateY(-50%);
+      transition:
+        background var(--dur-base) var(--ease-out),
+        border-color var(--dur-base) var(--ease-out),
+        color var(--dur-base) var(--ease-out),
+        transform var(--dur-base) var(--ease-out);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-arrow:hover {
+      border-color: var(--color-accent);
+      background: rgba(5, 5, 6, 0.78);
+      color: var(--color-accent);
+      transform: translateY(-50%) scale(1.04);
+    }
+
+    .hero-arrow:focus-visible {
+      box-shadow: var(--ring);
+    }
+
+    .hero-arrow-left {
+      left: 1rem;
+    }
+
+    .hero-arrow-right {
+      right: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .hero-arrow {
+        top: auto;
+        bottom: 4.25rem;
+        height: 2.5rem;
+        width: 2.5rem;
+      }
+
+      .hero-arrow-left {
+        left: auto;
+        right: 4.25rem;
+      }
+
+      .hero-arrow-right {
+        right: 1rem;
+      }
+    }
+
     .movie-scroll {
       scrollbar-width: none;
       scroll-behavior: smooth;
