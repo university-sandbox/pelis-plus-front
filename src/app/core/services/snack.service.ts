@@ -5,6 +5,8 @@ import { map, Observable } from 'rxjs';
 import { BACKEND } from '../api/endpoints';
 import { type Snack, type SnackCategory } from '../models/snack.model';
 
+type ListResponse<T> = T[] | { content: T[] } | { results: T[] } | { data: T[] };
+
 @Injectable({ providedIn: 'root' })
 export class SnackService {
   private readonly http = inject(HttpClient);
@@ -14,13 +16,29 @@ export class SnackService {
     const url = category
       ? `${BACKEND.url(BACKEND.SNACKS.LIST)}?category=${category}`
       : BACKEND.url(BACKEND.SNACKS.LIST);
-    return this.http.get<Snack[]>(url);
+    return this.http.get<ListResponse<Snack>>(url).pipe(map(normalizeListResponse));
   }
 
   /** All active categories */
   getCategories(): Observable<SnackCategory[]> {
     return this.http
-      .get<string[]>(BACKEND.url(BACKEND.SNACKS.CATEGORIES))
-      .pipe(map((c) => c as SnackCategory[]));
+      .get<ListResponse<string>>(BACKEND.url(BACKEND.SNACKS.CATEGORIES))
+      .pipe(map((categories) => normalizeListResponse(categories) as SnackCategory[]));
   }
+}
+
+function normalizeListResponse<T>(response: ListResponse<T>): T[] {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  if ('content' in response) {
+    return response.content;
+  }
+
+  if ('results' in response) {
+    return response.results;
+  }
+
+  return response.data;
 }
