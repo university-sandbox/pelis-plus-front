@@ -21,6 +21,7 @@ import { AdminService } from '../../../core/services/admin.service';
 import { type Movie } from '../../../core/models/movie.model';
 import { movieImageUrl } from '../../../core/api/media-url';
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader.component';
+import { PelisToastService } from '../../../shared/services/pelis-toast.service';
 import { AdminMovieFormComponent } from './admin-movie-form.component';
 
 type MovieSection = 'all' | NonNullable<Movie['status']>;
@@ -33,6 +34,7 @@ type MovieSection = 'all' | NonNullable<Movie['status']>;
 })
 export class AdminMoviesPageComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  private readonly toast = inject(PelisToastService);
   private readonly pageSize = 10;
 
   readonly movies = signal<Movie[]>([]);
@@ -41,7 +43,6 @@ export class AdminMoviesPageComponent implements OnInit {
   readonly showForm = signal(false);
   readonly editingMovie = signal<Movie | null>(null);
   readonly toggling = signal<number | null>(null);
-  readonly statusNotice = signal('');
   readonly currentPage = signal(1);
   readonly activeSection = signal<MovieSection>('all');
   readonly movieSections: Array<{ value: MovieSection; label: string }> = [
@@ -113,17 +114,18 @@ export class AdminMoviesPageComponent implements OnInit {
 
   toggleStatus(movie: Movie): void {
     this.toggling.set(movie.id);
-    this.statusNotice.set('');
     this.adminService.toggleMovieStatus(movie.id).subscribe({
       next: (updated) => {
         this.movies.update((list) => list.map((m) => (m.id === updated.id ? updated : m)));
         this.ensureValidPage();
         this.toggling.set(null);
-        this.statusNotice.set(
-          updated.active === false
-            ? 'Película desactivada. El backend canceló las funciones sin tickets vendidos y mantuvo válidas las que ya tenían tickets.'
-            : 'Película activada para cartelera y nuevas funciones.',
-        );
+        if (updated.active === false) {
+          this.toast.warning(
+            'Película desactivada. El backend canceló las funciones sin tickets vendidos y mantuvo válidas las que ya tenían tickets.',
+          );
+          return;
+        }
+        this.toast.info('Película activada para cartelera y nuevas funciones.');
       },
       error: () => this.toggling.set(null),
     });

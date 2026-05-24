@@ -263,6 +263,25 @@
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
+
+  .pelis-toast-panel {
+    --mdc-snackbar-container-color: transparent;
+    --mdc-snackbar-supporting-text-color: var(--ivory-1);
+    --mat-snack-bar-button-color: var(--cyan-400);
+    margin: 16px !important;
+  }
+
+  .pelis-toast-panel .mdc-snackbar__surface {
+    min-width: 0;
+    padding: 0;
+    border-radius: 8px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .pelis-toast-panel .mat-mdc-snack-bar-label {
+    padding: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

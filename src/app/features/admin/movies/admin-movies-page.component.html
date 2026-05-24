@@ -18,19 +18,6 @@
     </button>
   </div>
 
-  @if (statusNotice()) {
-    <div
-      class="mb-4 rounded-lg px-4 py-3 text-sm"
-      style="
-        background: rgba(255, 46, 120, 0.12);
-        border: 1px solid rgba(255, 46, 120, 0.24);
-        color: var(--color-text-secondary);
-      "
-    >
-      {{ statusNotice() }}
-    </div>
-  }
-
   <!-- Loading -->
   @if (loading()) {
     <div class="space-y-3">
