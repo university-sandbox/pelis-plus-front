@@ -308,6 +308,7 @@ export class NavbarComponent {
   logout(): void {
     this.authService.logout();
     this.closeMobileMenu();
+    void this.router.navigate(['/catalog']);
   }
 
   focusCatalogSearch(): void {

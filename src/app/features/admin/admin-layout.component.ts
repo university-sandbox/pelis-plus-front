@@ -55,6 +55,6 @@ export class AdminLayoutComponent {
   logout(): void {
     this.authService.logout();
     this.sidebarOpen.set(false);
-    void this.router.navigate(['/login']);
+    void this.router.navigate(['/catalog']);
   }
 }

@@ -5,15 +5,17 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../services/auth.service';
 
 /**
  * Global error interceptor.
- * - 401 from the backend → redirect to /login (session expired or invalid token)
+ * - 401 from the backend → clear session and redirect to /catalog (session expired or invalid token)
  * - 403 from the backend → redirect to /catalog (forbidden)
  * - Errors from third-party APIs are re-thrown without redirecting.
  * - All other errors are re-thrown for the caller to handle.
  */
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
   const router = inject(Router);
   const platformId = inject(PLATFORM_ID);
 
@@ -23,7 +25,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         const isBackendRequest = req.url.startsWith(environment.backend.baseUrl);
         if (isBackendRequest) {
           if (error.status === 401) {
-            void router.navigateByUrl('/login');
+            authService.logout();
+            void router.navigateByUrl('/catalog');
           } else if (error.status === 403) {
             void router.navigateByUrl('/catalog');
           }
