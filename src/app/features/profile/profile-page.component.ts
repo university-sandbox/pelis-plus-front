@@ -24,6 +24,26 @@ import { TicketComponent } from '../checkout/ticket.component';
 
 type ProfileTab = 'personal' | 'security' | 'tickets' | 'history' | 'membership';
 
+function toArray<T>(value: unknown): T[] {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (value && typeof value === 'object') {
+    const response = value as { content?: unknown; results?: unknown };
+
+    if (Array.isArray(response.content)) {
+      return response.content;
+    }
+
+    if (Array.isArray(response.results)) {
+      return response.results;
+    }
+  }
+
+  return [];
+}
+
 @Component({
   selector: 'app-profile-page',
   imports: [RouterLink, SlicePipe, ReactiveFormsModule, LucideAngularModule, NavbarComponent, SkeletonLoaderComponent, TicketComponent],
@@ -96,11 +116,11 @@ export class ProfilePageComponent implements OnInit {
       error: () => this.profileLoading.set(false),
     });
     this.ticketService.getMyTickets().subscribe({
-      next: (t) => { this.tickets.set(t); this.ticketsLoading.set(false); },
+      next: (t) => { this.tickets.set(toArray<TicketModel>(t)); this.ticketsLoading.set(false); },
       error: () => this.ticketsLoading.set(false),
     });
     this.orderService.getMyOrders().subscribe({
-      next: (o) => { this.orders.set(o); this.ordersLoading.set(false); },
+      next: (o) => { this.orders.set(toArray<Order>(o)); this.ordersLoading.set(false); },
       error: () => this.ordersLoading.set(false),
     });
   }
