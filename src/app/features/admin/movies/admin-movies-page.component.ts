@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal, type OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  type OnInit,
+} from '@angular/core';
 import {
   LucideAngularModule,
   Plus,
@@ -6,6 +13,8 @@ import {
   ToggleLeft,
   ToggleRight,
   RefreshCw,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-angular';
 
 import { AdminService } from '../../../core/services/admin.service';
@@ -22,6 +31,7 @@ import { AdminMovieFormComponent } from './admin-movie-form.component';
 })
 export class AdminMoviesPageComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  private readonly pageSize = 10;
 
   readonly movies = signal<Movie[]>([]);
   readonly loading = signal(true);
@@ -30,12 +40,22 @@ export class AdminMoviesPageComponent implements OnInit {
   readonly editingMovie = signal<Movie | null>(null);
   readonly toggling = signal<number | null>(null);
   readonly statusNotice = signal('');
+  readonly currentPage = signal(1);
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.movies().length / this.pageSize)),
+  );
+  readonly pagedMovies = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    return this.movies().slice(start, start + this.pageSize);
+  });
 
   readonly Plus = Plus;
   readonly Pencil = Pencil;
   readonly ToggleLeft = ToggleLeft;
   readonly ToggleRight = ToggleRight;
   readonly RefreshCw = RefreshCw;
+  readonly ChevronLeft = ChevronLeft;
+  readonly ChevronRight = ChevronRight;
 
   ngOnInit(): void {
     this.load();
@@ -47,6 +67,7 @@ export class AdminMoviesPageComponent implements OnInit {
     this.adminService.getMovies().subscribe({
       next: (list) => {
         this.movies.set(list);
+        this.ensureValidPage();
         this.loading.set(false);
       },
       error: () => {
@@ -54,6 +75,10 @@ export class AdminMoviesPageComponent implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  goPage(page: number): void {
+    this.currentPage.set(Math.min(Math.max(page, 1), this.totalPages()));
   }
 
   openCreate(): void {
@@ -89,6 +114,7 @@ export class AdminMoviesPageComponent implements OnInit {
       const idx = list.findIndex((m) => m.id === movie.id);
       return idx >= 0 ? list.map((m) => (m.id === movie.id ? movie : m)) : [movie, ...list];
     });
+    this.ensureValidPage();
     this.showForm.set(false);
   }
 
@@ -115,5 +141,11 @@ export class AdminMoviesPageComponent implements OnInit {
 
   posterUrl(path: string | null): string | null {
     return movieImageUrl(path, 'w92');
+  }
+
+  private ensureValidPage(): void {
+    if (this.currentPage() > this.totalPages()) {
+      this.currentPage.set(this.totalPages());
+    }
   }
 }

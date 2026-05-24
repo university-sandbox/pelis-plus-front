@@ -8,6 +8,8 @@ import {
 } from '@angular/core';
 import {
   Armchair,
+  ChevronLeft,
+  ChevronRight,
   Layers3,
   LucideAngularModule,
   Pencil,
@@ -45,6 +47,7 @@ type RoomTab = 'rooms' | 'types' | 'layouts';
 })
 export class AdminRoomsPageComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  private readonly pageSize = 10;
 
   readonly rooms = signal<AdminRoom[]>([]);
   readonly roomTypes = signal<AdminRoomType[]>([]);
@@ -55,6 +58,7 @@ export class AdminRoomsPageComponent implements OnInit {
   readonly showForm = signal(false);
   readonly modal = signal<RoomModal>('room');
   readonly activeTab = signal<RoomTab>('rooms');
+  readonly currentPage = signal(1);
   readonly editingRoom = signal<AdminRoom | null>(null);
   readonly editingRoomType = signal<AdminRoomType | null>(null);
   readonly editingRoomLayout = signal<AdminRoomLayout | null>(null);
@@ -67,6 +71,8 @@ export class AdminRoomsPageComponent implements OnInit {
   readonly RefreshCw = RefreshCw;
   readonly Armchair = Armchair;
   readonly Layers3 = Layers3;
+  readonly ChevronLeft = ChevronLeft;
+  readonly ChevronRight = ChevronRight;
 
   readonly activeTypes = computed(
     () => this.roomTypes().filter((roomType) => roomType.active).length,
@@ -77,6 +83,29 @@ export class AdminRoomsPageComponent implements OnInit {
   readonly activeRooms = computed(
     () => this.rooms().filter((room) => room.active !== false).length,
   );
+  readonly totalItems = computed(() => {
+    switch (this.activeTab()) {
+      case 'types':
+        return this.roomTypes().length;
+      case 'layouts':
+        return this.roomLayouts().length;
+      default:
+        return this.rooms().length;
+    }
+  });
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalItems() / this.pageSize)));
+  readonly pagedRoomTypes = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    return this.roomTypes().slice(start, start + this.pageSize);
+  });
+  readonly pagedRoomLayouts = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    return this.roomLayouts().slice(start, start + this.pageSize);
+  });
+  readonly pagedRooms = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize;
+    return this.rooms().slice(start, start + this.pageSize);
+  });
 
   readonly tabs: Array<{ value: RoomTab; label: string }> = [
     { value: 'rooms', label: 'Salas' },
@@ -89,7 +118,7 @@ export class AdminRoomsPageComponent implements OnInit {
     for (const venue of this.venues()) {
       venueMap.set(venue.id, { venueId: venue.id, venueName: venue.name, rooms: [] });
     }
-    for (const room of this.rooms()) {
+    for (const room of this.pagedRooms()) {
       const group = venueMap.get(room.venueId);
       if (group) group.rooms.push(room);
       else
@@ -130,6 +159,11 @@ export class AdminRoomsPageComponent implements OnInit {
 
   setTab(tab: RoomTab): void {
     this.activeTab.set(tab);
+    this.currentPage.set(1);
+  }
+
+  goPage(page: number): void {
+    this.currentPage.set(Math.min(Math.max(page, 1), this.totalPages()));
   }
 
   openCreate(): void {
@@ -181,6 +215,7 @@ export class AdminRoomsPageComponent implements OnInit {
     this.adminService.toggleRoomStatus(r.id).subscribe({
       next: (updated) => {
         this.rooms.update((list) => list.map((x) => (x.id === updated.id ? updated : x)));
+        this.ensureValidPage();
         this.toggling.set(null);
       },
       error: () => this.toggling.set(null),
@@ -194,6 +229,7 @@ export class AdminRoomsPageComponent implements OnInit {
         this.roomTypes.update((list) =>
           list.map((item) => (item.id === updated.id ? updated : item)),
         );
+        this.ensureValidPage();
         this.toggling.set(null);
       },
       error: () => this.toggling.set(null),
@@ -207,6 +243,7 @@ export class AdminRoomsPageComponent implements OnInit {
         this.roomLayouts.update((list) =>
           list.map((item) => (item.id === updated.id ? updated : item)),
         );
+        this.ensureValidPage();
         this.toggling.set(null);
       },
       error: () => this.toggling.set(null),
@@ -218,6 +255,7 @@ export class AdminRoomsPageComponent implements OnInit {
       const idx = list.findIndex((x) => x.id === r.id);
       return idx >= 0 ? list.map((x) => (x.id === r.id ? r : x)) : [...list, r];
     });
+    this.ensureValidPage();
     this.showForm.set(false);
   }
 
@@ -228,6 +266,7 @@ export class AdminRoomsPageComponent implements OnInit {
         ? list.map((item) => (item.id === roomType.id ? roomType : item))
         : [...list, roomType];
     });
+    this.ensureValidPage();
     this.showForm.set(false);
   }
 
@@ -238,6 +277,13 @@ export class AdminRoomsPageComponent implements OnInit {
         ? list.map((item) => (item.id === layout.id ? layout : item))
         : [...list, layout];
     });
+    this.ensureValidPage();
     this.showForm.set(false);
+  }
+
+  private ensureValidPage(): void {
+    if (this.currentPage() > this.totalPages()) {
+      this.currentPage.set(this.totalPages());
+    }
   }
 }

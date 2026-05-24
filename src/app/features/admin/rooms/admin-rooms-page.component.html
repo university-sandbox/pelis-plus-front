@@ -134,61 +134,65 @@
   } @else {
     @switch (activeTab()) {
       @case ('types') {
-        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          @for (type of roomTypes(); track type.id) {
-            <article class="pelis-card p-4">
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <p class="font-bold" style="color: var(--color-text-primary)">{{ type.name }}</p>
-                  <p class="mt-1 font-mono text-xs uppercase" style="color: var(--color-accent)">
-                    {{ type.code }}
-                  </p>
+        <div class="max-h-[calc(100dvh-20rem)] overflow-auto pr-1">
+          <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            @for (type of pagedRoomTypes(); track type.id) {
+              <article class="pelis-card p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="font-bold" style="color: var(--color-text-primary)">
+                      {{ type.name }}
+                    </p>
+                    <p class="mt-1 font-mono text-xs uppercase" style="color: var(--color-accent)">
+                      {{ type.code }}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    (click)="toggleTypeActive(type)"
+                    [disabled]="toggling() === type.id"
+                    [attr.aria-label]="type.active ? 'Desactivar tipo' : 'Activar tipo'"
+                  >
+                    @if (type.active) {
+                      <lucide-icon
+                        [img]="ToggleRight"
+                        [size]="24"
+                        style="color: var(--color-success)"
+                        aria-hidden="true"
+                      />
+                    } @else {
+                      <lucide-icon
+                        [img]="ToggleLeft"
+                        [size]="24"
+                        style="color: var(--color-text-disabled)"
+                        aria-hidden="true"
+                      />
+                    }
+                  </button>
                 </div>
+                <p class="mt-3 text-sm" style="color: var(--color-text-secondary)">
+                  {{ type.description }}
+                </p>
                 <button
                   type="button"
-                  (click)="toggleTypeActive(type)"
-                  [disabled]="toggling() === type.id"
-                  [attr.aria-label]="type.active ? 'Desactivar tipo' : 'Activar tipo'"
+                  (click)="openEditType(type)"
+                  class="mt-4 flex items-center gap-2 text-sm font-semibold"
+                  style="color: var(--color-accent)"
                 >
-                  @if (type.active) {
-                    <lucide-icon
-                      [img]="ToggleRight"
-                      [size]="24"
-                      style="color: var(--color-success)"
-                      aria-hidden="true"
-                    />
-                  } @else {
-                    <lucide-icon
-                      [img]="ToggleLeft"
-                      [size]="24"
-                      style="color: var(--color-text-disabled)"
-                      aria-hidden="true"
-                    />
-                  }
+                  <lucide-icon [img]="Pencil" [size]="14" aria-hidden="true" />Editar
                 </button>
-              </div>
-              <p class="mt-3 text-sm" style="color: var(--color-text-secondary)">
-                {{ type.description }}
-              </p>
-              <button
-                type="button"
-                (click)="openEditType(type)"
-                class="mt-4 flex items-center gap-2 text-sm font-semibold"
-                style="color: var(--color-accent)"
-              >
-                <lucide-icon [img]="Pencil" [size]="14" aria-hidden="true" />Editar
-              </button>
-            </article>
-          }
+              </article>
+            }
+          </div>
         </div>
       }
       @case ('layouts') {
         <div
-          class="overflow-hidden rounded-xl"
+          class="max-h-[calc(100dvh-20rem)] overflow-auto rounded-xl"
           style="border: 1px solid var(--color-border); background: var(--color-surface)"
         >
           <table class="w-full text-sm">
-            <thead>
+            <thead class="sticky top-0 z-[1]">
               <tr
                 style="
                   border-bottom: 1px solid var(--color-border);
@@ -228,7 +232,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (layout of roomLayouts(); track layout.id) {
+              @for (layout of pagedRoomLayouts(); track layout.id) {
                 <tr style="border-bottom: 1px solid var(--color-border)">
                   <td class="px-4 py-3 font-medium" style="color: var(--color-text-primary)">
                     {{ layout.name }}
@@ -289,130 +293,160 @@
         </div>
       }
       @default {
-        @for (group of venueGroups(); track group.venueId) {
-          <section class="mb-6">
-            <h2 class="mb-3 text-sm font-bold" style="color: var(--color-text-secondary)">
-              {{ group.venueName }}
-            </h2>
-            <div
-              class="overflow-hidden rounded-xl"
-              style="border: 1px solid var(--color-border); background: var(--color-surface)"
-            >
-              <table class="w-full text-sm">
-                <thead>
-                  <tr
-                    style="
-                      border-bottom: 1px solid var(--color-border);
-                      background: var(--color-surface-raised);
-                    "
-                  >
-                    <th
-                      class="px-4 py-3 text-left font-semibold"
-                      style="color: var(--color-text-secondary)"
+        <div class="max-h-[calc(100dvh-20rem)] overflow-auto pr-1">
+          @for (group of venueGroups(); track group.venueId) {
+            <section class="mb-6">
+              <h2 class="mb-3 text-sm font-bold" style="color: var(--color-text-secondary)">
+                {{ group.venueName }}
+              </h2>
+              <div
+                class="overflow-auto rounded-xl"
+                style="border: 1px solid var(--color-border); background: var(--color-surface)"
+              >
+                <table class="w-full text-sm">
+                  <thead class="sticky top-0 z-[1]">
+                    <tr
+                      style="
+                        border-bottom: 1px solid var(--color-border);
+                        background: var(--color-surface-raised);
+                      "
                     >
-                      Nombre
-                    </th>
-                    <th
-                      class="hidden px-4 py-3 text-left font-semibold sm:table-cell"
-                      style="color: var(--color-text-secondary)"
-                    >
-                      Tipo
-                    </th>
-                    <th
-                      class="hidden px-4 py-3 text-left font-semibold md:table-cell"
-                      style="color: var(--color-text-secondary)"
-                    >
-                      Distribución
-                    </th>
-                    <th
-                      class="hidden px-4 py-3 text-left font-semibold lg:table-cell"
-                      style="color: var(--color-text-secondary)"
-                    >
-                      Aforo
-                    </th>
-                    <th
-                      class="hidden px-4 py-3 text-left font-semibold sm:table-cell"
-                      style="color: var(--color-text-secondary)"
-                    >
-                      Activa
-                    </th>
-                    <th
-                      class="px-4 py-3 text-right font-semibold"
-                      style="color: var(--color-text-secondary)"
-                    >
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (r of group.rooms; track r.id) {
-                    <tr style="border-bottom: 1px solid var(--color-border)">
-                      <td class="px-4 py-3 font-medium" style="color: var(--color-text-primary)">
-                        {{ r.name }}
-                      </td>
-                      <td
-                        class="hidden px-4 py-3 sm:table-cell"
+                      <th
+                        class="px-4 py-3 text-left font-semibold"
                         style="color: var(--color-text-secondary)"
                       >
-                        {{ r.roomType?.name ?? 'Sin tipo' }}
-                      </td>
-                      <td
-                        class="hidden px-4 py-3 md:table-cell"
+                        Nombre
+                      </th>
+                      <th
+                        class="hidden px-4 py-3 text-left font-semibold sm:table-cell"
                         style="color: var(--color-text-secondary)"
                       >
-                        {{ r.roomLayout?.name ?? r.rows + ' × ' + r.cols }}
-                      </td>
-                      <td
-                        class="hidden px-4 py-3 lg:table-cell"
+                        Tipo
+                      </th>
+                      <th
+                        class="hidden px-4 py-3 text-left font-semibold md:table-cell"
                         style="color: var(--color-text-secondary)"
                       >
-                        {{ r.capacity }}
-                      </td>
-                      <td class="hidden px-4 py-3 sm:table-cell">
-                        <button
-                          type="button"
-                          (click)="toggleActive(r)"
-                          [disabled]="toggling() === r.id"
-                          [attr.aria-label]="
-                            r.active !== false ? 'Desactivar sala' : 'Activar sala'
-                          "
-                        >
-                          @if (r.active !== false) {
-                            <lucide-icon
-                              [img]="ToggleRight"
-                              [size]="22"
-                              style="color: var(--color-success)"
-                              aria-hidden="true"
-                            />
-                          } @else {
-                            <lucide-icon
-                              [img]="ToggleLeft"
-                              [size]="22"
-                              style="color: var(--color-text-disabled)"
-                              aria-hidden="true"
-                            />
-                          }
-                        </button>
-                      </td>
-                      <td class="px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          (click)="openEdit(r)"
-                          class="rounded-lg p-2 transition-colors"
-                          style="color: var(--color-text-secondary)"
-                          title="Editar sala"
-                        >
-                          <lucide-icon [img]="Pencil" [size]="14" aria-hidden="true" />
-                        </button>
-                      </td>
+                        Distribución
+                      </th>
+                      <th
+                        class="hidden px-4 py-3 text-left font-semibold lg:table-cell"
+                        style="color: var(--color-text-secondary)"
+                      >
+                        Aforo
+                      </th>
+                      <th
+                        class="hidden px-4 py-3 text-left font-semibold sm:table-cell"
+                        style="color: var(--color-text-secondary)"
+                      >
+                        Activa
+                      </th>
+                      <th
+                        class="px-4 py-3 text-right font-semibold"
+                        style="color: var(--color-text-secondary)"
+                      >
+                        Acciones
+                      </th>
                     </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </section>
-        }
+                  </thead>
+                  <tbody>
+                    @for (r of group.rooms; track r.id) {
+                      <tr style="border-bottom: 1px solid var(--color-border)">
+                        <td class="px-4 py-3 font-medium" style="color: var(--color-text-primary)">
+                          {{ r.name }}
+                        </td>
+                        <td
+                          class="hidden px-4 py-3 sm:table-cell"
+                          style="color: var(--color-text-secondary)"
+                        >
+                          {{ r.roomType?.name ?? 'Sin tipo' }}
+                        </td>
+                        <td
+                          class="hidden px-4 py-3 md:table-cell"
+                          style="color: var(--color-text-secondary)"
+                        >
+                          {{ r.roomLayout?.name ?? r.rows + ' × ' + r.cols }}
+                        </td>
+                        <td
+                          class="hidden px-4 py-3 lg:table-cell"
+                          style="color: var(--color-text-secondary)"
+                        >
+                          {{ r.capacity }}
+                        </td>
+                        <td class="hidden px-4 py-3 sm:table-cell">
+                          <button
+                            type="button"
+                            (click)="toggleActive(r)"
+                            [disabled]="toggling() === r.id"
+                            [attr.aria-label]="
+                              r.active !== false ? 'Desactivar sala' : 'Activar sala'
+                            "
+                          >
+                            @if (r.active !== false) {
+                              <lucide-icon
+                                [img]="ToggleRight"
+                                [size]="22"
+                                style="color: var(--color-success)"
+                                aria-hidden="true"
+                              />
+                            } @else {
+                              <lucide-icon
+                                [img]="ToggleLeft"
+                                [size]="22"
+                                style="color: var(--color-text-disabled)"
+                                aria-hidden="true"
+                              />
+                            }
+                          </button>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                          <button
+                            type="button"
+                            (click)="openEdit(r)"
+                            class="rounded-lg p-2 transition-colors"
+                            style="color: var(--color-text-secondary)"
+                            title="Editar sala"
+                          >
+                            <lucide-icon [img]="Pencil" [size]="14" aria-hidden="true" />
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          }
+        </div>
       }
+    }
+
+    @if (totalPages() > 1) {
+      <div class="mt-4 flex items-center justify-center gap-3">
+        <button
+          type="button"
+          [disabled]="currentPage() === 1"
+          (click)="goPage(currentPage() - 1)"
+          class="rounded-lg p-2 transition-colors disabled:opacity-40"
+          style="color: var(--color-text-secondary)"
+          aria-label="Página anterior"
+        >
+          <lucide-icon [img]="ChevronLeft" [size]="18" aria-hidden="true" />
+        </button>
+        <span class="text-sm" style="color: var(--color-text-secondary)">
+          Página {{ currentPage() }} de {{ totalPages() }}
+        </span>
+        <button
+          type="button"
+          [disabled]="currentPage() >= totalPages()"
+          (click)="goPage(currentPage() + 1)"
+          class="rounded-lg p-2 transition-colors disabled:opacity-40"
+          style="color: var(--color-text-secondary)"
+          aria-label="Página siguiente"
+        >
+          <lucide-icon [img]="ChevronRight" [size]="18" aria-hidden="true" />
+        </button>
+      </div>
     }
   }
 </div>
