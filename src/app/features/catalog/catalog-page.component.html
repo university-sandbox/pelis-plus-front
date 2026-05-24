@@ -16,13 +16,22 @@
               [style.opacity]="i === heroIndex() ? '1' : '0'"
             >
               @if (movie.backdropPath) {
-                <img
-                  [ngSrc]="backdropUrl(movie.backdropPath)"
-                  [alt]="movie.title"
-                  fill
-                  priority
-                  class="object-cover"
-                />
+                @if (i === 0) {
+                  <img
+                    [ngSrc]="backdropUrl(movie.backdropPath)"
+                    [alt]="movie.title"
+                    fill
+                    priority
+                    class="object-cover"
+                  />
+                } @else {
+                  <img
+                    [ngSrc]="backdropUrl(movie.backdropPath)"
+                    [alt]="movie.title"
+                    fill
+                    class="object-cover"
+                  />
+                }
               }
               <!-- Gradient overlays -->
               <div
@@ -169,14 +178,36 @@
           <section aria-label="En cartelera">
             <div class="mb-4 flex items-center justify-between">
               <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary);">En cartelera</h2>
-              <a
-                routerLink="/catalog"
-                class="flex items-center gap-1 text-sm font-medium transition-colors"
-                style="color: var(--color-accent);"
-              >
-                Ver todo
-                <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
-              </a>
+              <div class="flex items-center gap-2">
+                <a
+                  routerLink="/catalog"
+                  class="hidden items-center gap-1 text-sm font-medium transition-colors sm:flex"
+                  style="color: var(--color-accent);"
+                >
+                  Ver todo
+                  <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
+                </a>
+                @if (!nowPlayingLoading() && !nowPlayingError() && nowPlaying().length > 0) {
+                  <div class="carousel-controls" aria-label="Mover carrusel En cartelera">
+                    <button
+                      type="button"
+                      class="carousel-button"
+                      (click)="scrollCarousel('nowPlaying', 'left')"
+                      aria-label="Ver películas anteriores en cartelera"
+                    >
+                      <lucide-icon [img]="ChevronLeft" [size]="18" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      class="carousel-button"
+                      (click)="scrollCarousel('nowPlaying', 'right')"
+                      aria-label="Ver más películas en cartelera"
+                    >
+                      <lucide-icon [img]="ChevronRight" [size]="18" aria-hidden="true" />
+                    </button>
+                  </div>
+                }
+              </div>
             </div>
 
             @if (nowPlayingLoading()) {
@@ -198,6 +229,7 @@
               />
             } @else {
               <div
+                #nowPlayingCarousel
                 class="movie-scroll flex gap-4 overflow-x-auto pb-4"
                 style="scroll-snap-type: x mandatory;"
               >
@@ -214,14 +246,36 @@
           <section aria-label="Próximos estrenos">
             <div class="mb-4 flex items-center justify-between">
               <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary);">Próximos estrenos</h2>
-              <a
-                routerLink="/catalog"
-                class="flex items-center gap-1 text-sm font-medium transition-colors"
-                style="color: var(--color-accent);"
-              >
-                Ver todo
-                <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
-              </a>
+              <div class="flex items-center gap-2">
+                <a
+                  routerLink="/catalog"
+                  class="hidden items-center gap-1 text-sm font-medium transition-colors sm:flex"
+                  style="color: var(--color-accent);"
+                >
+                  Ver todo
+                  <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
+                </a>
+                @if (!upcomingLoading() && !upcomingError() && upcoming().length > 0) {
+                  <div class="carousel-controls" aria-label="Mover carrusel Próximos estrenos">
+                    <button
+                      type="button"
+                      class="carousel-button"
+                      (click)="scrollCarousel('upcoming', 'left')"
+                      aria-label="Ver estrenos anteriores"
+                    >
+                      <lucide-icon [img]="ChevronLeft" [size]="18" aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      class="carousel-button"
+                      (click)="scrollCarousel('upcoming', 'right')"
+                      aria-label="Ver más próximos estrenos"
+                    >
+                      <lucide-icon [img]="ChevronRight" [size]="18" aria-hidden="true" />
+                    </button>
+                  </div>
+                }
+              </div>
             </div>
 
             @if (upcomingLoading()) {
@@ -237,6 +291,7 @@
               />
             } @else {
               <div
+                #upcomingCarousel
                 class="movie-scroll flex gap-4 overflow-x-auto pb-4"
                 style="scroll-snap-type: x mandatory;"
               >
@@ -260,6 +315,26 @@
           <section aria-label="Populares esta semana">
             <div class="mb-4 flex items-center justify-between">
               <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary);">Populares esta semana</h2>
+              @if (!popularLoading() && !popularError() && popular().length > 0) {
+                <div class="carousel-controls" aria-label="Mover carrusel Populares esta semana">
+                  <button
+                    type="button"
+                    class="carousel-button"
+                    (click)="scrollCarousel('popular', 'left')"
+                    aria-label="Ver películas populares anteriores"
+                  >
+                    <lucide-icon [img]="ChevronLeft" [size]="18" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    class="carousel-button"
+                    (click)="scrollCarousel('popular', 'right')"
+                    aria-label="Ver más películas populares"
+                  >
+                    <lucide-icon [img]="ChevronRight" [size]="18" aria-hidden="true" />
+                  </button>
+                </div>
+              }
             </div>
 
             @if (popularLoading()) {
@@ -275,6 +350,7 @@
               />
             } @else {
               <div
+                #popularCarousel
                 class="movie-scroll flex gap-4 overflow-x-auto pb-4"
                 style="scroll-snap-type: x mandatory;"
               >

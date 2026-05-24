@@ -1,9 +1,42 @@
 
     .movie-scroll {
       scrollbar-width: none;
+      scroll-behavior: smooth;
     }
     .movie-scroll::-webkit-scrollbar {
       display: none;
+    }
+
+    .carousel-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .carousel-button {
+      display: inline-flex;
+      height: 2.25rem;
+      width: 2.25rem;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid var(--color-border-strong);
+      background: var(--color-surface-raised);
+      color: var(--color-text-primary);
+      outline: none;
+      transition:
+        border-color var(--dur-base) var(--ease-out),
+        color var(--dur-base) var(--ease-out),
+        transform var(--dur-base) var(--ease-out);
+    }
+
+    .carousel-button:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+      transform: translateY(-1px);
+    }
+
+    .carousel-button:focus-visible {
+      box-shadow: var(--ring);
     }
 
     .search-input {

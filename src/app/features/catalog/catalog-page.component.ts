@@ -3,13 +3,24 @@ import {
   Component,
   computed,
   inject,
-  OnInit,
   signal,
+  viewChild,
 } from '@angular/core';
+import type { ElementRef, OnInit } from '@angular/core';
 import { NgOptimizedImage, DecimalPipe, SlicePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Search, X, Star, Clock, Play, Info, ChevronRight } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  Search,
+  X,
+  Star,
+  Clock,
+  Play,
+  Info,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-angular';
 
 import { MovieService } from '../../core/services/movie.service';
 import { type Movie } from '../../core/models/movie.model';
@@ -19,6 +30,8 @@ import { MovieCardComponent } from './movie-card.component';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
+
+type CatalogCarousel = 'nowPlaying' | 'upcoming' | 'popular';
 
 @Component({
   selector: 'app-catalog-page',
@@ -41,6 +54,9 @@ import { ErrorStateComponent } from '../../shared/components/error-state/error-s
 })
 export class CatalogPageComponent implements OnInit {
   private readonly movieService = inject(MovieService);
+  private readonly nowPlayingCarousel = viewChild<ElementRef<HTMLElement>>('nowPlayingCarousel');
+  private readonly upcomingCarousel = viewChild<ElementRef<HTMLElement>>('upcomingCarousel');
+  private readonly popularCarousel = viewChild<ElementRef<HTMLElement>>('popularCarousel');
 
   readonly nowPlaying = signal<Movie[]>([]);
   readonly upcoming = signal<Movie[]>([]);
@@ -69,6 +85,7 @@ export class CatalogPageComponent implements OnInit {
   readonly Clock = Clock;
   readonly Play = Play;
   readonly Info = Info;
+  readonly ChevronLeft = ChevronLeft;
   readonly ChevronRight = ChevronRight;
 
   readonly heroMovies = computed(() => this.nowPlaying().slice(0, 5));
@@ -164,6 +181,31 @@ export class CatalogPageComponent implements OnInit {
 
   backdropUrl(path: string): string {
     return movieImageUrl(path, 'w1280') ?? '';
+  }
+
+  scrollCarousel(section: CatalogCarousel, direction: 'left' | 'right'): void {
+    const carousel = this.getCarousel(section)?.nativeElement;
+    if (!carousel) return;
+
+    const cardWidth = 176;
+    const visibleCards = Math.max(1, Math.floor(carousel.clientWidth / cardWidth));
+    const distance = visibleCards * cardWidth;
+
+    carousel.scrollBy({
+      left: direction === 'left' ? -distance : distance,
+      behavior: 'smooth',
+    });
+  }
+
+  private getCarousel(section: CatalogCarousel): ElementRef<HTMLElement> | undefined {
+    switch (section) {
+      case 'nowPlaying':
+        return this.nowPlayingCarousel();
+      case 'upcoming':
+        return this.upcomingCarousel();
+      case 'popular':
+        return this.popularCarousel();
+    }
   }
 
   private startHeroTimer(): void {
