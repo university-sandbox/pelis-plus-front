@@ -320,13 +320,14 @@
                 @for (movie of upcoming(); track movie.id) {
                   <div class="flex-none relative" style="width: 160px; scroll-snap-align: start;">
                     <app-movie-card [movie]="movie" />
-                    <!-- Próximamente badge -->
+                    <!-- Próximamente badge hidden by request.
                     <span
                       class="absolute left-2 top-2 rounded-full px-2 py-0.5 text-xs font-semibold"
                       style="background: var(--color-warning); color: var(--ink-0);"
                     >
                       Pronto
                     </span>
+                    -->
                   </div>
                 }
               </div>
