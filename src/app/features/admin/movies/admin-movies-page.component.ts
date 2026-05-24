@@ -23,6 +23,8 @@ import { movieImageUrl } from '../../../core/api/media-url';
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader.component';
 import { AdminMovieFormComponent } from './admin-movie-form.component';
 
+type MovieSection = 'all' | NonNullable<Movie['status']>;
+
 @Component({
   selector: 'app-admin-movies-page',
   imports: [LucideAngularModule, SkeletonLoaderComponent, AdminMovieFormComponent],
@@ -41,12 +43,25 @@ export class AdminMoviesPageComponent implements OnInit {
   readonly toggling = signal<number | null>(null);
   readonly statusNotice = signal('');
   readonly currentPage = signal(1);
+  readonly activeSection = signal<MovieSection>('all');
+  readonly movieSections: Array<{ value: MovieSection; label: string }> = [
+    { value: 'all', label: 'Todas' },
+    { value: 'now_playing', label: 'En cartelera' },
+    { value: 'upcoming', label: 'Próximamente' },
+    { value: 'popular', label: 'Popular' },
+  ];
+  readonly filteredMovies = computed(() => {
+    const section = this.activeSection();
+    return section === 'all'
+      ? this.movies()
+      : this.movies().filter((movie) => movie.status === section);
+  });
   readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.movies().length / this.pageSize)),
+    Math.max(1, Math.ceil(this.filteredMovies().length / this.pageSize)),
   );
   readonly pagedMovies = computed(() => {
     const start = (this.currentPage() - 1) * this.pageSize;
-    return this.movies().slice(start, start + this.pageSize);
+    return this.filteredMovies().slice(start, start + this.pageSize);
   });
 
   readonly Plus = Plus;
@@ -81,6 +96,11 @@ export class AdminMoviesPageComponent implements OnInit {
     this.currentPage.set(Math.min(Math.max(page, 1), this.totalPages()));
   }
 
+  setSection(section: MovieSection): void {
+    this.activeSection.set(section);
+    this.currentPage.set(1);
+  }
+
   openCreate(): void {
     this.editingMovie.set(null);
     this.showForm.set(true);
@@ -97,13 +117,13 @@ export class AdminMoviesPageComponent implements OnInit {
     this.adminService.toggleMovieStatus(movie.id).subscribe({
       next: (updated) => {
         this.movies.update((list) => list.map((m) => (m.id === updated.id ? updated : m)));
+        this.ensureValidPage();
         this.toggling.set(null);
         this.statusNotice.set(
           updated.active === false
             ? 'Película desactivada. El backend canceló las funciones sin tickets vendidos y mantuvo válidas las que ya tenían tickets.'
             : 'Película activada para cartelera y nuevas funciones.',
         );
-        this.load();
       },
       error: () => this.toggling.set(null),
     });
@@ -137,6 +157,12 @@ export class AdminMoviesPageComponent implements OnInit {
     if (status === 'now_playing') return 'var(--color-accent)';
     if (status === 'upcoming') return '#818cf8';
     return 'var(--color-text-secondary)';
+  }
+
+  sectionCount(section: MovieSection): number {
+    return section === 'all'
+      ? this.movies().length
+      : this.movies().filter((movie) => movie.status === section).length;
   }
 
   posterUrl(path: string | null): string | null {
