@@ -120,7 +120,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (movie of pagedMovies(); track movie.id) {
+            @for (movie of pagedMovies(); track movie.id + '-' + $index) {
               <tr
                 class="transition-colors"
                 [class.opacity-60]="movie.active === false"

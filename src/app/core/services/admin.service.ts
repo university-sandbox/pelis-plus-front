@@ -139,9 +139,14 @@ export class AdminService {
         );
 
         return forkJoin(nextPages.map((page) => this.getMoviesPage(page))).pipe(
-          map((pages) => [firstPage, ...pages].flatMap((page) => normalizeMoviesResponse(page))),
+          map((pages) =>
+            uniqueMoviesById(
+              [firstPage, ...pages].flatMap((page) => normalizeMoviesResponse(page)),
+            ),
+          ),
         );
       }),
+      map((movies) => uniqueMoviesById(movies)),
     );
   }
 
@@ -316,4 +321,16 @@ function normalizeMoviesResponse(response: AdminMoviesResponse): Movie[] {
 
 function isPageResponse(response: AdminMoviesResponse): response is PageResponse<Movie> {
   return !Array.isArray(response) && 'content' in response;
+}
+
+function uniqueMoviesById(movies: Movie[]): Movie[] {
+  const seen = new Set<number>();
+  return movies.filter((movie) => {
+    if (seen.has(movie.id)) {
+      return false;
+    }
+
+    seen.add(movie.id);
+    return true;
+  });
 }
