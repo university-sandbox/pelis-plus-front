@@ -1,6 +1,50 @@
 
-    .screening-card:hover {
-      border-color: rgba(255, 46, 120, 0.5) !important;
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-card);
-    }
+.movie-hero-back {
+  background: rgba(5, 5, 6, 0.52) !important;
+  border-color: rgba(246, 241, 231, 0.2) !important;
+  color: var(--color-text-primary) !important;
+  backdrop-filter: blur(12px);
+}
+
+.movie-hero-back:hover,
+.movie-hero-back:focus-visible {
+  background: rgba(28, 28, 32, 0.78) !important;
+  border-color: rgba(255, 46, 120, 0.55) !important;
+}
+
+.movie-back-link {
+  border: 1px solid rgba(255, 46, 120, 0.38);
+  border-radius: 999px;
+  background:
+    linear-gradient(135deg, rgba(255, 46, 120, 0.22), rgba(255, 46, 120, 0.08)),
+    var(--color-surface);
+  color: var(--color-text-primary);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.26);
+}
+
+.movie-back-link:hover,
+.movie-back-link:focus-visible {
+  border-color: rgba(255, 46, 120, 0.65);
+  background:
+    linear-gradient(135deg, rgba(255, 46, 120, 0.3), rgba(255, 46, 120, 0.12)),
+    var(--color-surface-raised);
+  color: var(--color-text-primary);
+}
+
+.movie-trailer-close {
+  background: rgba(5, 5, 6, 0.78);
+  color: var(--color-text-primary);
+  backdrop-filter: blur(10px);
+}
+
+.movie-trailer-close:hover,
+.movie-trailer-close:focus-visible {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.screening-card:hover {
+  border-color: rgba(255, 46, 120, 0.5) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}

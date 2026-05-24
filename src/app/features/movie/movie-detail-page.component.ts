@@ -19,6 +19,7 @@ import {
   Calendar,
   MapPin,
   ChevronRight,
+  X,
 } from 'lucide-angular';
 import { DomSanitizer } from '@angular/platform-browser';
 import type { SafeResourceUrl } from '@angular/platform-browser';
@@ -95,6 +96,7 @@ export class MovieDetailPageComponent implements OnInit {
   readonly Calendar = Calendar;
   readonly MapPin = MapPin;
   readonly ChevronRight = ChevronRight;
+  readonly X = X;
 
   readonly venues = computed<Venue[]>(() => {
     const seen = new Set<string>();
