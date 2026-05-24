@@ -34,7 +34,10 @@
         </div>
 
         <div class="flex items-center justify-between gap-2 mt-auto">
-          <span class="marquee-num text-base" style="color: var(--color-accent);">S/ {{ snack().price }}</span>
+          <span
+            class="marquee-num rounded px-2 py-1 text-base font-bold"
+            style="background: rgba(245, 165, 36, 0.12); color: var(--color-warning);"
+          >S/ {{ snack().price }}</span>
 
           @if (quantity() > 0) {
             <div class="flex items-center gap-2">
