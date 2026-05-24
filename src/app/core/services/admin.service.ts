@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import type { Observable } from 'rxjs';
+import { map, type Observable } from 'rxjs';
 
 import { BACKEND } from '../api/endpoints';
 import { type Movie, type Genre } from '../models/movie.model';
@@ -118,6 +118,8 @@ export interface PageResponse<T> {
   size: number;
 }
 
+type AdminMoviesResponse = Movie[] | PageResponse<Movie> | { results: Movie[] };
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private readonly http = inject(HttpClient);
@@ -125,7 +127,9 @@ export class AdminService {
   // ── Movies ──────────────────────────────────────────────────────────────
 
   getMovies(): Observable<Movie[]> {
-    return this.http.get<Movie[]>(BACKEND.url(BACKEND.ADMIN.MOVIES.LIST));
+    return this.http
+      .get<AdminMoviesResponse>(BACKEND.url(BACKEND.ADMIN.MOVIES.LIST))
+      .pipe(map((response) => normalizeMoviesResponse(response)));
   }
 
   createMovie(payload: AdminMoviePayload): Observable<Movie> {
@@ -278,4 +282,12 @@ export class AdminService {
   toggleUserStatus(id: string, status: 'active' | 'inactive'): Observable<void> {
     return this.http.patch<void>(BACKEND.url(BACKEND.ADMIN.USERS.TOGGLE_STATUS(id)), { status });
   }
+}
+
+function normalizeMoviesResponse(response: AdminMoviesResponse): Movie[] {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  return 'results' in response ? response.results : response.content;
 }
