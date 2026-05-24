@@ -6,6 +6,7 @@ import {
   signal,
   type OnInit,
 } from '@angular/core';
+import { forkJoin } from 'rxjs';
 import {
   Armchair,
   ChevronLeft,
@@ -138,16 +139,19 @@ export class AdminRoomsPageComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.error.set(false);
-    this.adminService.getVenues().subscribe({ next: (v) => this.venues.set(v) });
-    this.adminService
-      .getRoomTypes()
-      .subscribe({ next: (roomTypes) => this.roomTypes.set(roomTypes) });
-    this.adminService
-      .getRoomLayouts()
-      .subscribe({ next: (layouts) => this.roomLayouts.set(layouts) });
-    this.adminService.getRooms().subscribe({
-      next: (r) => {
-        this.rooms.set(r);
+
+    forkJoin({
+      venues: this.adminService.getVenues(),
+      roomTypes: this.adminService.getRoomTypes(),
+      roomLayouts: this.adminService.getRoomLayouts(),
+      rooms: this.adminService.getRooms(),
+    }).subscribe({
+      next: ({ venues, roomTypes, roomLayouts, rooms }) => {
+        this.venues.set(venues);
+        this.roomTypes.set(roomTypes);
+        this.roomLayouts.set(roomLayouts);
+        this.rooms.set(rooms);
+        this.ensureValidPage();
         this.loading.set(false);
       },
       error: () => {

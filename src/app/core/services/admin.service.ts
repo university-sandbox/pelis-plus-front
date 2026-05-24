@@ -112,13 +112,21 @@ export interface AdminRoomLayout {
 
 export interface PageResponse<T> {
   content: T[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
+  totalElements?: number;
+  totalPages?: number;
+  number?: number;
+  size?: number;
+  page?: {
+    totalElements: number;
+    totalPages: number;
+    number: number;
+    size: number;
+  };
 }
 
 type AdminMoviesResponse = Movie[] | PageResponse<Movie> | { results: Movie[] };
+type AdminListResponse<T> = T[] | PageResponse<T>;
+type AdminVenue = { id: string; name: string; address: string; city: string };
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -129,13 +137,13 @@ export class AdminService {
   getMovies(): Observable<Movie[]> {
     return this.getMoviesPage().pipe(
       switchMap((firstPage) => {
-        if (!isPageResponse(firstPage) || firstPage.totalPages <= 1) {
+        if (!isPageResponse(firstPage) || getPageTotalPages(firstPage) <= 1) {
           return of(normalizeMoviesResponse(firstPage));
         }
 
         const nextPages = Array.from(
-          { length: firstPage.totalPages - 1 },
-          (_, index) => firstPage.number + index + 1,
+          { length: getPageTotalPages(firstPage) - 1 },
+          (_, index) => getPageNumber(firstPage) + index + 2,
         );
 
         return forkJoin(nextPages.map((page) => this.getMoviesPage(page))).pipe(
@@ -197,7 +205,7 @@ export class AdminService {
   // ── Rooms ───────────────────────────────────────────────────────────────
 
   getRooms(): Observable<AdminRoom[]> {
-    return this.http.get<AdminRoom[]>(BACKEND.url(BACKEND.ADMIN.ROOMS.LIST));
+    return this.getAllPages((page) => this.getRoomsPage(page));
   }
 
   createRoom(payload: AdminRoomPayload): Observable<AdminRoom> {
@@ -213,7 +221,7 @@ export class AdminService {
   }
 
   getRoomTypes(): Observable<AdminRoomType[]> {
-    return this.http.get<AdminRoomType[]>(BACKEND.url(BACKEND.ADMIN.ROOM_TYPES.LIST));
+    return this.getAllPages((page) => this.getRoomTypesPage(page));
   }
 
   createRoomType(payload: AdminRoomTypePayload): Observable<AdminRoomType> {
@@ -232,7 +240,7 @@ export class AdminService {
   }
 
   getRoomLayouts(): Observable<AdminRoomLayout[]> {
-    return this.http.get<AdminRoomLayout[]>(BACKEND.url(BACKEND.ADMIN.ROOM_LAYOUTS.LIST));
+    return this.getAllPages((page) => this.getRoomLayoutsPage(page));
   }
 
   createRoomLayout(payload: AdminRoomLayoutPayload): Observable<AdminRoomLayout> {
@@ -253,10 +261,8 @@ export class AdminService {
     );
   }
 
-  getVenues(): Observable<Array<{ id: string; name: string; address: string; city: string }>> {
-    return this.http.get<Array<{ id: string; name: string; address: string; city: string }>>(
-      BACKEND.url(BACKEND.VENUES.LIST),
-    );
+  getVenues(): Observable<AdminVenue[]> {
+    return this.getAllPages((page) => this.getVenuesPage(page));
   }
 
   // ── Snacks ──────────────────────────────────────────────────────────────
@@ -309,6 +315,82 @@ export class AdminService {
 
     return this.http.get<AdminMoviesResponse>(BACKEND.url(BACKEND.ADMIN.MOVIES.LIST), { params });
   }
+
+  private getRoomsPage(page?: number): Observable<AdminListResponse<AdminRoom>> {
+    const params =
+      page !== undefined ? { params: new HttpParams().set('page', page.toString()) } : {};
+
+    return this.http.get<AdminListResponse<AdminRoom>>(
+      BACKEND.url(BACKEND.ADMIN.ROOMS.LIST),
+      params,
+    );
+  }
+
+  private getRoomTypesPage(page?: number): Observable<AdminListResponse<AdminRoomType>> {
+    const params =
+      page !== undefined ? { params: new HttpParams().set('page', page.toString()) } : {};
+
+    return this.http.get<AdminListResponse<AdminRoomType>>(
+      BACKEND.url(BACKEND.ADMIN.ROOM_TYPES.LIST),
+      params,
+    );
+  }
+
+  private getRoomLayoutsPage(page?: number): Observable<AdminListResponse<AdminRoomLayout>> {
+    const params =
+      page !== undefined ? { params: new HttpParams().set('page', page.toString()) } : {};
+
+    return this.http.get<AdminListResponse<AdminRoomLayout>>(
+      BACKEND.url(BACKEND.ADMIN.ROOM_LAYOUTS.LIST),
+      params,
+    );
+  }
+
+  private getVenuesPage(page?: number): Observable<AdminListResponse<AdminVenue>> {
+    const params =
+      page !== undefined ? { params: new HttpParams().set('page', page.toString()) } : {};
+
+    return this.http.get<AdminListResponse<AdminVenue>>(BACKEND.url(BACKEND.VENUES.LIST), params);
+  }
+
+  private getAllPages<T>(
+    getPage: (page?: number) => Observable<AdminListResponse<T>>,
+  ): Observable<T[]> {
+    return getPage().pipe(
+      switchMap((firstPage) => {
+        const totalPages = getPageTotalPages(firstPage);
+        if (!isPageResponse(firstPage) || totalPages <= 1) {
+          return of(normalizeListResponse(firstPage));
+        }
+
+        const nextPages = Array.from({ length: totalPages - 1 }, (_, index) => index + 2);
+
+        return forkJoin(nextPages.map((page) => getPage(page))).pipe(
+          map((pages) => [firstPage, ...pages].flatMap((page) => normalizeListResponse(page))),
+        );
+      }),
+    );
+  }
+}
+
+function normalizeListResponse<T>(response: AdminListResponse<T>): T[] {
+  return Array.isArray(response) ? response : response.content;
+}
+
+function getPageTotalPages<T>(response: AdminListResponse<T> | AdminMoviesResponse): number {
+  if (!isPageResponse(response)) {
+    return 1;
+  }
+
+  return response.totalPages ?? response.page?.totalPages ?? 1;
+}
+
+function getPageNumber<T>(response: AdminListResponse<T> | AdminMoviesResponse): number {
+  if (!isPageResponse(response)) {
+    return 0;
+  }
+
+  return response.number ?? response.page?.number ?? 0;
 }
 
 function normalizeMoviesResponse(response: AdminMoviesResponse): Movie[] {
@@ -319,7 +401,9 @@ function normalizeMoviesResponse(response: AdminMoviesResponse): Movie[] {
   return 'results' in response ? response.results : response.content;
 }
 
-function isPageResponse(response: AdminMoviesResponse): response is PageResponse<Movie> {
+function isPageResponse<T>(
+  response: AdminListResponse<T> | AdminMoviesResponse,
+): response is PageResponse<T> {
   return !Array.isArray(response) && 'content' in response;
 }
 
