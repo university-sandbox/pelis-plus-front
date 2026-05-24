@@ -221,8 +221,15 @@
   }
 
   .pelis-button:hover,
-  .pelis-button:focus-visible {
-    background: var(--marquee-300);
+  .pelis-button:focus-visible,
+  button[type='submit'][style*='var(--color-accent)']:not(:disabled):hover,
+  button[type='submit'][style*='var(--color-accent)']:not(:disabled):focus-visible {
+    background: var(--marquee-300) !important;
+    color: var(--ink-0) !important;
+  }
+
+  button[type='submit'][style*='var(--color-accent)']:disabled {
+    cursor: not-allowed;
   }
 
   .pelis-button-secondary {

@@ -81,7 +81,7 @@
   --accent:       var(--marquee-400);
   --accent-hover: var(--marquee-300);
   --accent-press: var(--marquee-500);
-  --accent-fg:    var(--ivory-1);  /* text on accent */
+  --accent-fg:    var(--ink-0);     /* text on accent; preserves AA contrast on marquee buttons */
 
   /* Gradients — used in hero / poster moments, never on small UI */
   --grad-vice: linear-gradient(135deg, #FF2E78 0%, #7A0830 45%, #00A4BF 100%);

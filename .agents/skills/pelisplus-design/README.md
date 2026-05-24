@@ -152,7 +152,7 @@ The whole system asks: *what does it feel like the moment before a film starts?*
 - **Cinematic, not bouncy.** Default easing is `cubic-bezier(0.16, 1, 0.3, 1)` — a slow dolly out.
 - Durations: 120 / 220 / 420 / 800ms. The 800ms "scene" duration is reserved for full-page transitions (e.g., film detail expanding into seat picker).
 - **Page transitions:** parallax-scroll the hero as the seat picker slides up over it. Inspired directly by GTA VI's scroll-driven storytelling.
-- **Hover:** `translateY(-4px)` plus a magenta border tint on cards. Buttons brighten the fill one step (400 → 300).
+- **Hover:** `translateY(-4px)` plus a magenta border tint on cards. Buttons keep an opaque fill and brighten one step (400 → 300); never fade the background or switch to transparent on hover because CTA text must remain readable.
 - **Press:** `translateY(1px) scale(0.99)`, no color change. Marquee buttons pick up the brand glow shadow.
 - **Loading:** content shimmers between `ink-2` and `ink-3`, never a spinner.
 - Respect `prefers-reduced-motion` — collapse the parallax to a simple fade.
@@ -216,4 +216,3 @@ We use **[Lucide](https://lucide.dev)** via CDN. It's a community-maintained for
 **Emoji policy:** none in product UI. The brand mark (aperture) is our one decorative glyph. Unicode `★` is allowed in ratings, `→` in inline copy.
 
 **Substitution flag:** Lucide is a substitution for a possible custom icon set. If PelisPlus commissions one, swap by re-implementing the same 11 glyph names with the same 1.75 stroke style. The design system will continue to work.
-
