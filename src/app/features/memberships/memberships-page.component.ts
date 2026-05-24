@@ -1,18 +1,37 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnInit,
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { LucideAngularModule, Crown, Check, Zap } from 'lucide-angular';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Check,
+  CreditCard,
+  Crown,
+  ShieldCheck,
+  Zap,
+  type LucideIconData,
+  LucideAngularModule,
+} from 'lucide-angular';
 
 import { MembershipService } from '../../core/services/membership.service';
 import { type MembershipPlan } from '../../core/models/membership.model';
+import { AuthService } from '../../core/services/auth.service';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader.component';
 import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
+
+type MembershipCheckoutStep = 'plans' | 'review' | 'payment-ready';
+
+interface MembershipCheckoutStepItem {
+  id: MembershipCheckoutStep;
+  label: string;
+}
 
 @Component({
   selector: 'app-memberships-page',
@@ -22,16 +41,40 @@ import { ErrorStateComponent } from '../../shared/components/error-state/error-s
 })
 export class MembershipsPageComponent implements OnInit {
   private readonly membershipService = inject(MembershipService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   readonly plans = signal<MembershipPlan[]>([]);
   readonly loading = signal(true);
   readonly error = signal(false);
-  readonly subscribing = signal<string | null>(null);
+  readonly checkoutStep = signal<MembershipCheckoutStep>('plans');
+  readonly selectedPlan = signal<MembershipPlan | null>(null);
+  readonly preparingPayment = signal(false);
+  readonly paymentSession = signal<{ planId: string; formToken: string } | null>(null);
+  readonly paymentError = signal<string | null>(null);
+  readonly checkoutSteps: readonly MembershipCheckoutStepItem[] = [
+    { id: 'plans', label: 'Elige tu plan' },
+    { id: 'review', label: 'Revisa tu compra' },
+    { id: 'payment-ready', label: 'Listo para pagar' },
+  ];
+  readonly selectedPlanBenefits = computed(() => this.selectedPlan()?.benefits ?? []);
+  readonly estimatedSavings = computed(() => {
+    const plan = this.selectedPlan();
+
+    if (!plan) {
+      return 0;
+    }
+
+    return Number((plan.ticketsPerMonth * 24 * (plan.discountPercentage / 100)).toFixed(2));
+  });
 
   readonly Crown = Crown;
   readonly Check = Check;
   readonly Zap = Zap;
+  readonly ArrowLeft = ArrowLeft;
+  readonly CreditCard = CreditCard;
+  readonly ShieldCheck = ShieldCheck;
+  readonly AlertCircle = AlertCircle;
 
   ngOnInit(): void {
     this.loadPlans();
@@ -46,19 +89,74 @@ export class MembershipsPageComponent implements OnInit {
     });
   }
 
-  subscribe(plan: MembershipPlan): void {
-    this.subscribing.set(plan.id);
+  choosePlan(plan: MembershipPlan): void {
+    if (!this.authService.isClient()) {
+      void this.router.navigate(['/login']);
+      return;
+    }
+
+    this.selectedPlan.set(plan);
+    this.paymentSession.set(null);
+    this.paymentError.set(null);
+    this.checkoutStep.set('review');
+  }
+
+  backToPlans(): void {
+    this.checkoutStep.set('plans');
+    this.selectedPlan.set(null);
+    this.paymentSession.set(null);
+    this.paymentError.set(null);
+    this.preparingPayment.set(false);
+  }
+
+  preparePayment(): void {
+    const plan = this.selectedPlan();
+
+    if (!plan || this.preparingPayment()) {
+      return;
+    }
+
+    this.preparingPayment.set(true);
+    this.paymentError.set(null);
+
     this.membershipService.subscribe(plan.id).subscribe({
-      next: (res) => {
-        this.membershipService.confirmSubscription(res.planId).subscribe({
-          next: () => {
-            this.subscribing.set(null);
-            void this.router.navigate(['/profile'], { queryParams: { tab: 'membership' } });
-          },
-          error: () => this.subscribing.set(null),
-        });
+      next: (session) => {
+        this.paymentSession.set(session);
+        this.preparingPayment.set(false);
+        this.checkoutStep.set('payment-ready');
       },
-      error: () => this.subscribing.set(null),
+      error: () => {
+        this.preparingPayment.set(false);
+        this.paymentError.set('No pudimos preparar la sesión de pago. Inténtalo nuevamente.');
+      },
     });
+  }
+
+  paymentStepStatus(step: MembershipCheckoutStep): 'done' | 'active' | 'pending' {
+    const order: MembershipCheckoutStep[] = ['plans', 'review', 'payment-ready'];
+    const currentIndex = order.indexOf(this.checkoutStep());
+    const stepIndex = order.indexOf(step);
+
+    if (stepIndex < currentIndex) {
+      return 'done';
+    }
+
+    if (stepIndex === currentIndex) {
+      return 'active';
+    }
+
+    return 'pending';
+  }
+
+  stepIcon(step: MembershipCheckoutStep): LucideIconData {
+    if (this.paymentStepStatus(step) === 'done') {
+      return Check;
+    }
+
+    if (step === 'payment-ready') {
+      return CreditCard;
+    }
+
+    return step === 'plans' ? Crown : ShieldCheck;
   }
 }

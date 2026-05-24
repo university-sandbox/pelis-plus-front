@@ -16,6 +16,26 @@
           </p>
         </div>
 
+        <div class="mb-8 grid gap-3 sm:grid-cols-3" aria-label="Progreso de suscripción">
+          @for (step of checkoutSteps; track step.id) {
+            <div
+              class="flex items-center gap-3 rounded-lg px-4 py-3"
+              [style.background]="paymentStepStatus(step.id) === 'active' ? 'var(--color-surface)' : 'var(--color-surface-raised)'"
+              [style.border]="paymentStepStatus(step.id) === 'active' ? '1px solid var(--color-accent)' : '1px solid var(--color-border)'"
+              [style.opacity]="paymentStepStatus(step.id) === 'pending' ? '0.62' : '1'"
+            >
+              <span
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                [style.background]="paymentStepStatus(step.id) === 'pending' ? 'var(--color-surface)' : 'var(--color-accent-muted)'"
+                [style.color]="paymentStepStatus(step.id) === 'pending' ? 'var(--color-text-secondary)' : 'var(--color-accent)'"
+              >
+                <lucide-icon [img]="stepIcon(step.id)" [size]="16" aria-hidden="true" />
+              </span>
+              <span class="text-sm font-bold" style="color: var(--color-text-primary);">{{ step.label }}</span>
+            </div>
+          }
+        </div>
+
         @if (loading()) {
           <div class="grid gap-6 sm:grid-cols-3">
             @for (n of [1,2,3]; track n) {
@@ -24,6 +44,159 @@
           </div>
         } @else if (error()) {
           <app-error-state title="No pudimos cargar los planes" (retry)="loadPlans()" />
+        } @else if (checkoutStep() === 'review' && selectedPlan(); as plan) {
+          <section
+            class="mx-auto max-w-3xl rounded-lg p-6 sm:p-8"
+            style="background: var(--color-surface); border: 1px solid var(--color-border); box-shadow: var(--shadow-card);"
+            aria-label="Revisión de membresía"
+          >
+            <button
+              type="button"
+              (click)="backToPlans()"
+              class="mb-6 flex items-center gap-2 text-sm font-semibold transition-colors"
+              style="color: var(--color-text-secondary);"
+            >
+              <lucide-icon [img]="ArrowLeft" [size]="16" aria-hidden="true" />
+              Cambiar plan
+            </button>
+
+            <div class="grid gap-8 md:grid-cols-[1fr_280px]">
+              <div>
+                <p class="pelis-overline mb-3">Resumen de compra</p>
+                <h2 class="text-2xl font-extrabold" style="color: var(--color-text-primary);">
+                  Membresía {{ plan.name }}
+                </h2>
+                <p class="mt-2 text-sm leading-6" style="color: var(--color-text-secondary);">
+                  Confirma tu plan antes de crear la sesión de pago. La membresía se activará recién cuando el pago sea validado en el siguiente paso.
+                </p>
+
+                <ul class="mt-6 grid gap-3" role="list">
+                  @for (benefit of selectedPlanBenefits(); track benefit.label) {
+                    <li class="flex items-start gap-3 rounded-lg p-3" style="background: var(--color-surface-raised); border: 1px solid var(--color-border);">
+                      <lucide-icon [img]="Check" [size]="16" class="mt-0.5 shrink-0" style="color: var(--color-success);" aria-hidden="true" />
+                      <span class="text-sm" style="color: var(--color-text-secondary);">{{ benefit.label }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+
+              <aside
+                class="h-fit rounded-lg p-5"
+                style="background: var(--color-surface-raised); border: 1px solid var(--color-border);"
+                aria-label="Detalle del pago"
+              >
+                <div class="mb-4 flex items-center justify-between gap-4">
+                  <span class="text-sm" style="color: var(--color-text-secondary);">Plan</span>
+                  <span class="text-sm font-bold" style="color: var(--color-text-primary);">{{ plan.name }}</span>
+                </div>
+                <div class="mb-4 flex items-center justify-between gap-4">
+                  <span class="text-sm" style="color: var(--color-text-secondary);">Vigencia</span>
+                  <span class="text-sm font-bold" style="color: var(--color-text-primary);">{{ plan.validity }}</span>
+                </div>
+                <div class="mb-4 flex items-center justify-between gap-4">
+                  <span class="text-sm" style="color: var(--color-text-secondary);">Entradas/mes</span>
+                  <span class="text-sm font-bold" style="color: var(--color-text-primary);">{{ plan.ticketsPerMonth }}</span>
+                </div>
+                <div class="mb-4 flex items-center justify-between gap-4">
+                  <span class="text-sm" style="color: var(--color-text-secondary);">Descuento</span>
+                  <span class="text-sm font-bold" style="color: var(--color-text-primary);">{{ plan.discountPercentage }}%</span>
+                </div>
+                <div class="mb-4 flex items-center justify-between gap-4">
+                  <span class="text-sm" style="color: var(--color-text-secondary);">Ahorro estimado</span>
+                  <span class="text-sm font-bold" style="color: var(--color-success);">S/ {{ estimatedSavings() }}</span>
+                </div>
+                <div class="border-t pt-4" style="border-color: var(--color-border);">
+                  <div class="flex items-center justify-between gap-4">
+                    <span class="font-bold" style="color: var(--color-text-primary);">Total mensual</span>
+                    <span class="text-xl font-extrabold" style="color: var(--color-text-primary);">S/ {{ plan.price }}</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  (click)="preparePayment()"
+                  [disabled]="preparingPayment()"
+                  class="mt-6 flex w-full items-center justify-center gap-2 rounded py-3 text-sm font-bold transition-colors"
+                  style="background: var(--color-accent); color: var(--color-text-inverse);"
+                  [style.opacity]="preparingPayment() ? '0.7' : '1'"
+                >
+                  @if (preparingPayment()) {
+                    <span>Preparando pago...</span>
+                  } @else {
+                    <lucide-icon [img]="CreditCard" [size]="17" aria-hidden="true" />
+                    <span>Preparar pago</span>
+                  }
+                </button>
+
+                @if (paymentError()) {
+                  <p class="mt-4 flex items-start gap-2 text-sm" style="color: var(--color-error);" role="alert">
+                    <lucide-icon [img]="AlertCircle" [size]="16" class="mt-0.5 shrink-0" aria-hidden="true" />
+                    {{ paymentError() }}
+                  </p>
+                }
+              </aside>
+            </div>
+          </section>
+        } @else if (checkoutStep() === 'payment-ready' && selectedPlan(); as plan) {
+          <section
+            class="mx-auto max-w-2xl rounded-lg p-6 text-center sm:p-8"
+            style="background: var(--color-surface); border: 1px solid var(--color-border); box-shadow: var(--shadow-card);"
+            aria-label="Sesión de pago preparada"
+          >
+            <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-lg" style="background: var(--color-accent-muted); border: 1px solid rgba(255,46,120,.28);">
+              <lucide-icon [img]="ShieldCheck" [size]="28" style="color: var(--color-accent);" aria-hidden="true" />
+            </div>
+            <p class="pelis-overline mb-3">Pago pendiente</p>
+            <h2 class="text-2xl font-extrabold" style="color: var(--color-text-primary);">
+              Tu membresía {{ plan.name }} está lista para pagar
+            </h2>
+            <p class="mx-auto mt-3 max-w-lg text-sm leading-6" style="color: var(--color-text-secondary);">
+              Ya creamos la sesión previa con Izipay. El formulario real de pago se conectará en el siguiente paso; por ahora no activamos la membresía ni confirmamos el cargo.
+            </p>
+
+            <div
+              class="mt-6 grid gap-3 rounded-lg p-4 text-left"
+              style="background: var(--color-surface-raised); border: 1px solid var(--color-border);"
+            >
+              <div class="flex items-center justify-between gap-4">
+                <span class="text-sm" style="color: var(--color-text-secondary);">Plan</span>
+                <span class="text-sm font-bold" style="color: var(--color-text-primary);">{{ plan.name }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-4">
+                <span class="text-sm" style="color: var(--color-text-secondary);">Total mensual</span>
+                <span class="text-sm font-bold" style="color: var(--color-text-primary);">S/ {{ plan.price }}</span>
+              </div>
+              @if (paymentSession(); as session) {
+                <div class="grid gap-1">
+                  <span class="text-sm" style="color: var(--color-text-secondary);">Token de formulario</span>
+                  <code class="break-all rounded px-3 py-2 text-xs" style="background: var(--color-bg); color: var(--color-text-primary); border: 1px solid var(--color-border);">
+                    {{ session.formToken }}
+                  </code>
+                </div>
+              }
+            </div>
+
+            <div class="mt-6 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                (click)="backToPlans()"
+                class="rounded py-3 text-sm font-bold transition-colors"
+                style="background: var(--color-surface-raised); color: var(--color-text-primary); border: 1px solid var(--color-border-strong);"
+              >
+                Elegir otro plan
+              </button>
+              <button
+                type="button"
+                disabled
+                class="flex items-center justify-center gap-2 rounded py-3 text-sm font-bold"
+                style="background: var(--color-accent); color: var(--color-text-inverse); opacity: .58;"
+                aria-disabled="true"
+              >
+                <lucide-icon [img]="CreditCard" [size]="17" aria-hidden="true" />
+                Continuar al pago
+              </button>
+            </div>
+          </section>
         } @else {
           <div class="grid gap-6 sm:grid-cols-3">
             @for (plan of plans(); track plan.id) {
@@ -80,15 +253,13 @@
                 <div class="px-6 pb-6">
                   <button
                     type="button"
-                    (click)="subscribe(plan)"
-                    [disabled]="subscribing() === plan.id"
+                    (click)="choosePlan(plan)"
                     class="w-full rounded py-3 text-sm font-bold transition-colors"
                     [style.background]="plan.recommended ? 'var(--color-accent)' : 'var(--color-surface-raised)'"
                     [style.color]="plan.recommended ? 'var(--color-text-primary)' : 'var(--color-text-primary)'"
                     [style.border]="plan.recommended ? 'none' : '1px solid var(--color-border-strong)'"
-                    [style.opacity]="subscribing() === plan.id ? '0.7' : '1'"
                   >
-                    {{ subscribing() === plan.id ? 'Procesando…' : 'Suscribirme' }}
+                    Suscribirme
                   </button>
                 </div>
               </article>
