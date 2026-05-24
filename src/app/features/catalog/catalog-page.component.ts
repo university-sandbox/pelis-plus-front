@@ -6,10 +6,12 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import type { ElementRef, OnInit } from '@angular/core';
+import type { ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { NgOptimizedImage, DecimalPipe, SlicePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import {
   LucideAngularModule,
   Search,
@@ -32,6 +34,22 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { ErrorStateComponent } from '../../shared/components/error-state/error-state.component';
 
 type CatalogCarousel = 'nowPlaying' | 'upcoming' | 'popular';
+type CatalogSection = CatalogCarousel;
+type HeroMovie = Movie & { backdropPath: string };
+
+const catalogSections = [
+  'nowPlaying',
+  'upcoming',
+  'popular',
+] as const satisfies readonly CatalogSection[];
+
+function parseCatalogSection(section: string | null): CatalogSection | null {
+  return catalogSections.some((value) => value === section) ? (section as CatalogSection) : null;
+}
+
+function hasBackdropImage(movie: Movie): movie is HeroMovie {
+  return Boolean(movie.backdropPath?.trim());
+}
 
 @Component({
   selector: 'app-catalog-page',
@@ -52,8 +70,9 @@ type CatalogCarousel = 'nowPlaying' | 'upcoming' | 'popular';
   templateUrl: './catalog-page.component.html',
   styleUrl: './catalog-page.component.scss',
 })
-export class CatalogPageComponent implements OnInit {
+export class CatalogPageComponent implements OnInit, OnDestroy {
   private readonly movieService = inject(MovieService);
+  private readonly route = inject(ActivatedRoute);
   private readonly nowPlayingCarousel = viewChild<ElementRef<HTMLElement>>('nowPlayingCarousel');
   private readonly upcomingCarousel = viewChild<ElementRef<HTMLElement>>('upcomingCarousel');
   private readonly popularCarousel = viewChild<ElementRef<HTMLElement>>('popularCarousel');
@@ -73,6 +92,75 @@ export class CatalogPageComponent implements OnInit {
   readonly popularError = signal(false);
 
   readonly heroIndex = signal(0);
+  readonly activeSection = toSignal(
+    this.route.queryParamMap.pipe(map((params) => parseCatalogSection(params.get('section')))),
+    { initialValue: null },
+  );
+
+  readonly activeSectionTitle = computed(() => {
+    switch (this.activeSection()) {
+      case 'nowPlaying':
+        return 'En cartelera';
+      case 'upcoming':
+        return 'Próximos estrenos';
+      case 'popular':
+        return 'Populares esta semana';
+      default:
+        return '';
+    }
+  });
+
+  readonly activeSectionDescription = computed(() => {
+    switch (this.activeSection()) {
+      case 'nowPlaying':
+        return 'Todas las películas disponibles para reservar ahora.';
+      case 'upcoming':
+        return 'Estrenos que llegan pronto a nuestras salas.';
+      case 'popular':
+        return 'Las películas que más se están viendo esta semana.';
+      default:
+        return '';
+    }
+  });
+
+  readonly activeSectionMovies = computed(() => {
+    switch (this.activeSection()) {
+      case 'nowPlaying':
+        return this.nowPlaying();
+      case 'upcoming':
+        return this.upcoming();
+      case 'popular':
+        return this.popular();
+      default:
+        return [];
+    }
+  });
+
+  readonly activeSectionLoading = computed(() => {
+    switch (this.activeSection()) {
+      case 'nowPlaying':
+        return this.nowPlayingLoading();
+      case 'upcoming':
+        return this.upcomingLoading();
+      case 'popular':
+        return this.popularLoading();
+      default:
+        return false;
+    }
+  });
+
+  readonly activeSectionError = computed(() => {
+    switch (this.activeSection()) {
+      case 'nowPlaying':
+        return this.nowPlayingError();
+      case 'upcoming':
+        return this.upcomingError();
+      case 'popular':
+        return this.popularError();
+      default:
+        return false;
+    }
+  });
 
   searchQuery = '';
   private heroTouchStartX: number | null = null;
@@ -89,7 +177,7 @@ export class CatalogPageComponent implements OnInit {
   readonly ChevronLeft = ChevronLeft;
   readonly ChevronRight = ChevronRight;
 
-  readonly heroMovies = computed(() => this.nowPlaying().slice(0, 5));
+  readonly heroMovies = computed(() => this.nowPlaying().filter(hasBackdropImage).slice(0, 5));
 
   readonly currentHeroMovie = computed(() => {
     const movies = this.heroMovies();
@@ -105,6 +193,10 @@ export class CatalogPageComponent implements OnInit {
     this.loadUpcoming();
     this.loadPopular();
     this.startHeroTimer();
+  }
+
+  ngOnDestroy(): void {
+    if (this.heroTimer) clearInterval(this.heroTimer);
   }
 
   loadNowPlaying(): void {
@@ -229,6 +321,20 @@ export class CatalogPageComponent implements OnInit {
       left: direction === 'left' ? -distance : distance,
       behavior: 'smooth',
     });
+  }
+
+  reloadActiveSection(): void {
+    switch (this.activeSection()) {
+      case 'nowPlaying':
+        this.loadNowPlaying();
+        break;
+      case 'upcoming':
+        this.loadUpcoming();
+        break;
+      case 'popular':
+        this.loadPopular();
+        break;
+    }
   }
 
   private getCarousel(section: CatalogCarousel): ElementRef<HTMLElement> | undefined {

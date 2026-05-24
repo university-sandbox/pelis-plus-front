@@ -1,326 +1,438 @@
+<app-navbar />
 
-    <app-navbar />
-
-    <main class="min-h-dvh" style="background: var(--color-bg);">
-
-      <!-- ── Hero Banner ─────────────────────────────────────── -->
-      @if (heroMovies().length > 0) {
-        <section
-          class="grain hero-carousel relative w-full overflow-hidden"
-          style="height: 62vh; min-height: 420px; max-height: 720px; background: var(--ink-0);"
-          aria-label="Película destacada"
-          (touchstart)="onHeroTouchStart($event)"
-          (touchend)="onHeroTouchEnd($event)"
+<main class="min-h-dvh" style="background: var(--color-bg)">
+  <!-- ── Hero Banner ─────────────────────────────────────── -->
+  @if (heroMovies().length > 0) {
+    <section
+      class="grain hero-carousel relative w-full overflow-hidden"
+      style="height: 62vh; min-height: 420px; max-height: 720px; background: var(--ink-0)"
+      aria-label="Película destacada"
+      (touchstart)="onHeroTouchStart($event)"
+      (touchend)="onHeroTouchEnd($event)"
+    >
+      @for (movie of heroMovies(); track movie.id; let i = $index) {
+        <div
+          class="absolute inset-0 transition-opacity duration-500"
+          [style.opacity]="i === heroIndex() ? '1' : '0'"
         >
-          @for (movie of heroMovies(); track movie.id; let i = $index) {
-            <div
-              class="absolute inset-0 transition-opacity duration-500"
-              [style.opacity]="i === heroIndex() ? '1' : '0'"
-            >
-              @if (movie.backdropPath) {
-                @if (i === 0) {
-                  <img
-                    [ngSrc]="backdropUrl(movie.backdropPath)"
-                    [alt]="movie.title"
-                    fill
-                    priority
-                    class="object-cover"
-                  />
-                } @else {
-                  <img
-                    [ngSrc]="backdropUrl(movie.backdropPath)"
-                    [alt]="movie.title"
-                    fill
-                    class="object-cover"
-                  />
-                }
-              }
-              <!-- Gradient overlays -->
-              <div
-                class="absolute inset-0"
-                style="background: linear-gradient(to right, var(--ink-0) 18%, rgba(5,5,6,.72) 42%, transparent 76%);"
-              ></div>
-              <div
-                class="absolute inset-0"
-                style="background: linear-gradient(to top, var(--ink-0) 0%, rgba(5,5,6,.62) 38%, transparent 72%);"
-              ></div>
-            </div>
+          @if (movie.backdropPath) {
+            @if (i === 0) {
+              <img
+                [ngSrc]="backdropUrl(movie.backdropPath)"
+                [alt]="movie.title"
+                fill
+                priority
+                class="object-cover"
+              />
+            } @else {
+              <img
+                [ngSrc]="backdropUrl(movie.backdropPath)"
+                [alt]="movie.title"
+                fill
+                class="object-cover"
+              />
+            }
           }
-
-          <!-- Hero content -->
-          @if (currentHeroMovie(); as hero) {
-            <div class="absolute bottom-0 left-0 max-w-4xl p-6 sm:p-10 lg:p-16">
-              <p class="pelis-overline mb-3">
-                En cartelera
-              </p>
-              <h1 class="display-m mb-4 max-w-3xl" style="color: var(--color-text-primary);">
-                {{ hero.title }}
-              </h1>
-              <div class="mb-4 flex flex-wrap items-center gap-3 text-sm" style="color: var(--color-text-secondary);">
-                <span class="flex items-center gap-1">
-                  <lucide-icon [img]="Star" [size]="14" style="color: var(--color-warning);" aria-hidden="true" />
-                  {{ hero.voteAverage | number:'1.1-1' }}
-                </span>
-                @if (hero.releaseDate) {
-                  <span>{{ hero.releaseDate | slice:0:4 }}</span>
-                }
-              </div>
-              <p class="mb-6 hidden max-w-xl text-sm leading-relaxed sm:line-clamp-2" style="color: var(--color-text-secondary);">
-                {{ hero.overview }}
-              </p>
-              <div class="flex flex-wrap gap-3">
-                <a
-                  [routerLink]="['/movie', hero.id]"
-                  class="pelis-button flex items-center gap-2 px-5 py-2.5 text-sm"
-                >
-                  <lucide-icon [img]="Play" [size]="16" aria-hidden="true" />
-                  Reservar entradas
-                </a>
-                <a
-                  [routerLink]="['/movie', hero.id]"
-                  class="pelis-button-secondary flex items-center gap-2 px-5 py-2.5 text-sm font-semibold"
-                >
-                  <lucide-icon [img]="Info" [size]="16" aria-hidden="true" />
-                  Ver detalle
-                </a>
-              </div>
-            </div>
-          }
-
-          <!-- Hero arrows -->
-          @if (heroMovies().length > 1) {
-            <button
-              type="button"
-              class="hero-arrow hero-arrow-left"
-              (click)="showPreviousHero()"
-              aria-label="Ver película destacada anterior"
-            >
-              <lucide-icon [img]="ChevronLeft" [size]="24" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              class="hero-arrow hero-arrow-right"
-              (click)="showNextHero()"
-              aria-label="Ver siguiente película destacada"
-            >
-              <lucide-icon [img]="ChevronRight" [size]="24" aria-hidden="true" />
-            </button>
-          }
-
-          <!-- Hero dots -->
-          @if (heroMovies().length > 1) {
-            <div class="absolute bottom-4 right-6 flex gap-1.5" role="tablist" aria-label="Seleccionar película destacada">
-              @for (m of heroMovies(); track m.id; let i = $index) {
-                <button
-                  type="button"
-                  role="tab"
-                  [attr.aria-selected]="i === heroIndex()"
-                  [attr.aria-label]="'Película ' + (i + 1)"
-                  (click)="setHeroIndex(i)"
-                  class="h-1.5 rounded-full transition-all duration-300"
-                  [style.width]="i === heroIndex() ? '24px' : '6px'"
-                  [style.background]="i === heroIndex() ? 'var(--color-accent)' : 'rgba(255,255,255,.3)'"
-                ></button>
-              }
-            </div>
-          }
-        </section>
+          <!-- Gradient overlays -->
+          <div
+            class="absolute inset-0"
+            style="
+              background: linear-gradient(
+                to right,
+                var(--ink-0) 18%,
+                rgba(5, 5, 6, 0.72) 42%,
+                transparent 76%
+              );
+            "
+          ></div>
+          <div
+            class="absolute inset-0"
+            style="
+              background: linear-gradient(
+                to top,
+                var(--ink-0) 0%,
+                rgba(5, 5, 6, 0.62) 38%,
+                transparent 72%
+              );
+            "
+          ></div>
+        </div>
       }
 
-      <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
-
-        <!-- ── Search ──────────────────────────────── -->
-        <section aria-label="Buscar película">
-          <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p class="pelis-overline mb-2">Cartelera</p>
-              <h2 class="display-m text-4xl" style="color: var(--color-text-primary);">Función exacta. Butaca exacta.</h2>
-            </div>
-            <!-- Search input -->
-            <div class="relative flex-1 max-w-sm">
-              <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                <lucide-icon [img]="Search" [size]="16" style="color: var(--color-text-secondary);" aria-hidden="true" />
-              </span>
-              <input
-                type="search"
-                [(ngModel)]="searchQuery"
-                (ngModelChange)="onSearchChange($event)"
-                placeholder="Buscar película…"
-                class="search-input w-full rounded py-2.5 pl-9 pr-4 text-sm"
-                aria-label="Buscar película"
+      <!-- Hero content -->
+      @if (currentHeroMovie(); as hero) {
+        <div class="absolute bottom-0 left-0 max-w-4xl p-6 sm:p-10 lg:p-16">
+          <p class="pelis-overline mb-3">En cartelera</p>
+          <h1 class="display-m mb-4 max-w-3xl" style="color: var(--color-text-primary)">
+            {{ hero.title }}
+          </h1>
+          <div
+            class="mb-4 flex flex-wrap items-center gap-3 text-sm"
+            style="color: var(--color-text-secondary)"
+          >
+            <span class="flex items-center gap-1">
+              <lucide-icon
+                [img]="Star"
+                [size]="14"
+                style="color: var(--color-warning)"
+                aria-hidden="true"
               />
-              @if (searchQuery) {
+              {{ hero.voteAverage | number: '1.1-1' }}
+            </span>
+            @if (hero.releaseDate) {
+              <span>{{ hero.releaseDate | slice: 0 : 4 }}</span>
+            }
+          </div>
+          <p
+            class="mb-6 hidden max-w-xl text-sm leading-relaxed sm:line-clamp-2"
+            style="color: var(--color-text-secondary)"
+          >
+            {{ hero.overview }}
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a
+              [routerLink]="['/movie', hero.id]"
+              class="pelis-button flex items-center gap-2 px-5 py-2.5 text-sm"
+            >
+              <lucide-icon [img]="Play" [size]="16" aria-hidden="true" />
+              Reservar entradas
+            </a>
+            <a
+              [routerLink]="['/movie', hero.id]"
+              class="pelis-button-secondary flex items-center gap-2 px-5 py-2.5 text-sm font-semibold"
+            >
+              <lucide-icon [img]="Info" [size]="16" aria-hidden="true" />
+              Ver detalle
+            </a>
+          </div>
+        </div>
+      }
+
+      <!-- Hero arrows -->
+      @if (heroMovies().length > 1) {
+        <button
+          type="button"
+          class="hero-arrow hero-arrow-left"
+          (click)="showPreviousHero()"
+          aria-label="Ver película destacada anterior"
+        >
+          <lucide-icon [img]="ChevronLeft" [size]="24" aria-hidden="true" />
+        </button>
+        <button
+          type="button"
+          class="hero-arrow hero-arrow-right"
+          (click)="showNextHero()"
+          aria-label="Ver siguiente película destacada"
+        >
+          <lucide-icon [img]="ChevronRight" [size]="24" aria-hidden="true" />
+        </button>
+      }
+
+      <!-- Hero dots -->
+      @if (heroMovies().length > 1) {
+        <div
+          class="absolute bottom-4 right-6 flex gap-1.5"
+          role="tablist"
+          aria-label="Seleccionar película destacada"
+        >
+          @for (m of heroMovies(); track m.id; let i = $index) {
+            <button
+              type="button"
+              role="tab"
+              [attr.aria-selected]="i === heroIndex()"
+              [attr.aria-label]="'Película ' + (i + 1)"
+              (click)="setHeroIndex(i)"
+              class="h-1.5 rounded-full transition-all duration-300"
+              [style.width]="i === heroIndex() ? '24px' : '6px'"
+              [style.background]="
+                i === heroIndex() ? 'var(--color-accent)' : 'rgba(255,255,255,.3)'
+              "
+            ></button>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-12">
+    <!-- ── Search ──────────────────────────────── -->
+    <section aria-label="Buscar película">
+      <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="pelis-overline mb-2">Cartelera</p>
+          <h2 class="display-m text-4xl" style="color: var(--color-text-primary)">
+            Función exacta. Butaca exacta.
+          </h2>
+        </div>
+        <!-- Search input -->
+        <div class="relative flex-1 max-w-sm">
+          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+            <lucide-icon
+              [img]="Search"
+              [size]="16"
+              style="color: var(--color-text-secondary)"
+              aria-hidden="true"
+            />
+          </span>
+          <input
+            type="search"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchChange($event)"
+            placeholder="Buscar película…"
+            class="search-input w-full rounded py-2.5 pl-9 pr-4 text-sm"
+            aria-label="Buscar película"
+          />
+          @if (searchQuery) {
+            <button
+              type="button"
+              (click)="clearSearch()"
+              class="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+              style="color: var(--color-text-secondary)"
+              aria-label="Limpiar búsqueda"
+            >
+              <lucide-icon [img]="X" [size]="14" aria-hidden="true" />
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Search results ───────────────────────────────── -->
+    @if (searchQuery) {
+      <section aria-label="Resultados de búsqueda">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-xl font-bold" style="color: var(--color-text-primary)">
+            Resultados para "{{ searchQuery }}"
+          </h2>
+        </div>
+
+        @if (searchLoading()) {
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            @for (n of skeletonArray; track n) {
+              <app-skeleton-loader
+                height="0"
+                radius="12px"
+                class="block"
+                style="aspect-ratio: 2/3"
+              />
+            }
+          </div>
+        } @else if (searchResults().length === 0) {
+          <app-empty-state
+            title="Sin resultados"
+            [description]="noResultsDescription"
+            actionLabel="Limpiar búsqueda"
+            (action)="clearSearch()"
+          ></app-empty-state>
+        } @else {
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+            @for (movie of searchResults(); track movie.id) {
+              <app-movie-card [movie]="movie" />
+            }
+          </div>
+        }
+      </section>
+    } @else if (activeSection()) {
+      <section [attr.aria-label]="activeSectionTitle()">
+        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p class="pelis-overline mb-2">Ver todo</p>
+            <h2 class="pelis-display text-4xl" style="color: var(--color-text-primary)">
+              {{ activeSectionTitle() }}
+            </h2>
+            <p
+              class="mt-2 max-w-2xl text-sm leading-relaxed"
+              style="color: var(--color-text-secondary)"
+            >
+              {{ activeSectionDescription() }}
+            </p>
+          </div>
+          <a
+            routerLink="/catalog"
+            class="section-back-link inline-flex items-center gap-1 text-sm font-semibold transition-colors"
+            style="color: var(--color-accent)"
+          >
+            <lucide-icon [img]="ChevronLeft" [size]="14" aria-hidden="true" />
+            Volver a cartelera
+          </a>
+        </div>
+
+        @if (activeSectionLoading()) {
+          <div
+            class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+          >
+            @for (n of skeletonArray; track n) {
+              <app-skeleton-loader
+                height="0"
+                radius="12px"
+                class="block"
+                style="aspect-ratio: 2/3"
+              />
+            }
+          </div>
+        } @else if (activeSectionError()) {
+          <app-error-state
+            title="No pudimos cargar esta sección"
+            description="Verifica tu conexión e inténtalo de nuevo."
+            (retry)="reloadActiveSection()"
+          />
+        } @else if (activeSectionMovies().length === 0) {
+          <app-empty-state
+            title="Sin películas disponibles"
+            description="No hay películas disponibles en esta sección por ahora."
+          />
+        } @else {
+          <div
+            class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+          >
+            @for (movie of activeSectionMovies(); track movie.id) {
+              <app-movie-card [movie]="movie" />
+            }
+          </div>
+        }
+      </section>
+    } @else {
+      <!-- ── En cartelera ───────────────────────────────── -->
+      <section aria-label="En cartelera">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary)">
+            En cartelera
+          </h2>
+          <div class="flex items-center gap-2">
+            <a
+              routerLink="/catalog"
+              [queryParams]="{ section: 'nowPlaying' }"
+              class="hidden items-center gap-1 text-sm font-medium transition-colors sm:flex"
+              style="color: var(--color-accent)"
+            >
+              Ver todo
+              <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
+            </a>
+            @if (!nowPlayingLoading() && !nowPlayingError() && nowPlaying().length > 0) {
+              <div class="carousel-controls" aria-label="Mover carrusel En cartelera">
                 <button
                   type="button"
-                  (click)="clearSearch()"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style="color: var(--color-text-secondary);"
-                  aria-label="Limpiar búsqueda"
+                  class="carousel-button"
+                  (click)="scrollCarousel('nowPlaying', 'left')"
+                  aria-label="Ver películas anteriores en cartelera"
                 >
-                  <lucide-icon [img]="X" [size]="14" aria-hidden="true" />
+                  <lucide-icon [img]="ChevronLeft" [size]="18" aria-hidden="true" />
                 </button>
-              }
-            </div>
+                <button
+                  type="button"
+                  class="carousel-button"
+                  (click)="scrollCarousel('nowPlaying', 'right')"
+                  aria-label="Ver más películas en cartelera"
+                >
+                  <lucide-icon [img]="ChevronRight" [size]="18" aria-hidden="true" />
+                </button>
+              </div>
+            }
           </div>
+        </div>
 
-        </section>
-
-        <!-- ── Search results ───────────────────────────────── -->
-        @if (searchQuery) {
-          <section aria-label="Resultados de búsqueda">
-            <div class="mb-4 flex items-center justify-between">
-              <h2 class="text-xl font-bold" style="color: var(--color-text-primary);">
-                Resultados para "{{ searchQuery }}"
-              </h2>
-            </div>
-
-            @if (searchLoading()) {
-              <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                @for (n of skeletonArray; track n) {
-                  <app-skeleton-loader height="0" radius="12px" class="block" style="aspect-ratio: 2/3;" />
-                }
-              </div>
-            } @else if (searchResults().length === 0) {
-              <app-empty-state
-                title="Sin resultados"
-                [description]="noResultsDescription"
-                actionLabel="Limpiar búsqueda"
-                (action)="clearSearch()"
-              ></app-empty-state>
-            } @else {
-              <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-                @for (movie of searchResults(); track movie.id) {
-                  <app-movie-card [movie]="movie" />
-                }
-              </div>
+        @if (nowPlayingLoading()) {
+          <div class="flex gap-4 overflow-hidden">
+            @for (n of skeletonArray; track n) {
+              <app-skeleton-loader
+                height="0"
+                radius="12px"
+                class="flex-none"
+                style="width: 160px; aspect-ratio: 2/3"
+              />
             }
-          </section>
+          </div>
+        } @else if (nowPlayingError()) {
+          <app-error-state
+            title="No pudimos cargar las películas"
+            description="Verifica tu conexión e inténtalo de nuevo."
+            (retry)="loadNowPlaying()"
+          />
+        } @else if (nowPlaying().length === 0) {
+          <app-empty-state
+            title="Sin películas disponibles"
+            description="No hay películas en cartelera por ahora."
+          />
         } @else {
-          <!-- ── En cartelera ───────────────────────────────── -->
-          <section aria-label="En cartelera">
-            <div class="mb-4 flex items-center justify-between">
-              <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary);">En cartelera</h2>
-              <div class="flex items-center gap-2">
-                <a
-                  routerLink="/catalog"
-                  class="hidden items-center gap-1 text-sm font-medium transition-colors sm:flex"
-                  style="color: var(--color-accent);"
-                >
-                  Ver todo
-                  <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
-                </a>
-                @if (!nowPlayingLoading() && !nowPlayingError() && nowPlaying().length > 0) {
-                  <div class="carousel-controls" aria-label="Mover carrusel En cartelera">
-                    <button
-                      type="button"
-                      class="carousel-button"
-                      (click)="scrollCarousel('nowPlaying', 'left')"
-                      aria-label="Ver películas anteriores en cartelera"
-                    >
-                      <lucide-icon [img]="ChevronLeft" [size]="18" aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      class="carousel-button"
-                      (click)="scrollCarousel('nowPlaying', 'right')"
-                      aria-label="Ver más películas en cartelera"
-                    >
-                      <lucide-icon [img]="ChevronRight" [size]="18" aria-hidden="true" />
-                    </button>
-                  </div>
-                }
-              </div>
-            </div>
-
-            @if (nowPlayingLoading()) {
-              <div class="flex gap-4 overflow-hidden">
-                @for (n of skeletonArray; track n) {
-                  <app-skeleton-loader height="0" radius="12px" class="flex-none" style="width: 160px; aspect-ratio: 2/3;" />
-                }
-              </div>
-            } @else if (nowPlayingError()) {
-              <app-error-state
-                title="No pudimos cargar las películas"
-                description="Verifica tu conexión e inténtalo de nuevo."
-                (retry)="loadNowPlaying()"
-              />
-            } @else if (nowPlaying().length === 0) {
-              <app-empty-state
-                title="Sin películas disponibles"
-                description="No hay películas en cartelera por ahora."
-              />
-            } @else {
-              <div
-                #nowPlayingCarousel
-                class="movie-scroll flex gap-4 overflow-x-auto pb-4"
-                style="scroll-snap-type: x mandatory;"
-              >
-                @for (movie of nowPlaying(); track movie.id) {
-                  <div class="flex-none" style="width: 160px; scroll-snap-align: start;">
-                    <app-movie-card [movie]="movie" />
-                  </div>
-                }
+          <div
+            #nowPlayingCarousel
+            class="movie-scroll flex gap-4 overflow-x-auto pb-4"
+            style="scroll-snap-type: x mandatory"
+          >
+            @for (movie of nowPlaying(); track movie.id) {
+              <div class="flex-none" style="width: 160px; scroll-snap-align: start">
+                <app-movie-card [movie]="movie" />
               </div>
             }
-          </section>
+          </div>
+        }
+      </section>
 
-          <!-- ── Próximos estrenos ──────────────────────────── -->
-          <section aria-label="Próximos estrenos">
-            <div class="mb-4 flex items-center justify-between">
-              <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary);">Próximos estrenos</h2>
-              <div class="flex items-center gap-2">
-                <a
-                  routerLink="/catalog"
-                  class="hidden items-center gap-1 text-sm font-medium transition-colors sm:flex"
-                  style="color: var(--color-accent);"
+      <!-- ── Próximos estrenos ──────────────────────────── -->
+      <section aria-label="Próximos estrenos">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary)">
+            Próximos estrenos
+          </h2>
+          <div class="flex items-center gap-2">
+            <a
+              routerLink="/catalog"
+              [queryParams]="{ section: 'upcoming' }"
+              class="hidden items-center gap-1 text-sm font-medium transition-colors sm:flex"
+              style="color: var(--color-accent)"
+            >
+              Ver todo
+              <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
+            </a>
+            @if (!upcomingLoading() && !upcomingError() && upcoming().length > 0) {
+              <div class="carousel-controls" aria-label="Mover carrusel Próximos estrenos">
+                <button
+                  type="button"
+                  class="carousel-button"
+                  (click)="scrollCarousel('upcoming', 'left')"
+                  aria-label="Ver estrenos anteriores"
                 >
-                  Ver todo
-                  <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
-                </a>
-                @if (!upcomingLoading() && !upcomingError() && upcoming().length > 0) {
-                  <div class="carousel-controls" aria-label="Mover carrusel Próximos estrenos">
-                    <button
-                      type="button"
-                      class="carousel-button"
-                      (click)="scrollCarousel('upcoming', 'left')"
-                      aria-label="Ver estrenos anteriores"
-                    >
-                      <lucide-icon [img]="ChevronLeft" [size]="18" aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      class="carousel-button"
-                      (click)="scrollCarousel('upcoming', 'right')"
-                      aria-label="Ver más próximos estrenos"
-                    >
-                      <lucide-icon [img]="ChevronRight" [size]="18" aria-hidden="true" />
-                    </button>
-                  </div>
-                }
+                  <lucide-icon [img]="ChevronLeft" [size]="18" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  class="carousel-button"
+                  (click)="scrollCarousel('upcoming', 'right')"
+                  aria-label="Ver más próximos estrenos"
+                >
+                  <lucide-icon [img]="ChevronRight" [size]="18" aria-hidden="true" />
+                </button>
               </div>
-            </div>
+            }
+          </div>
+        </div>
 
-            @if (upcomingLoading()) {
-              <div class="flex gap-4 overflow-hidden">
-                @for (n of skeletonArray; track n) {
-                  <app-skeleton-loader height="0" radius="12px" class="flex-none" style="width: 160px; aspect-ratio: 2/3;" />
-                }
-              </div>
-            } @else if (upcomingError()) {
-              <app-error-state
-                title="No pudimos cargar los próximos estrenos"
-                (retry)="loadUpcoming()"
+        @if (upcomingLoading()) {
+          <div class="flex gap-4 overflow-hidden">
+            @for (n of skeletonArray; track n) {
+              <app-skeleton-loader
+                height="0"
+                radius="12px"
+                class="flex-none"
+                style="width: 160px; aspect-ratio: 2/3"
               />
-            } @else {
-              <div
-                #upcomingCarousel
-                class="movie-scroll flex gap-4 overflow-x-auto pb-4"
-                style="scroll-snap-type: x mandatory;"
-              >
-                @for (movie of upcoming(); track movie.id) {
-                  <div class="flex-none relative" style="width: 160px; scroll-snap-align: start;">
-                    <app-movie-card [movie]="movie" />
-                    <!-- Próximamente badge hidden by request.
+            }
+          </div>
+        } @else if (upcomingError()) {
+          <app-error-state
+            title="No pudimos cargar los próximos estrenos"
+            (retry)="loadUpcoming()"
+          />
+        } @else {
+          <div
+            #upcomingCarousel
+            class="movie-scroll flex gap-4 overflow-x-auto pb-4"
+            style="scroll-snap-type: x mandatory"
+          >
+            @for (movie of upcoming(); track movie.id) {
+              <div class="flex-none relative" style="width: 160px; scroll-snap-align: start">
+                <app-movie-card [movie]="movie" />
+                <!-- Próximamente badge hidden by request.
                     <span
                       class="absolute left-2 top-2 rounded-full px-2 py-0.5 text-xs font-semibold"
                       style="background: var(--color-warning); color: var(--ink-0);"
@@ -328,63 +440,81 @@
                       Pronto
                     </span>
                     -->
-                  </div>
-                }
               </div>
             }
-          </section>
-
-          <!-- ── Populares ──────────────────────────────────── -->
-          <section aria-label="Populares esta semana">
-            <div class="mb-4 flex items-center justify-between">
-              <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary);">Populares esta semana</h2>
-              @if (!popularLoading() && !popularError() && popular().length > 0) {
-                <div class="carousel-controls" aria-label="Mover carrusel Populares esta semana">
-                  <button
-                    type="button"
-                    class="carousel-button"
-                    (click)="scrollCarousel('popular', 'left')"
-                    aria-label="Ver películas populares anteriores"
-                  >
-                    <lucide-icon [img]="ChevronLeft" [size]="18" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    class="carousel-button"
-                    (click)="scrollCarousel('popular', 'right')"
-                    aria-label="Ver más películas populares"
-                  >
-                    <lucide-icon [img]="ChevronRight" [size]="18" aria-hidden="true" />
-                  </button>
-                </div>
-              }
-            </div>
-
-            @if (popularLoading()) {
-              <div class="flex gap-4 overflow-hidden">
-                @for (n of skeletonArray; track n) {
-                  <app-skeleton-loader height="0" radius="12px" class="flex-none" style="width: 160px; aspect-ratio: 2/3;" />
-                }
-              </div>
-            } @else if (popularError()) {
-              <app-error-state
-                title="No pudimos cargar las películas populares"
-                (retry)="loadPopular()"
-              />
-            } @else {
-              <div
-                #popularCarousel
-                class="movie-scroll flex gap-4 overflow-x-auto pb-4"
-                style="scroll-snap-type: x mandatory;"
-              >
-                @for (movie of popular(); track movie.id) {
-                  <div class="flex-none" style="width: 160px; scroll-snap-align: start;">
-                    <app-movie-card [movie]="movie" />
-                  </div>
-                }
-              </div>
-            }
-          </section>
+          </div>
         }
-      </div>
-    </main>
+      </section>
+
+      <!-- ── Populares ──────────────────────────────────── -->
+      <section aria-label="Populares esta semana">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="pelis-display text-3xl" style="color: var(--color-text-primary)">
+            Populares esta semana
+          </h2>
+          <div class="flex items-center gap-2">
+            <a
+              routerLink="/catalog"
+              [queryParams]="{ section: 'popular' }"
+              class="hidden items-center gap-1 text-sm font-medium transition-colors sm:flex"
+              style="color: var(--color-accent)"
+            >
+              Ver todo
+              <lucide-icon [img]="ChevronRight" [size]="14" aria-hidden="true" />
+            </a>
+            @if (!popularLoading() && !popularError() && popular().length > 0) {
+              <div class="carousel-controls" aria-label="Mover carrusel Populares esta semana">
+                <button
+                  type="button"
+                  class="carousel-button"
+                  (click)="scrollCarousel('popular', 'left')"
+                  aria-label="Ver películas populares anteriores"
+                >
+                  <lucide-icon [img]="ChevronLeft" [size]="18" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  class="carousel-button"
+                  (click)="scrollCarousel('popular', 'right')"
+                  aria-label="Ver más películas populares"
+                >
+                  <lucide-icon [img]="ChevronRight" [size]="18" aria-hidden="true" />
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (popularLoading()) {
+          <div class="flex gap-4 overflow-hidden">
+            @for (n of skeletonArray; track n) {
+              <app-skeleton-loader
+                height="0"
+                radius="12px"
+                class="flex-none"
+                style="width: 160px; aspect-ratio: 2/3"
+              />
+            }
+          </div>
+        } @else if (popularError()) {
+          <app-error-state
+            title="No pudimos cargar las películas populares"
+            (retry)="loadPopular()"
+          />
+        } @else {
+          <div
+            #popularCarousel
+            class="movie-scroll flex gap-4 overflow-x-auto pb-4"
+            style="scroll-snap-type: x mandatory"
+          >
+            @for (movie of popular(); track movie.id) {
+              <div class="flex-none" style="width: 160px; scroll-snap-align: start">
+                <app-movie-card [movie]="movie" />
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</main>
