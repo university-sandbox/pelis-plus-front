@@ -268,6 +268,8 @@
     --mdc-snackbar-container-color: transparent;
     --mdc-snackbar-supporting-text-color: var(--ivory-1);
     --mat-snack-bar-button-color: var(--cyan-400);
+    background: transparent !important;
+    box-shadow: none !important;
     margin: 16px !important;
   }
 
@@ -275,11 +277,14 @@
     min-width: 0;
     padding: 0;
     border-radius: 8px;
-    background: transparent;
-    box-shadow: none;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
   }
 
+  .pelis-toast-panel .mdc-snackbar__label,
   .pelis-toast-panel .mat-mdc-snack-bar-label {
+    display: block;
     padding: 0;
   }
 }
