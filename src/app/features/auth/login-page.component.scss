@@ -87,8 +87,10 @@
   outline: none;
 }
 
-.demo-use-btn:hover {
+.demo-use-btn:hover:not(:disabled),
+.demo-use-btn:focus-visible:not(:disabled) {
   background: var(--color-accent-hover) !important;
+  color: var(--color-text-inverse) !important;
 }
 
 .demo-use-btn:disabled {

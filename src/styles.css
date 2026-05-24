@@ -222,6 +222,8 @@
 
   .pelis-button:hover,
   .pelis-button:focus-visible,
+  .demo-use-btn[style*='var(--color-accent)']:not(:disabled):hover,
+  .demo-use-btn[style*='var(--color-accent)']:not(:disabled):focus-visible,
   button[type='submit'][style*='var(--color-accent)']:not(:disabled):hover,
   button[type='submit'][style*='var(--color-accent)']:not(:disabled):focus-visible {
     background: var(--marquee-300) !important;
