@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { map, type Observable } from 'rxjs';
+import { forkJoin, map, of, switchMap, type Observable } from 'rxjs';
 
 import { BACKEND } from '../api/endpoints';
 import { type Movie, type Genre } from '../models/movie.model';
@@ -127,9 +127,22 @@ export class AdminService {
   // ── Movies ──────────────────────────────────────────────────────────────
 
   getMovies(): Observable<Movie[]> {
-    return this.http
-      .get<AdminMoviesResponse>(BACKEND.url(BACKEND.ADMIN.MOVIES.LIST))
-      .pipe(map((response) => normalizeMoviesResponse(response)));
+    return this.getMoviesPage().pipe(
+      switchMap((firstPage) => {
+        if (!isPageResponse(firstPage) || firstPage.totalPages <= 1) {
+          return of(normalizeMoviesResponse(firstPage));
+        }
+
+        const nextPages = Array.from(
+          { length: firstPage.totalPages - 1 },
+          (_, index) => firstPage.number + index + 1,
+        );
+
+        return forkJoin(nextPages.map((page) => this.getMoviesPage(page))).pipe(
+          map((pages) => [firstPage, ...pages].flatMap((page) => normalizeMoviesResponse(page))),
+        );
+      }),
+    );
   }
 
   createMovie(payload: AdminMoviePayload): Observable<Movie> {
@@ -282,6 +295,15 @@ export class AdminService {
   toggleUserStatus(id: string, status: 'active' | 'inactive'): Observable<void> {
     return this.http.patch<void>(BACKEND.url(BACKEND.ADMIN.USERS.TOGGLE_STATUS(id)), { status });
   }
+
+  private getMoviesPage(page?: number): Observable<AdminMoviesResponse> {
+    let params = new HttpParams().set('size', '100');
+    if (page !== undefined) {
+      params = params.set('page', page.toString());
+    }
+
+    return this.http.get<AdminMoviesResponse>(BACKEND.url(BACKEND.ADMIN.MOVIES.LIST), { params });
+  }
 }
 
 function normalizeMoviesResponse(response: AdminMoviesResponse): Movie[] {
@@ -290,4 +312,8 @@ function normalizeMoviesResponse(response: AdminMoviesResponse): Movie[] {
   }
 
   return 'results' in response ? response.results : response.content;
+}
+
+function isPageResponse(response: AdminMoviesResponse): response is PageResponse<Movie> {
+  return !Array.isArray(response) && 'content' in response;
 }
