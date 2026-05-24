@@ -51,7 +51,8 @@ export class LoginPageComponent {
   readonly hasDemoAccounts = computed(() => this.demoAccounts().length > 0);
   readonly demoPassword = environment.auth.demoPassword;
   readonly mvpAccountsUnlock = environment.auth.mvpAccountsUnlock.trim();
-  readonly unlockRequired = computed(() => this.mvpAccountsUnlock.length > 0);
+  readonly hasMvpAccountsUnlock = computed(() => this.mvpAccountsUnlock.length > 0);
+  readonly canShowDemoAccounts = computed(() => this.hasDemoAccounts() && this.hasMvpAccountsUnlock());
   readonly formError = signal<string | null>(null);
   readonly isSubmitting = signal(false);
   readonly showPassword = signal(false);
@@ -96,10 +97,12 @@ export class LoginPageComponent {
   }
 
   openDemoAccounts(): void {
+    if (!this.canShowDemoAccounts()) return;
+
     this.unlockValue.set('');
     this.unlockError.set(null);
     this.showSaveUnlockChoice.set(false);
-    this.accountsUnlocked.set(!this.unlockRequired() || this.hasSavedMvpUnlock());
+    this.accountsUnlocked.set(this.hasSavedMvpUnlock());
     this.showDemoAccounts.set(true);
     this.focusDemoDialog();
   }
