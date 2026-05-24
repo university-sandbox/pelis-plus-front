@@ -1,9 +1,30 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  PLATFORM_ID,
+  computed,
+  inject,
+  signal,
+  type ElementRef,
+  viewChild,
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { Router } from '@angular/router';
-import { LucideAngularModule, Mail, Lock, Film, Eye, EyeOff, AlertCircle, ArrowLeft } from 'lucide-angular';
+import { Router, RouterLink } from '@angular/router';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  Film,
+  Info,
+  Lock,
+  Mail,
+  UserRound,
+  X,
+  LucideAngularModule,
+} from 'lucide-angular';
 
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
@@ -23,12 +44,23 @@ interface LoginForm {
 export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
 
-  readonly demoEmail = environment.auth.demoEmail;
+  readonly demoDialog = viewChild<ElementRef<HTMLElement>>('demoDialog');
+  readonly demoAccounts = signal(parseDemoAccounts(environment.auth.demoEmail));
+  readonly hasDemoAccounts = computed(() => this.demoAccounts().length > 0);
   readonly demoPassword = environment.auth.demoPassword;
+  readonly mvpAccountsUnlock = environment.auth.mvpAccountsUnlock.trim();
+  readonly unlockRequired = computed(() => this.mvpAccountsUnlock.length > 0);
   readonly formError = signal<string | null>(null);
   readonly isSubmitting = signal(false);
   readonly showPassword = signal(false);
+  readonly showDemoAccounts = signal(false);
+  readonly accountsUnlocked = signal(false);
+  readonly showSaveUnlockChoice = signal(false);
+  readonly unlockValue = signal('');
+  readonly unlockError = signal<string | null>(null);
+  readonly canSubmitUnlock = computed(() => this.unlockValue().trim().length > 0);
 
   readonly Mail = Mail;
   readonly Lock = Lock;
@@ -37,6 +69,9 @@ export class LoginPageComponent {
   readonly EyeOff = EyeOff;
   readonly AlertCircle = AlertCircle;
   readonly ArrowLeft = ArrowLeft;
+  readonly Info = Info;
+  readonly UserRound = UserRound;
+  readonly X = X;
 
   readonly loginForm = new FormGroup<LoginForm>({
     email: new FormControl('', {
@@ -49,11 +84,86 @@ export class LoginPageComponent {
     }),
   });
 
-  get emailCtrl() { return this.loginForm.controls.email; }
-  get passwordCtrl() { return this.loginForm.controls.password; }
+  get emailCtrl() {
+    return this.loginForm.controls.email;
+  }
+  get passwordCtrl() {
+    return this.loginForm.controls.password;
+  }
 
   togglePassword(): void {
     this.showPassword.update((v) => !v);
+  }
+
+  openDemoAccounts(): void {
+    this.unlockValue.set('');
+    this.unlockError.set(null);
+    this.showSaveUnlockChoice.set(false);
+    this.accountsUnlocked.set(!this.unlockRequired() || this.hasSavedMvpUnlock());
+    this.showDemoAccounts.set(true);
+    this.focusDemoDialog();
+  }
+
+  closeDemoAccounts(): void {
+    this.showDemoAccounts.set(false);
+    this.unlockValue.set('');
+    this.unlockError.set(null);
+    this.showSaveUnlockChoice.set(false);
+    this.accountsUnlocked.set(false);
+  }
+
+  updateUnlockValue(event: Event): void {
+    const input = event.target;
+    this.unlockValue.set(input instanceof HTMLInputElement ? input.value : '');
+    this.unlockError.set(null);
+  }
+
+  unlockDemoAccounts(): void {
+    if (!this.canSubmitUnlock()) return;
+
+    if (this.unlockValue().trim() !== this.mvpAccountsUnlock) {
+      this.unlockError.set('Código incorrecto. Verifica el acceso MVP.');
+      return;
+    }
+
+    this.unlockError.set(null);
+    this.showSaveUnlockChoice.set(true);
+  }
+
+  saveMvpUnlock(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(MVP_ACCOUNTS_UNLOCK_STORAGE_KEY, this.mvpAccountsUnlock);
+    }
+    this.showSaveUnlockChoice.set(false);
+    this.accountsUnlocked.set(true);
+  }
+
+  continueWithoutSavingUnlock(): void {
+    this.showSaveUnlockChoice.set(false);
+    this.accountsUnlocked.set(true);
+  }
+
+  private hasSavedMvpUnlock(): boolean {
+    return hasStoredMvpUnlock(this.platformId, this.mvpAccountsUnlock);
+  }
+
+  private focusDemoDialog(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    setTimeout(() => this.demoDialog()?.nativeElement.focus());
+  }
+
+  useDemoAccount(email: string): void {
+    this.loginForm.patchValue({
+      email,
+      password: this.demoPassword,
+    });
+    this.loginForm.markAsPristine();
+    this.loginForm.markAsUntouched();
+    this.formError.set(null);
+    this.closeDemoAccounts();
   }
 
   submit(): void {
@@ -79,7 +189,9 @@ export class LoginPageComponent {
 
         const is401 =
           (error instanceof HttpErrorResponse && error.status === 401) ||
-          (typeof error === 'object' && error !== null && (error as { status?: number }).status === 401);
+          (typeof error === 'object' &&
+            error !== null &&
+            (error as { status?: number }).status === 401);
 
         if (is401) {
           this.formError.set('Credenciales incorrectas. Verifica tu correo y contraseña.');
@@ -90,4 +202,21 @@ export class LoginPageComponent {
       },
     });
   }
+}
+
+function parseDemoAccounts(value: string): readonly string[] {
+  return value
+    .split(';')
+    .map((email) => email.trim())
+    .filter((email) => email.length > 0);
+}
+
+const MVP_ACCOUNTS_UNLOCK_STORAGE_KEY = 'pelisplus_mvp_accounts_unlock';
+
+function hasStoredMvpUnlock(platformId: object, expectedValue: string): boolean {
+  if (!isPlatformBrowser(platformId)) {
+    return false;
+  }
+
+  return localStorage.getItem(MVP_ACCOUNTS_UNLOCK_STORAGE_KEY) === expectedValue;
 }

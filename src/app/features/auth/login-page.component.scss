@@ -1,47 +1,111 @@
+.auth-input {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-primary);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+  outline: none;
+}
 
-    .auth-input {
-      background: var(--color-surface-raised);
-      border: 1px solid var(--color-border-strong);
-      color: var(--color-text-primary);
-      transition: border-color 0.15s, box-shadow 0.15s;
-      outline: none;
-    }
+.auth-input::placeholder {
+  color: var(--color-text-disabled);
+}
 
-    .auth-input::placeholder {
-      color: var(--color-text-disabled);
-    }
+.auth-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: var(--ring);
+}
 
-    .auth-input:focus {
-      border-color: var(--color-accent);
-      box-shadow: var(--ring);
-    }
+.auth-input-error {
+  border-color: var(--color-error) !important;
+}
 
-    .auth-input-error {
-      border-color: var(--color-error) !important;
-    }
+.auth-input-error:focus {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+}
 
-    .auth-input-error:focus {
-      box-shadow: 0 0 0 2px rgba(239,68,68,.15) !important;
-    }
+.auth-btn:hover:not(:disabled) {
+  background: var(--color-accent-hover) !important;
+}
 
-    .auth-btn:hover:not(:disabled) {
-      background: var(--color-accent-hover) !important;
-    }
+.auth-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-    .auth-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+.auth-btn:focus-visible {
+  box-shadow: var(--ring);
+}
 
-    .auth-btn:focus-visible {
-      box-shadow: var(--ring);
-    }
+.back-btn:hover {
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary) !important;
+}
 
-    .back-btn:hover {
-      background: var(--color-surface-raised);
-      color: var(--color-text-primary) !important;
-    }
+.back-btn:focus-visible,
+.demo-trigger:focus-visible,
+.demo-close:focus-visible,
+.demo-use-btn:focus-visible {
+  box-shadow: var(--ring);
+}
 
-    .back-btn:focus-visible {
-      box-shadow: var(--ring);
-    }
+.demo-trigger,
+.demo-close {
+  border: 1px solid transparent;
+  outline: none;
+}
+
+.demo-trigger:hover,
+.demo-close:hover {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary) !important;
+}
+
+.demo-overlay {
+  background: rgba(2, 6, 23, 0.74);
+  backdrop-filter: blur(8px);
+}
+
+.demo-backdrop {
+  cursor: default;
+  border: 0;
+  background: transparent;
+}
+
+.demo-modal {
+  max-height: min(86dvh, 640px);
+  overflow: auto;
+}
+
+.demo-account {
+  overflow: hidden;
+}
+
+.demo-use-btn {
+  outline: none;
+}
+
+.demo-use-btn:hover {
+  background: var(--color-accent-hover) !important;
+}
+
+.demo-use-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.demo-secondary-btn {
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  outline: none;
+}
+
+.demo-secondary-btn:hover {
+  background: var(--color-surface);
+}
+
+.demo-secondary-btn:focus-visible {
+  box-shadow: var(--ring);
+}

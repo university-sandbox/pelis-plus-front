@@ -13,6 +13,7 @@ export interface AppEnvironment {
   auth: {
     demoEmail: string;
     demoPassword: string;
+    mvpAccountsUnlock: string;
     tokenStorageKey: string;
   };
 }

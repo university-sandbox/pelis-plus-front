@@ -13,6 +13,7 @@ const commonEnvSchema = z.object({
   NG_APP_BACKEND_BASE_URL: z.string().url(),
   NG_APP_AUTH_DEMO_EMAIL: z.string().default(''),
   NG_APP_AUTH_DEMO_PASSWORD: z.string().default(''),
+  NG_APP_MVP_ACCOUNTS: z.string().default(''),
   NG_APP_AUTH_TOKEN_STORAGE_KEY: z.string().default('auth_token'),
 });
 
@@ -35,6 +36,7 @@ const runtimeEnv = {
   NG_APP_BACKEND_BASE_URL: readEnv('NG_APP_BACKEND_BASE_URL'),
   NG_APP_AUTH_DEMO_EMAIL: readEnv('NG_APP_AUTH_DEMO_EMAIL'),
   NG_APP_AUTH_DEMO_PASSWORD: readEnv('NG_APP_AUTH_DEMO_PASSWORD'),
+  NG_APP_MVP_ACCOUNTS: readEnv('NG_APP_MVP_ACCOUNTS'),
   NG_APP_AUTH_TOKEN_STORAGE_KEY: readEnv('NG_APP_AUTH_TOKEN_STORAGE_KEY'),
 };
 const parsedEnv = commonEnvSchema.safeParse(runtimeEnv);
@@ -65,6 +67,7 @@ export const environment: AppEnvironment = {
   auth: {
     demoEmail: parsedEnv.data.NG_APP_AUTH_DEMO_EMAIL,
     demoPassword: parsedEnv.data.NG_APP_AUTH_DEMO_PASSWORD,
+    mvpAccountsUnlock: parsedEnv.data.NG_APP_MVP_ACCOUNTS,
     tokenStorageKey: parsedEnv.data.NG_APP_AUTH_TOKEN_STORAGE_KEY,
   },
 };

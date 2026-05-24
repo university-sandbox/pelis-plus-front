@@ -1,173 +1,406 @@
-
-    <div
-      class="flex min-h-dvh items-center justify-center px-4 py-12"
-      style="background: var(--color-bg);"
-    >
-      <!-- Card -->
-      <div
-        class="w-full max-w-md rounded-lg p-8 shadow-xl"
-        style="background: var(--color-surface); border: 1px solid var(--color-border);"
+<div
+  class="flex min-h-dvh items-center justify-center px-4 py-12"
+  style="background: var(--color-bg)"
+>
+  <!-- Card -->
+  <div
+    class="w-full max-w-md rounded-lg p-8 shadow-xl"
+    style="background: var(--color-surface); border: 1px solid var(--color-border)"
+  >
+    <!-- Back to catalog -->
+    <div class="mb-6 flex items-center justify-between gap-3">
+      <a
+        routerLink="/"
+        class="back-btn flex w-fit items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium transition-colors"
+        style="color: var(--color-text-secondary)"
+        aria-label="Volver al catálogo"
       >
-        <!-- Back to catalog -->
-        <a
-          routerLink="/"
-          class="back-btn mb-6 flex w-fit items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium transition-colors"
-          style="color: var(--color-text-secondary);"
-          aria-label="Volver al catálogo"
+        <lucide-icon [img]="ArrowLeft" [size]="16" aria-hidden="true" />
+        Volver
+      </a>
+
+      @if (hasDemoAccounts()) {
+        <button
+          type="button"
+          class="demo-trigger flex h-9 w-9 items-center justify-center rounded-lg transition-colors"
+          style="color: var(--color-text-secondary)"
+          aria-label="Ver cuentas demo"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="showDemoAccounts()"
+          (click)="openDemoAccounts()"
         >
-          <lucide-icon [img]="ArrowLeft" [size]="16" aria-hidden="true" />
-          Volver
-        </a>
+          <lucide-icon [img]="Info" [size]="18" aria-hidden="true" />
+        </button>
+      }
+    </div>
 
-        <!-- Logo -->
-        <div class="mb-8 flex flex-col items-center gap-2 text-center">
-          <div
-            class="flex h-14 w-14 items-center justify-center rounded-lg"
-            style="background: var(--color-accent-muted); border: 1px solid rgba(255,46,120,.28);"
-          >
-            <lucide-icon [img]="Film" [size]="28" style="color: var(--color-accent);" aria-hidden="true" />
-          </div>
-          <h1 class="pelis-display text-4xl" style="color: var(--color-text-primary);">
-            Bienvenido de vuelta
-          </h1>
-          <p class="text-sm" style="color: var(--color-text-secondary);">
-            Ingresa tus credenciales para continuar
-          </p>
+    <!-- Logo -->
+    <div class="mb-8 flex flex-col items-center gap-2 text-center">
+      <div
+        class="flex h-14 w-14 items-center justify-center rounded-lg"
+        style="background: var(--color-accent-muted); border: 1px solid rgba(255, 46, 120, 0.28)"
+      >
+        <lucide-icon
+          [img]="Film"
+          [size]="28"
+          style="color: var(--color-accent)"
+          aria-hidden="true"
+        />
+      </div>
+      <h1 class="pelis-display text-4xl" style="color: var(--color-text-primary)">
+        Bienvenido de vuelta
+      </h1>
+      <p class="text-sm" style="color: var(--color-text-secondary)">
+        Ingresa tus credenciales para continuar
+      </p>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate class="space-y-5">
+      <!-- Email -->
+      <div class="space-y-1.5">
+        <label
+          for="login-email"
+          class="block text-sm font-medium"
+          style="color: var(--color-text-primary)"
+        >
+          Correo electrónico
+        </label>
+        <div class="relative">
+          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+            <lucide-icon
+              [img]="Mail"
+              [size]="16"
+              style="color: var(--color-text-secondary)"
+              aria-hidden="true"
+            />
+          </span>
+          <input
+            id="login-email"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            placeholder="tu@correo.com"
+            class="auth-input w-full rounded py-3 pl-9 pr-4 text-sm"
+            [class.auth-input-error]="emailCtrl.touched && emailCtrl.invalid"
+            [attr.aria-describedby]="
+              emailCtrl.touched && emailCtrl.invalid ? 'login-email-error' : null
+            "
+            [attr.aria-invalid]="emailCtrl.touched && emailCtrl.invalid ? 'true' : null"
+          />
         </div>
-
-        <!-- Form -->
-        <form [formGroup]="loginForm" (ngSubmit)="submit()" novalidate class="space-y-5">
-
-          <!-- Email -->
-          <div class="space-y-1.5">
-            <label
-              for="login-email"
-              class="block text-sm font-medium"
-              style="color: var(--color-text-primary);"
-            >
-              Correo electrónico
-            </label>
-            <div class="relative">
-              <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                <lucide-icon [img]="Mail" [size]="16" style="color: var(--color-text-secondary);" aria-hidden="true" />
-              </span>
-              <input
-                id="login-email"
-                type="email"
-                formControlName="email"
-                autocomplete="email"
-                placeholder="tu@correo.com"
-                class="auth-input w-full rounded py-3 pl-9 pr-4 text-sm"
-                [class.auth-input-error]="emailCtrl.touched && emailCtrl.invalid"
-                [attr.aria-describedby]="emailCtrl.touched && emailCtrl.invalid ? 'login-email-error' : null"
-                [attr.aria-invalid]="emailCtrl.touched && emailCtrl.invalid ? 'true' : null"
-              />
-            </div>
-            @if (emailCtrl.touched && emailCtrl.invalid) {
-              <p id="login-email-error" class="flex items-center gap-1 text-xs" style="color: var(--color-error);" role="alert">
-                <lucide-icon [img]="AlertCircle" [size]="12" aria-hidden="true" />
-                Ingresa un correo electrónico válido.
-              </p>
-            }
-          </div>
-
-          <!-- Password -->
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
-              <label
-                for="login-password"
-                class="block text-sm font-medium"
-                style="color: var(--color-text-primary);"
-              >
-                Contraseña
-              </label>
-              <a
-                routerLink="/forgot-password"
-                class="text-xs font-medium transition-colors"
-                style="color: var(--color-accent);"
-              >
-                ¿Olvidaste tu contraseña?
-              </a>
-            </div>
-            <div class="relative">
-              <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
-                <lucide-icon [img]="Lock" [size]="16" style="color: var(--color-text-secondary);" aria-hidden="true" />
-              </span>
-              <input
-                id="login-password"
-                [type]="showPassword() ? 'text' : 'password'"
-                formControlName="password"
-                autocomplete="current-password"
-                placeholder="••••••••"
-                class="auth-input w-full rounded py-3 pl-9 pr-10 text-sm"
-                [class.auth-input-error]="passwordCtrl.touched && passwordCtrl.invalid"
-                [attr.aria-describedby]="passwordCtrl.touched && passwordCtrl.invalid ? 'login-password-error' : null"
-                [attr.aria-invalid]="passwordCtrl.touched && passwordCtrl.invalid ? 'true' : null"
-              />
-              <button
-                type="button"
-                (click)="togglePassword()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 transition-colors"
-                style="color: var(--color-text-secondary);"
-                [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-              >
-                @if (showPassword()) {
-                  <lucide-icon [img]="EyeOff" [size]="16" aria-hidden="true" />
-                } @else {
-                  <lucide-icon [img]="Eye" [size]="16" aria-hidden="true" />
-                }
-              </button>
-            </div>
-            @if (passwordCtrl.touched && passwordCtrl.invalid) {
-              <p id="login-password-error" class="flex items-center gap-1 text-xs" style="color: var(--color-error);" role="alert">
-                <lucide-icon [img]="AlertCircle" [size]="12" aria-hidden="true" />
-                La contraseña debe tener al menos 4 caracteres.
-              </p>
-            }
-          </div>
-
-          <!-- Global error -->
-          @if (formError()) {
-            <div
-              class="flex items-center gap-2 rounded-lg p-3 text-sm"
-              style="background: rgba(239,68,68,.10); border: 1px solid rgba(239,68,68,.25); color: var(--color-error);"
-              role="alert"
-              aria-live="polite"
-            >
-              <lucide-icon [img]="AlertCircle" [size]="16" aria-hidden="true" />
-              {{ formError() }}
-            </div>
-          }
-
-          <!-- Submit -->
-          <button
-            type="submit"
-            [disabled]="isSubmitting()"
-            class="auth-btn w-full rounded py-3 text-sm font-bold transition-colors"
-            style="background: var(--color-accent); color: var(--color-text-inverse);"
+        @if (emailCtrl.touched && emailCtrl.invalid) {
+          <p
+            id="login-email-error"
+            class="flex items-center gap-1 text-xs"
+            style="color: var(--color-error)"
+            role="alert"
           >
-            {{ isSubmitting() ? 'Ingresando…' : 'Ingresar' }}
-          </button>
-        </form>
-
-        <!-- Register link -->
-        <p class="mt-6 text-center text-sm" style="color: var(--color-text-secondary);">
-          ¿No tienes cuenta?
-          <a
-            routerLink="/register"
-            class="font-semibold transition-colors"
-            style="color: var(--color-accent);"
-          >
-            Regístrate gratis
-          </a>
-        </p>
-
-        <!-- Demo hint -->
-        @if (demoEmail) {
-          <p class="mt-4 text-center text-xs" style="color: var(--color-text-disabled);" aria-live="polite">
-            Demo: <span class="font-medium" style="color: var(--color-text-secondary);">{{ demoEmail }}</span>
-            / <span class="font-medium" style="color: var(--color-text-secondary);">{{ demoPassword }}</span>
+            <lucide-icon [img]="AlertCircle" [size]="12" aria-hidden="true" />
+            Ingresa un correo electrónico válido.
           </p>
         }
       </div>
+
+      <!-- Password -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <label
+            for="login-password"
+            class="block text-sm font-medium"
+            style="color: var(--color-text-primary)"
+          >
+            Contraseña
+          </label>
+          <a
+            routerLink="/forgot-password"
+            class="text-xs font-medium transition-colors"
+            style="color: var(--color-accent)"
+          >
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+        <div class="relative">
+          <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+            <lucide-icon
+              [img]="Lock"
+              [size]="16"
+              style="color: var(--color-text-secondary)"
+              aria-hidden="true"
+            />
+          </span>
+          <input
+            id="login-password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            class="auth-input w-full rounded py-3 pl-9 pr-10 text-sm"
+            [class.auth-input-error]="passwordCtrl.touched && passwordCtrl.invalid"
+            [attr.aria-describedby]="
+              passwordCtrl.touched && passwordCtrl.invalid ? 'login-password-error' : null
+            "
+            [attr.aria-invalid]="passwordCtrl.touched && passwordCtrl.invalid ? 'true' : null"
+          />
+          <button
+            type="button"
+            (click)="togglePassword()"
+            class="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 transition-colors"
+            style="color: var(--color-text-secondary)"
+            [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            @if (showPassword()) {
+              <lucide-icon [img]="EyeOff" [size]="16" aria-hidden="true" />
+            } @else {
+              <lucide-icon [img]="Eye" [size]="16" aria-hidden="true" />
+            }
+          </button>
+        </div>
+        @if (passwordCtrl.touched && passwordCtrl.invalid) {
+          <p
+            id="login-password-error"
+            class="flex items-center gap-1 text-xs"
+            style="color: var(--color-error)"
+            role="alert"
+          >
+            <lucide-icon [img]="AlertCircle" [size]="12" aria-hidden="true" />
+            La contraseña debe tener al menos 4 caracteres.
+          </p>
+        }
+      </div>
+
+      <!-- Global error -->
+      @if (formError()) {
+        <div
+          class="flex items-center gap-2 rounded-lg p-3 text-sm"
+          style="
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: var(--color-error);
+          "
+          role="alert"
+          aria-live="polite"
+        >
+          <lucide-icon [img]="AlertCircle" [size]="16" aria-hidden="true" />
+          {{ formError() }}
+        </div>
+      }
+
+      <!-- Submit -->
+      <button
+        type="submit"
+        [disabled]="isSubmitting()"
+        class="auth-btn w-full rounded py-3 text-sm font-bold transition-colors"
+        style="background: var(--color-accent); color: var(--color-text-inverse)"
+      >
+        {{ isSubmitting() ? 'Ingresando…' : 'Ingresar' }}
+      </button>
+    </form>
+
+    <!-- Register link -->
+    <p class="mt-6 text-center text-sm" style="color: var(--color-text-secondary)">
+      ¿No tienes cuenta?
+      <a
+        routerLink="/register"
+        class="font-semibold transition-colors"
+        style="color: var(--color-accent)"
+      >
+        Regístrate gratis
+      </a>
+    </p>
+  </div>
+
+  @if (showDemoAccounts()) {
+    <div
+      class="demo-overlay fixed inset-0 z-50 flex items-center justify-center px-4 py-6"
+      role="presentation"
+      (document:keydown.escape)="closeDemoAccounts()"
+    >
+      <button
+        type="button"
+        class="demo-backdrop absolute inset-0"
+        aria-label="Cerrar cuentas demo"
+        (click)="closeDemoAccounts()"
+      ></button>
+
+      <section
+        #demoDialog
+        class="demo-modal relative w-full max-w-md rounded-lg p-5 shadow-2xl"
+        style="background: var(--color-surface); border: 1px solid var(--color-border)"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="demo-accounts-title"
+        aria-describedby="demo-accounts-description"
+        tabindex="-1"
+      >
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-start gap-3">
+            <span
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+              style="
+                background: var(--color-accent-muted);
+                color: var(--color-accent);
+                border: 1px solid rgba(255, 46, 120, 0.28);
+              "
+            >
+              <lucide-icon [img]="UserRound" [size]="20" aria-hidden="true" />
+            </span>
+            <div>
+              <h2
+                id="demo-accounts-title"
+                class="text-base font-bold"
+                style="color: var(--color-text-primary)"
+              >
+                Cuentas demo
+              </h2>
+              <p
+                id="demo-accounts-description"
+                class="mt-1 text-sm"
+                style="color: var(--color-text-secondary)"
+              >
+                @if (accountsUnlocked()) {
+                  Selecciona una cuenta para completar el formulario.
+                } @else {
+                  Ingresa el acceso MVP para ver las cuentas disponibles.
+                }
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="demo-close flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors"
+            style="color: var(--color-text-secondary)"
+            aria-label="Cerrar cuentas demo"
+            (click)="closeDemoAccounts()"
+          >
+            <lucide-icon [img]="X" [size]="18" aria-hidden="true" />
+          </button>
+        </div>
+
+        @if (showSaveUnlockChoice()) {
+          <div
+            class="mt-5 rounded-lg p-4"
+            style="
+              background: var(--color-surface-raised);
+              border: 1px solid var(--color-border-strong);
+            "
+          >
+            <p class="text-sm font-semibold" style="color: var(--color-text-primary)">
+              Acceso correcto
+            </p>
+            <p class="mt-1 text-sm" style="color: var(--color-text-secondary)">
+              ¿Quieres guardar este acceso en este navegador para futuras consultas?
+            </p>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                class="demo-use-btn rounded py-2.5 text-sm font-bold transition-colors"
+                style="background: var(--color-accent); color: var(--color-text-inverse)"
+                (click)="saveMvpUnlock()"
+              >
+                Guardar
+              </button>
+              <button
+                type="button"
+                class="demo-secondary-btn rounded py-2.5 text-sm font-bold transition-colors"
+                style="color: var(--color-text-primary)"
+                (click)="continueWithoutSavingUnlock()"
+              >
+                Solo esta vez
+              </button>
+            </div>
+          </div>
+        } @else if (accountsUnlocked()) {
+          <div class="mt-5 space-y-3">
+            @for (account of demoAccounts(); track account) {
+              <article
+                class="demo-account rounded-lg p-4"
+                style="
+                  background: var(--color-surface-raised);
+                  border: 1px solid var(--color-border-strong);
+                "
+              >
+                <div class="min-w-0">
+                  <p
+                    class="text-xs font-semibold uppercase"
+                    style="color: var(--color-text-disabled)"
+                  >
+                    Correo
+                  </p>
+                  <p
+                    class="mt-1 truncate text-sm font-semibold"
+                    style="color: var(--color-text-primary)"
+                  >
+                    {{ account }}
+                  </p>
+                  <p
+                    class="mt-3 text-xs font-semibold uppercase"
+                    style="color: var(--color-text-disabled)"
+                  >
+                    Contraseña
+                  </p>
+                  <p class="mt-1 text-sm font-semibold" style="color: var(--color-text-primary)">
+                    {{ demoPassword }}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  class="demo-use-btn mt-4 w-full rounded py-2.5 text-sm font-bold transition-colors"
+                  style="background: var(--color-accent); color: var(--color-text-inverse)"
+                  (click)="useDemoAccount(account)"
+                >
+                  Usar cuenta
+                </button>
+              </article>
+            }
+          </div>
+        } @else {
+          <form class="mt-5 space-y-4" (ngSubmit)="unlockDemoAccounts()" novalidate>
+            <div class="space-y-1.5">
+              <label
+                for="mvp-accounts-unlock"
+                class="block text-sm font-medium"
+                style="color: var(--color-text-primary)"
+              >
+                Acceso MVP
+              </label>
+              <input
+                id="mvp-accounts-unlock"
+                type="password"
+                autocomplete="off"
+                class="auth-input w-full rounded px-3 py-3 text-sm"
+                [value]="unlockValue()"
+                [class.auth-input-error]="unlockError()"
+                [attr.aria-describedby]="unlockError() ? 'mvp-accounts-unlock-error' : null"
+                [attr.aria-invalid]="unlockError() ? 'true' : null"
+                (input)="updateUnlockValue($event)"
+              />
+              @if (unlockError()) {
+                <p
+                  id="mvp-accounts-unlock-error"
+                  class="flex items-center gap-1 text-xs"
+                  style="color: var(--color-error)"
+                  role="alert"
+                >
+                  <lucide-icon [img]="AlertCircle" [size]="12" aria-hidden="true" />
+                  {{ unlockError() }}
+                </p>
+              }
+            </div>
+
+            <button
+              type="submit"
+              class="demo-use-btn w-full rounded py-2.5 text-sm font-bold transition-colors"
+              style="background: var(--color-accent); color: var(--color-text-inverse)"
+              [disabled]="!canSubmitUnlock()"
+            >
+              Desbloquear cuentas
+            </button>
+          </form>
+        }
+      </section>
     </div>
+  }
+</div>
