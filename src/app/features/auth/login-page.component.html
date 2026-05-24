@@ -357,7 +357,7 @@
             }
           </div>
         } @else {
-          <form class="mt-5 space-y-4" (ngSubmit)="unlockDemoAccounts()" novalidate>
+          <div class="mt-5 space-y-4">
             <div class="space-y-1.5">
               <label
                 for="mvp-accounts-unlock"
@@ -376,6 +376,7 @@
                 [attr.aria-describedby]="unlockError() ? 'mvp-accounts-unlock-error' : null"
                 [attr.aria-invalid]="unlockError() ? 'true' : null"
                 (input)="updateUnlockValue($event)"
+                (keydown.enter)="unlockDemoAccounts(); $event.preventDefault()"
               />
               @if (unlockError()) {
                 <p
@@ -391,14 +392,15 @@
             </div>
 
             <button
-              type="submit"
+              type="button"
               class="demo-use-btn w-full rounded py-2.5 text-sm font-bold transition-colors"
               style="background: var(--color-accent); color: var(--color-text-inverse)"
               [disabled]="!canSubmitUnlock()"
+              (click)="unlockDemoAccounts()"
             >
               Desbloquear cuentas
             </button>
-          </form>
+          </div>
         }
       </section>
     </div>
