@@ -54,15 +54,24 @@
         </nav>
 
         <!-- Back to site -->
-        <div class="px-3 py-4" style="border-top: 1px solid var(--color-border);">
+        <div class="space-y-2 px-3 py-4" style="border-top: 1px solid var(--color-border);">
           <a
             routerLink="/catalog"
-            class="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+            class="admin-action flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
             style="color: var(--color-text-secondary);"
           >
             <lucide-icon [img]="Home" [size]="15" aria-hidden="true" />
             Ver vista cliente
           </a>
+          <button
+            type="button"
+            (click)="logout()"
+            class="admin-action flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+            style="color: var(--color-text-secondary);"
+          >
+            <lucide-icon [img]="LogOut" [size]="15" aria-hidden="true" />
+            Cerrar sesión
+          </button>
         </div>
       </aside>
 
@@ -87,6 +96,15 @@
             }
           </button>
           <span class="text-sm font-bold" style="color: var(--color-text-primary);">Admin Panel</span>
+          <button
+            type="button"
+            (click)="logout()"
+            class="ml-auto rounded-lg p-2 transition-colors"
+            style="color: var(--color-text-secondary);"
+            aria-label="Cerrar sesión"
+          >
+            <lucide-icon [img]="LogOut" [size]="20" aria-hidden="true" />
+          </button>
         </header>
 
         <main class="flex-1 overflow-auto p-6">

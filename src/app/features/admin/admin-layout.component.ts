@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import {
   LucideAngularModule,
   type LucideIconData,
@@ -13,7 +13,10 @@ import {
   X,
   Clapperboard,
   Home,
+  LogOut,
 } from 'lucide-angular';
+
+import { AuthService } from '../../core/services/auth.service';
 
 interface NavItem {
   path: string;
@@ -29,12 +32,16 @@ interface NavItem {
   styleUrl: './admin-layout.component.scss',
 })
 export class AdminLayoutComponent {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   readonly sidebarOpen = signal(false);
 
   readonly Clapperboard = Clapperboard;
   readonly Menu = Menu;
   readonly X = X;
   readonly Home = Home;
+  readonly LogOut = LogOut;
 
   readonly navItems: NavItem[] = [
     { path: '/admin/movies', label: 'Películas', icon: Film },
@@ -44,4 +51,10 @@ export class AdminLayoutComponent {
     { path: '/admin/orders', label: 'Pedidos', icon: ClipboardList },
     { path: '/admin/users', label: 'Usuarios', icon: Users },
   ];
+
+  logout(): void {
+    this.authService.logout();
+    this.sidebarOpen.set(false);
+    void this.router.navigate(['/login']);
+  }
 }
