@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import type { OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   LucideAngularModule,
   ArrowLeft,
@@ -45,9 +46,11 @@ export class CheckoutPageComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly membershipService = inject(MembershipService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly paying = signal(false);
-  readonly paymentError = signal(false);
+  readonly paymentError = signal<string | null>(null);
+  readonly paymentCancelled = signal(false);
   readonly membershipLoading = signal(true);
   readonly activeMembership = signal<ActiveMembership | null>(null);
   readonly activeMembershipPlan = signal<MembershipPlan | null>(null);
@@ -97,6 +100,7 @@ export class CheckoutPageComponent implements OnInit {
     }
 
     this.loadMembershipBenefit();
+    this.paymentCancelled.set(this.route.snapshot.queryParamMap.get('payment') === 'cancelled');
   }
 
   ticketTotal(): number {
@@ -136,6 +140,10 @@ export class CheckoutPageComponent implements OnInit {
   }
 
   pay(): void {
+    if (this.paying()) {
+      return;
+    }
+
     if (!this.authService.isClient()) {
       void this.router.navigate(['/catalog']);
       return;
@@ -147,7 +155,8 @@ export class CheckoutPageComponent implements OnInit {
 
     this.syncMembershipDiscount();
     this.paying.set(true);
-    this.paymentError.set(false);
+    this.paymentError.set(null);
+    this.paymentCancelled.set(false);
     this.pendingPayment.set(null);
     const cart = this.cartService.cart();
     this.orderService
@@ -168,11 +177,17 @@ export class CheckoutPageComponent implements OnInit {
           }
 
           this.pendingPayment.set(res);
+          if (res.checkoutUrl) {
+            window.location.assign(res.checkoutUrl);
+            return;
+          }
+
           this.paying.set(false);
+          this.paymentError.set('Stripe no devolvió una URL de checkout para este pedido.');
         },
-        error: () => {
+        error: (error: unknown) => {
           this.paying.set(false);
-          this.paymentError.set(true);
+          this.paymentError.set(this.paymentErrorMessage(error));
         },
       });
   }
@@ -208,5 +223,19 @@ export class CheckoutPageComponent implements OnInit {
 
   private syncMembershipDiscount(): void {
     this.cartService.applyMembershipDiscount(this.membershipBenefit().discount);
+  }
+
+  private paymentErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const message = typeof error.error?.message === 'string' ? error.error.message : '';
+      if (message.includes('STRIPE_SECRET_KEY')) {
+        return 'Falta configurar STRIPE_SECRET_KEY en el backend para crear la sesión de Stripe.';
+      }
+      if (message) {
+        return message;
+      }
+    }
+
+    return 'No pudimos preparar el pedido. Revisa la configuración de Stripe e inténtalo de nuevo.';
   }
 }

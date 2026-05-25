@@ -85,6 +85,13 @@ export const routes: Routes = [
         (c) => c.ConfirmationPageComponent,
       ),
   },
+  {
+    path: 'checkout/stripe/success',
+    loadComponent: () =>
+      import('./features/checkout/stripe-success-page.component').then(
+        (c) => c.StripeSuccessPageComponent,
+      ),
+  },
 
   // ── User profile (auth required) ─────────────────────
   {
@@ -95,6 +102,13 @@ export const routes: Routes = [
   },
 
   // ── Memberships (public) ─────────────────────────────
+  {
+    path: 'memberships/stripe/success',
+    loadComponent: () =>
+      import('./features/memberships/membership-stripe-success-page.component').then(
+        (c) => c.MembershipStripeSuccessPageComponent,
+      ),
+  },
   {
     path: 'memberships',
     loadComponent: () =>

@@ -6,7 +6,8 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   AlertCircle,
   ArrowLeft,
@@ -20,6 +21,7 @@ import {
 } from 'lucide-angular';
 
 import { MembershipService } from '../../core/services/membership.service';
+import { type MembershipSubscriptionResponse } from '../../core/services/membership.service';
 import { type MembershipPlan } from '../../core/models/membership.model';
 import { AuthService } from '../../core/services/auth.service';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
@@ -43,6 +45,7 @@ export class MembershipsPageComponent implements OnInit {
   private readonly membershipService = inject(MembershipService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly plans = signal<MembershipPlan[]>([]);
   readonly loading = signal(true);
@@ -50,7 +53,7 @@ export class MembershipsPageComponent implements OnInit {
   readonly checkoutStep = signal<MembershipCheckoutStep>('plans');
   readonly selectedPlan = signal<MembershipPlan | null>(null);
   readonly preparingPayment = signal(false);
-  readonly paymentSession = signal<{ planId: string; formToken: string } | null>(null);
+  readonly paymentSession = signal<MembershipSubscriptionResponse | null>(null);
   readonly paymentError = signal<string | null>(null);
   readonly checkoutSteps: readonly MembershipCheckoutStepItem[] = [
     { id: 'plans', label: 'Elige tu plan' },
@@ -77,6 +80,10 @@ export class MembershipsPageComponent implements OnInit {
   readonly AlertCircle = AlertCircle;
 
   ngOnInit(): void {
+    if (this.route.snapshot.queryParamMap.get('payment') === 'cancelled') {
+      this.paymentError.set('El pago de la membresía fue cancelado. Puedes intentarlo nuevamente cuando quieras.');
+    }
+
     this.loadPlans();
   }
 
@@ -121,15 +128,30 @@ export class MembershipsPageComponent implements OnInit {
 
     this.membershipService.subscribe(plan.id).subscribe({
       next: (session) => {
-        this.paymentSession.set(session);
         this.preparingPayment.set(false);
+        if (!session.checkoutUrl) {
+          this.paymentError.set('Stripe no devolvió una URL de checkout para esta membresía.');
+          return;
+        }
+
+        this.paymentSession.set(session);
         this.checkoutStep.set('payment-ready');
       },
-      error: () => {
+      error: (error: unknown) => {
         this.preparingPayment.set(false);
-        this.paymentError.set('No pudimos preparar la sesión de pago. Inténtalo nuevamente.');
+        this.paymentError.set(this.paymentErrorMessage(error));
       },
     });
+  }
+
+  goToStripeCheckout(): void {
+    const checkoutUrl = this.paymentSession()?.checkoutUrl;
+    if (!checkoutUrl) {
+      this.paymentError.set('Stripe no devolvió una URL de checkout para esta membresía.');
+      return;
+    }
+
+    window.location.assign(checkoutUrl);
   }
 
   paymentStepStatus(step: MembershipCheckoutStep): 'done' | 'active' | 'pending' {
@@ -158,5 +180,19 @@ export class MembershipsPageComponent implements OnInit {
     }
 
     return step === 'plans' ? Crown : ShieldCheck;
+  }
+
+  private paymentErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const message = typeof error.error?.message === 'string' ? error.error.message : '';
+      if (message.includes('STRIPE_SECRET_KEY')) {
+        return 'Falta configurar STRIPE_SECRET_KEY en el backend para crear la sesión de Stripe.';
+      }
+      if (message) {
+        return message;
+      }
+    }
+
+    return 'No pudimos preparar la sesión de Stripe. Revisa la configuración e inténtalo nuevamente.';
   }
 }

@@ -13,14 +13,19 @@ import {
 export class OrderService {
   private readonly http = inject(HttpClient);
 
-  /** Create order and receive Izipay formToken */
+  /** Create order and receive a Stripe Checkout sandbox URL when payment is required. */
   createOrder(payload: CreateOrderPayload): Observable<CreateOrderResponse> {
     return this.http.post<CreateOrderResponse>(BACKEND.url(BACKEND.ORDERS.CREATE), payload);
   }
 
-  /** Confirm order after Izipay payment callback */
+  /** Confirm order after a legacy/manual payment callback. */
   confirmOrder(orderId: string, paymentResult: unknown): Observable<Order> {
     return this.http.post<Order>(BACKEND.url(BACKEND.ORDERS.CONFIRM(orderId)), { paymentResult });
+  }
+
+  /** Verify a Stripe Checkout Session server-side and issue tickets. */
+  confirmStripeCheckout(sessionId: string): Observable<Order> {
+    return this.http.post<Order>(BACKEND.url(BACKEND.ORDERS.CONFIRM_STRIPE), { sessionId });
   }
 
   /** Fetch order detail */

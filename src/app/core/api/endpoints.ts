@@ -83,10 +83,12 @@ export const BACKEND = {
 
   // --- Orders & Checkout ---
   ORDERS: {
-    /** POST /orders → { order, requiresPayment, formToken } */
+    /** POST /orders → { order, requiresPayment, checkoutUrl } */
     CREATE: '/orders',
-    /** POST /orders/:id/confirm → { order } (verify Izipay paymentResult server-side) */
+    /** POST /orders/:id/confirm → { order } */
     CONFIRM: (id: number | string) => `/orders/${id}/confirm`,
+    /** POST /orders/stripe/confirm → { order } */
+    CONFIRM_STRIPE: '/orders/stripe/confirm',
     /** GET /orders/:id */
     DETAIL: (id: number | string) => `/orders/${id}`,
     /** GET /orders/me */
@@ -109,10 +111,12 @@ export const BACKEND = {
     MY_PLAN: '/memberships/me',
     /** GET /memberships/me/benefits */
     MY_BENEFITS: '/memberships/me/benefits',
-    /** POST /memberships/subscribe → { orderId, formToken } */
+    /** POST /memberships/subscribe → { planId, checkoutSessionId, checkoutUrl } */
     SUBSCRIBE: '/memberships/subscribe',
     /** POST /memberships/me/confirm */
     CONFIRM: '/memberships/me/confirm',
+    /** POST /memberships/stripe/confirm */
+    CONFIRM_STRIPE: '/memberships/stripe/confirm',
     /** PATCH /memberships/me/cancel */
     CANCEL: '/memberships/me/cancel',
   },

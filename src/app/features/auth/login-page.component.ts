@@ -11,7 +11,7 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ReactiveFormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   AlertCircle,
   ArrowLeft,
@@ -44,6 +44,7 @@ interface LoginForm {
 export class LoginPageComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly platformId = inject(PLATFORM_ID);
 
   readonly demoDialog = viewChild<ElementRef<HTMLElement>>('demoDialog');
@@ -184,7 +185,8 @@ export class LoginPageComponent {
     this.authService.login(email, password).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        const nextRoute = this.authService.isAdmin() ? '/admin' : environment.app.postLoginRoute;
+        const redirect = this.safeRedirectUrl();
+        const nextRoute = this.authService.isAdmin() ? '/admin' : (redirect ?? environment.app.postLoginRoute);
         void this.router.navigateByUrl(nextRoute);
       },
       error: (error: unknown) => {
@@ -204,6 +206,15 @@ export class LoginPageComponent {
         this.formError.set('No podemos conectarnos ahora. Inténtalo en un momento.');
       },
     });
+  }
+
+  private safeRedirectUrl(): string | null {
+    const redirect = this.route.snapshot.queryParamMap.get('redirect');
+    if (!redirect || !redirect.startsWith('/') || redirect.startsWith('//')) {
+      return null;
+    }
+
+    return redirect;
   }
 }
 

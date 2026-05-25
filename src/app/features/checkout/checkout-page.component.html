@@ -259,6 +259,25 @@
             </div>
           </div>
 
+          @if (paymentCancelled()) {
+            <div
+              class="flex items-start gap-2 rounded-xl p-4"
+              style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.28)"
+              role="status"
+            >
+              <lucide-icon
+                [img]="ShieldCheck"
+                [size]="20"
+                style="color: var(--color-error); flex-shrink: 0"
+                aria-hidden="true"
+              />
+              <p class="text-xs leading-5" style="color: var(--color-text-secondary)">
+                <strong style="color: var(--color-text-primary)">Pago cancelado.</strong>
+                Tu pedido no fue confirmado. Puedes intentarlo nuevamente cuando quieras.
+              </p>
+            </div>
+          }
+
           @if (pendingPayment(); as payment) {
             <section
               class="rounded-xl p-5"
@@ -274,21 +293,21 @@
                 </div>
                 <div>
                   <h2 class="font-bold" style="color: var(--color-text-primary)">
-                    Listo para pago
+                    Redirigiendo a Stripe
                   </h2>
                   <p class="mt-1 text-xs leading-5" style="color: var(--color-text-secondary)">
-                    Aplicamos tus beneficios de membresía. El pago real se conectará en el siguiente
-                    paso.
+                    Aplicamos tus beneficios de membresía. Completarás el pago en la pasarela
+                    sandbox de Stripe.
                   </p>
                 </div>
               </div>
 
-              @if (payment.formToken) {
+              @if (payment.checkoutSessionId) {
                 <div class="mb-4 grid gap-1">
                   <span
                     class="text-xs font-semibold uppercase"
                     style="color: var(--color-text-secondary)"
-                    >Token de pago</span
+                    >Sesión de Stripe</span
                   >
                   <code
                     class="break-all rounded-lg px-3 py-2 text-xs"
@@ -298,28 +317,25 @@
                       border: 1px solid var(--color-border);
                     "
                   >
-                    {{ payment.formToken }}
+                    {{ payment.checkoutSessionId }}
                   </code>
                 </div>
               }
 
-              <button
-                type="button"
-                disabled
+              <a
+                [href]="payment.checkoutUrl ?? '#'"
                 class="flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-base font-bold"
                 style="
                   background: var(--color-accent);
                   color: var(--color-text-inverse);
-                  opacity: 0.58;
                 "
-                aria-disabled="true"
               >
                 <lucide-icon [img]="CreditCard" [size]="18" aria-hidden="true" />
-                <span>Continuar al pago · S/ {{ payment.paymentAmount }}</span>
-              </button>
+                <span>Ir a Stripe · S/ {{ payment.paymentAmount }}</span>
+              </a>
 
               <p class="mt-3 text-center text-xs" style="color: var(--color-text-secondary)">
-                Tu pedido quedó reservado mientras se conecta la pasarela real.
+                Tu pedido quedó reservado mientras completas el pago.
               </p>
             </section>
           } @else {
@@ -336,7 +352,7 @@
               />
               <p class="text-xs" style="color: var(--color-text-secondary)">
                 Pago seguro procesado por
-                <strong style="color: var(--color-text-primary)">Izipay</strong>. Nunca almacenamos
+                <strong style="color: var(--color-text-primary)">Stripe</strong>. Nunca almacenamos
                 tus datos de tarjeta.
               </p>
             </div>
@@ -363,7 +379,7 @@
 
           @if (paymentError()) {
             <p class="text-center text-sm" style="color: var(--color-error)">
-              No pudimos preparar el pedido. Inténtalo de nuevo.
+              {{ paymentError() }}
             </p>
           }
         </div>
