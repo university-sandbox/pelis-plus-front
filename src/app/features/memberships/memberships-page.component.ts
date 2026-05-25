@@ -128,21 +128,30 @@ export class MembershipsPageComponent implements OnInit {
 
     this.membershipService.subscribe(plan.id).subscribe({
       next: (session) => {
-        this.paymentSession.set(session);
         this.preparingPayment.set(false);
-        this.checkoutStep.set('payment-ready');
-        if (session.checkoutUrl) {
-          window.location.assign(session.checkoutUrl);
+        if (!session.checkoutUrl) {
+          this.paymentError.set('Stripe no devolvió una URL de checkout para esta membresía.');
           return;
         }
 
-        this.paymentError.set('Stripe no devolvió una URL de checkout para esta membresía.');
+        this.paymentSession.set(session);
+        this.checkoutStep.set('payment-ready');
       },
       error: (error: unknown) => {
         this.preparingPayment.set(false);
         this.paymentError.set(this.paymentErrorMessage(error));
       },
     });
+  }
+
+  goToStripeCheckout(): void {
+    const checkoutUrl = this.paymentSession()?.checkoutUrl;
+    if (!checkoutUrl) {
+      this.paymentError.set('Stripe no devolvió una URL de checkout para esta membresía.');
+      return;
+    }
+
+    window.location.assign(checkoutUrl);
   }
 
   paymentStepStatus(step: MembershipCheckoutStep): 'done' | 'active' | 'pending' {

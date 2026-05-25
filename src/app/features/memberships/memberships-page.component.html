@@ -185,14 +185,17 @@
               >
                 Elegir otro plan
               </button>
-              <a
-                [href]="paymentSession()?.checkoutUrl ?? '#'"
+              <button
+                type="button"
+                (click)="goToStripeCheckout()"
+                [disabled]="!paymentSession()?.checkoutUrl"
                 class="flex items-center justify-center gap-2 rounded py-3 text-sm font-bold"
                 style="background: var(--color-accent); color: var(--color-text-inverse);"
+                [style.opacity]="paymentSession()?.checkoutUrl ? '1' : '.58'"
               >
                 <lucide-icon [img]="CreditCard" [size]="17" aria-hidden="true" />
                 Ir a Stripe
-              </a>
+              </button>
             </div>
           </section>
         } @else {
