@@ -85,6 +85,14 @@ export const routes: Routes = [
         (c) => c.ConfirmationPageComponent,
       ),
   },
+  {
+    path: 'checkout/stripe/success',
+    canActivate: [clientGuard],
+    loadComponent: () =>
+      import('./features/checkout/stripe-success-page.component').then(
+        (c) => c.StripeSuccessPageComponent,
+      ),
+  },
 
   // ── User profile (auth required) ─────────────────────
   {

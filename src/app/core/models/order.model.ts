@@ -50,7 +50,9 @@ export interface CreateOrderPayload {
 
 export interface CreateOrderResponse {
   orderId: string;
-  formToken: string | null; // Izipay payment form token, null when no payment is needed
+  formToken: string | null;
+  checkoutSessionId: string | null;
+  checkoutUrl: string | null;
   order: Order;
   requiresPayment: boolean;
   membershipTicketsApplied: number;

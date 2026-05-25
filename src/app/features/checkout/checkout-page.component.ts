@@ -169,6 +169,12 @@ export class CheckoutPageComponent implements OnInit {
 
           this.pendingPayment.set(res);
           this.paying.set(false);
+          if (res.checkoutUrl) {
+            window.location.assign(res.checkoutUrl);
+            return;
+          }
+
+          this.paymentError.set(true);
         },
         error: () => {
           this.paying.set(false);
