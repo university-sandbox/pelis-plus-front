@@ -140,6 +140,10 @@ export class CheckoutPageComponent implements OnInit {
   }
 
   pay(): void {
+    if (this.paying()) {
+      return;
+    }
+
     if (!this.authService.isClient()) {
       void this.router.navigate(['/catalog']);
       return;
@@ -173,12 +177,12 @@ export class CheckoutPageComponent implements OnInit {
           }
 
           this.pendingPayment.set(res);
-          this.paying.set(false);
           if (res.checkoutUrl) {
             window.location.assign(res.checkoutUrl);
             return;
           }
 
+          this.paying.set(false);
           this.paymentError.set('Stripe no devolvió una URL de checkout para este pedido.');
         },
         error: (error: unknown) => {
