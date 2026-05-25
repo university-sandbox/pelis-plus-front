@@ -111,10 +111,12 @@ export const BACKEND = {
     MY_PLAN: '/memberships/me',
     /** GET /memberships/me/benefits */
     MY_BENEFITS: '/memberships/me/benefits',
-    /** POST /memberships/subscribe → { orderId, formToken } */
+    /** POST /memberships/subscribe → { planId, checkoutSessionId, checkoutUrl } */
     SUBSCRIBE: '/memberships/subscribe',
     /** POST /memberships/me/confirm */
     CONFIRM: '/memberships/me/confirm',
+    /** POST /memberships/stripe/confirm */
+    CONFIRM_STRIPE: '/memberships/stripe/confirm',
     /** PATCH /memberships/me/cancel */
     CANCEL: '/memberships/me/cancel',
   },

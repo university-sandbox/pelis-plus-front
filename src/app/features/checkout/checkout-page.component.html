@@ -360,7 +360,7 @@
 
           @if (paymentError()) {
             <p class="text-center text-sm" style="color: var(--color-error)">
-              No pudimos preparar el pedido. Inténtalo de nuevo.
+              {{ paymentError() }}
             </p>
           }
         </div>

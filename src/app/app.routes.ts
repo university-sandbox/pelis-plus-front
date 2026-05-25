@@ -104,6 +104,14 @@ export const routes: Routes = [
 
   // ── Memberships (public) ─────────────────────────────
   {
+    path: 'memberships/stripe/success',
+    canActivate: [clientGuard],
+    loadComponent: () =>
+      import('./features/memberships/membership-stripe-success-page.component').then(
+        (c) => c.MembershipStripeSuccessPageComponent,
+      ),
+  },
+  {
     path: 'memberships',
     loadComponent: () =>
       import('./features/memberships/memberships-page.component').then(
