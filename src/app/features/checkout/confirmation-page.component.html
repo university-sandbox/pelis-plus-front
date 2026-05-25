@@ -25,6 +25,30 @@
               <app-skeleton-loader height="340px" radius="16px" />
             }
           </div>
+        } @else if (loadError()) {
+          <div
+            class="rounded-2xl px-6 py-8 text-center"
+            style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-secondary);"
+          >
+            <h2 class="text-lg font-bold" style="color: var(--color-text-primary);">
+              No pudimos cargar tus entradas
+            </h2>
+            <p class="mt-2 text-sm">
+              El pago fue confirmado, pero hubo un problema consultando las entradas. Puedes intentarlo desde tu perfil.
+            </p>
+          </div>
+        } @else if (tickets().length === 0) {
+          <div
+            class="rounded-2xl px-6 py-8 text-center"
+            style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-secondary);"
+          >
+            <h2 class="text-lg font-bold" style="color: var(--color-text-primary);">
+              Entradas en preparación
+            </h2>
+            <p class="mt-2 text-sm">
+              Tu compra está confirmada. Si tus entradas no aparecen todavía, revisa tu perfil en unos segundos.
+            </p>
+          </div>
         } @else {
           <div class="space-y-6">
             @for (ticket of tickets(); track ticket.id) {

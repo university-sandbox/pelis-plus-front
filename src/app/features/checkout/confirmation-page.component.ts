@@ -26,6 +26,7 @@ export class ConfirmationPageComponent implements OnInit {
 
   readonly tickets = signal<Ticket[]>([]);
   readonly loading = signal(true);
+  readonly loadError = signal(false);
 
   readonly CheckCircle = CheckCircle;
   readonly Home = Home;
@@ -36,9 +37,13 @@ export class ConfirmationPageComponent implements OnInit {
     this.ticketService.getMyTickets().subscribe({
       next: (list) => {
         this.tickets.set(list.filter((t) => t.orderId === orderId));
+        this.loadError.set(false);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.loadError.set(true);
+        this.loading.set(false);
+      },
     });
   }
 }

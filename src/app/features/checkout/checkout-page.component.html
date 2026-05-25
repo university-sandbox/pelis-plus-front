@@ -259,6 +259,25 @@
             </div>
           </div>
 
+          @if (paymentCancelled()) {
+            <div
+              class="flex items-start gap-2 rounded-xl p-4"
+              style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.28)"
+              role="status"
+            >
+              <lucide-icon
+                [img]="ShieldCheck"
+                [size]="20"
+                style="color: var(--color-error); flex-shrink: 0"
+                aria-hidden="true"
+              />
+              <p class="text-xs leading-5" style="color: var(--color-text-secondary)">
+                <strong style="color: var(--color-text-primary)">Pago cancelado.</strong>
+                Tu pedido no fue confirmado. Puedes intentarlo nuevamente cuando quieras.
+              </p>
+            </div>
+          }
+
           @if (pendingPayment(); as payment) {
             <section
               class="rounded-xl p-5"

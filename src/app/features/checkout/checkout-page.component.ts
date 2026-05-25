@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import type { OnInit } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   LucideAngularModule,
   ArrowLeft,
@@ -46,9 +46,11 @@ export class CheckoutPageComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly membershipService = inject(MembershipService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly paying = signal(false);
   readonly paymentError = signal<string | null>(null);
+  readonly paymentCancelled = signal(false);
   readonly membershipLoading = signal(true);
   readonly activeMembership = signal<ActiveMembership | null>(null);
   readonly activeMembershipPlan = signal<MembershipPlan | null>(null);
@@ -98,6 +100,7 @@ export class CheckoutPageComponent implements OnInit {
     }
 
     this.loadMembershipBenefit();
+    this.paymentCancelled.set(this.route.snapshot.queryParamMap.get('payment') === 'cancelled');
   }
 
   ticketTotal(): number {
@@ -149,6 +152,7 @@ export class CheckoutPageComponent implements OnInit {
     this.syncMembershipDiscount();
     this.paying.set(true);
     this.paymentError.set(null);
+    this.paymentCancelled.set(false);
     this.pendingPayment.set(null);
     const cart = this.cartService.cart();
     this.orderService

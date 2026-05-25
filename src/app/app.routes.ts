@@ -87,7 +87,6 @@ export const routes: Routes = [
   },
   {
     path: 'checkout/stripe/success',
-    canActivate: [clientGuard],
     loadComponent: () =>
       import('./features/checkout/stripe-success-page.component').then(
         (c) => c.StripeSuccessPageComponent,
@@ -105,7 +104,6 @@ export const routes: Routes = [
   // ── Memberships (public) ─────────────────────────────
   {
     path: 'memberships/stripe/success',
-    canActivate: [clientGuard],
     loadComponent: () =>
       import('./features/memberships/membership-stripe-success-page.component').then(
         (c) => c.MembershipStripeSuccessPageComponent,
