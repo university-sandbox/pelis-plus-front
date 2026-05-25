@@ -74,6 +74,12 @@ export class CheckoutPageComponent implements OnInit {
       this.membershipBenefit().freeTicketsApplied,
   );
   readonly membershipSnacksApplied = computed(() => this.membershipBenefit().freeSnacksApplied);
+  readonly membershipTicketDiscount = computed(() =>
+    this.pendingPayment()
+      ? Math.max(0, this.displayDiscount() - this.membershipSnackDiscount())
+      : this.membershipBenefit().ticketDiscount,
+  );
+  readonly membershipSnackDiscount = computed(() => this.membershipBenefit().snackDiscount);
 
   readonly ArrowLeft = ArrowLeft;
   readonly CreditCard = CreditCard;

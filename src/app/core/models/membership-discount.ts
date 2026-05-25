@@ -6,6 +6,8 @@ export interface MembershipDiscountSummary {
   discount: number;
   freeTicketsApplied: number;
   freeSnacksApplied: number;
+  ticketDiscount: number;
+  snackDiscount: number;
 }
 
 export function summarizeMembershipDiscount(
@@ -30,6 +32,7 @@ export function summarizeMembershipDiscount(
   const percentageDiscount = prices
     .slice(freeTicketsApplied)
     .reduce((sum, price) => sum + price * (plan.discountPercentage / 100), 0);
+  const ticketDiscount = roundCurrency(freeTicketDiscount + percentageDiscount);
   const ticketTotal = prices.reduce((sum, price) => sum + price, 0);
   const snackBenefit = getSnackBenefit(plan);
   const snackPrices = getEligibleSnackUnitPrices(snacks, snackBenefit.categories);
@@ -37,12 +40,17 @@ export function summarizeMembershipDiscount(
   const freeSnackDiscount = snackPrices
     .slice(0, freeSnacksApplied)
     .reduce((sum, price) => sum + price, 0);
-  const cartSubtotal = ticketTotal + snackPrices.reduce((sum, price) => sum + price, 0);
-  const discount = roundCurrency(
-    Math.min(cartSubtotal, freeTicketDiscount + percentageDiscount + freeSnackDiscount),
-  );
+  const snackPercentageBenefit = getSnackPercentageBenefit(plan);
+  const snackPercentageDiscount = getEligibleSnackUnitPrices(
+    snacks,
+    snackPercentageBenefit.categories,
+  ).reduce((sum, price) => sum + price * (snackPercentageBenefit.percentage / 100), 0);
+  const snackDiscount = roundCurrency(freeSnackDiscount + snackPercentageDiscount);
+  const snackTotal = snacks.reduce((sum, item) => sum + item.snack.price * item.quantity, 0);
+  const cartSubtotal = ticketTotal + snackTotal;
+  const discount = roundCurrency(Math.min(cartSubtotal, ticketDiscount + snackDiscount));
 
-  return { discount, freeTicketsApplied, freeSnacksApplied };
+  return { discount, freeTicketsApplied, freeSnacksApplied, ticketDiscount, snackDiscount };
 }
 
 function isActiveMembership(membership: ActiveMembership, now: number): boolean {
@@ -56,7 +64,13 @@ function roundCurrency(value: number): number {
 }
 
 function emptySummary(): MembershipDiscountSummary {
-  return { discount: 0, freeTicketsApplied: 0, freeSnacksApplied: 0 };
+  return {
+    discount: 0,
+    freeTicketsApplied: 0,
+    freeSnacksApplied: 0,
+    ticketDiscount: 0,
+    snackDiscount: 0,
+  };
 }
 
 function getSnackBenefit(plan: MembershipPlan): {
@@ -132,6 +146,28 @@ function getEligibleCategories(text: string): readonly SnackCategory[] | null {
   }
 
   return categories.size > 0 ? [...categories] : null;
+}
+
+function getSnackPercentageBenefit(plan: MembershipPlan): {
+  categories: readonly SnackCategory[] | null;
+  percentage: number;
+} {
+  const snackDiscounts = plan.benefits
+    .map((benefit) => normalizeText(`${benefit.label} ${benefit.description}`))
+    .filter((text) => hasSnackKeyword(text) && getPercentage(text) > 0);
+
+  if (snackDiscounts.length === 0) {
+    return { categories: null, percentage: 0 };
+  }
+
+  const percentage = Math.max(...snackDiscounts.map(getPercentage));
+  const categories = getEligibleCategories(snackDiscounts.join(' '));
+
+  return { categories, percentage };
+}
+
+function getPercentage(text: string): number {
+  return Number(text.match(/\b(\d+(?:\.\d+)?)\s*%/)?.[1] ?? 0);
 }
 
 function getEligibleSnackUnitPrices(

@@ -11,6 +11,8 @@ describe('summarizeMembershipDiscount', () => {
       discount: 0,
       freeTicketsApplied: 0,
       freeSnacksApplied: 0,
+      ticketDiscount: 0,
+      snackDiscount: 0,
     });
   });
 
@@ -23,7 +25,13 @@ describe('summarizeMembershipDiscount', () => {
         plan(),
         now,
       ),
-    ).toEqual({ discount: 0, freeTicketsApplied: 0, freeSnacksApplied: 0 });
+    ).toEqual({
+      discount: 0,
+      freeTicketsApplied: 0,
+      freeSnacksApplied: 0,
+      ticketDiscount: 0,
+      snackDiscount: 0,
+    });
   });
 
   it('applies remaining free tickets before the plan percentage discount', () => {
@@ -35,7 +43,13 @@ describe('summarizeMembershipDiscount', () => {
         plan({ discountPercentage: 25 }),
         now,
       ),
-    ).toEqual({ discount: 41, freeTicketsApplied: 1, freeSnacksApplied: 0 });
+    ).toEqual({
+      discount: 41,
+      freeTicketsApplied: 1,
+      freeSnacksApplied: 0,
+      ticketDiscount: 41,
+      snackDiscount: 0,
+    });
   });
 
   it('applies the plan percentage discount when no free tickets remain', () => {
@@ -47,7 +61,13 @@ describe('summarizeMembershipDiscount', () => {
         plan({ discountPercentage: 20 }),
         now,
       ),
-    ).toEqual({ discount: 8.3, freeTicketsApplied: 0, freeSnacksApplied: 0 });
+    ).toEqual({
+      discount: 8.3,
+      freeTicketsApplied: 0,
+      freeSnacksApplied: 0,
+      ticketDiscount: 8.3,
+      snackDiscount: 0,
+    });
   });
 
   it('applies included snack benefits from the active plan', () => {
@@ -62,7 +82,13 @@ describe('summarizeMembershipDiscount', () => {
         }),
         now,
       ),
-    ).toEqual({ discount: 22.8, freeTicketsApplied: 0, freeSnacksApplied: 1 });
+    ).toEqual({
+      discount: 22.8,
+      freeTicketsApplied: 0,
+      freeSnacksApplied: 1,
+      ticketDiscount: 4.8,
+      snackDiscount: 18,
+    });
   });
 
   it('limits combo benefits to combo snacks', () => {
@@ -77,7 +103,58 @@ describe('summarizeMembershipDiscount', () => {
         }),
         now,
       ),
-    ).toEqual({ discount: 18, freeTicketsApplied: 0, freeSnacksApplied: 1 });
+    ).toEqual({
+      discount: 18,
+      freeTicketsApplied: 0,
+      freeSnacksApplied: 1,
+      ticketDiscount: 0,
+      snackDiscount: 18,
+    });
+  });
+
+  it('applies percentage discounts for all confiteria snacks', () => {
+    expect(
+      summarizeMembershipDiscount(
+        [ticket(22)],
+        [snack(18, 'extras', 3)],
+        membership({ ticketsTotal: 1, ticketsUsed: 0 }),
+        plan({
+          discountPercentage: 35,
+          benefits: [
+            { label: '25% en snacks', description: '25% de descuento en toda la confitería' },
+          ],
+        }),
+        now,
+      ),
+    ).toEqual({
+      discount: 35.5,
+      freeTicketsApplied: 1,
+      freeSnacksApplied: 0,
+      ticketDiscount: 22,
+      snackDiscount: 13.5,
+    });
+  });
+
+  it('limits percentage discounts to the snack categories described by the plan', () => {
+    expect(
+      summarizeMembershipDiscount(
+        [],
+        [snack(18, 'extras', 3), snack(10, 'drinks', 2)],
+        membership(),
+        plan({
+          benefits: [
+            { label: '15% en snacks', description: '15% de descuento en combos y bebidas' },
+          ],
+        }),
+        now,
+      ),
+    ).toEqual({
+      discount: 3,
+      freeTicketsApplied: 0,
+      freeSnacksApplied: 0,
+      ticketDiscount: 0,
+      snackDiscount: 3,
+    });
   });
 });
 

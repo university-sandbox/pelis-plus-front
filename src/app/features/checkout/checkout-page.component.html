@@ -229,13 +229,22 @@
                   <span>Incluidos</span>
                 </div>
               }
-              @if (displayDiscount() > 0) {
+              @if (membershipSnackDiscount() > 0) {
+                <div class="flex items-center justify-between" style="color: var(--color-success)">
+                  <span class="flex items-center gap-1">
+                    <lucide-icon [img]="Tag" [size]="12" aria-hidden="true" />
+                    Descuento confitería
+                  </span>
+                  <span>- S/ {{ membershipSnackDiscount() }}</span>
+                </div>
+              }
+              @if (membershipTicketDiscount() > 0) {
                 <div class="flex items-center justify-between" style="color: var(--color-success)">
                   <span class="flex items-center gap-1">
                     <lucide-icon [img]="Tag" [size]="12" aria-hidden="true" />
                     Beneficio membresía
                   </span>
-                  <span>- S/ {{ displayDiscount() }}</span>
+                  <span>- S/ {{ membershipTicketDiscount() }}</span>
                 </div>
               }
               <div class="border-t pt-2" style="border-color: var(--color-border)">
