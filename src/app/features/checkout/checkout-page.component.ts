@@ -1,22 +1,35 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import type { OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { LucideAngularModule, ArrowLeft, CreditCard, ShieldCheck, Minus, Plus, Trash2, Tag } from 'lucide-angular';
+import {
+  LucideAngularModule,
+  ArrowLeft,
+  CreditCard,
+  ShieldCheck,
+  Minus,
+  Plus,
+  Trash2,
+  Tag,
+  TicketCheck,
+} from 'lucide-angular';
+import { forkJoin, of } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
 
 import { CartService } from '../../core/services/cart.service';
 import { OrderService } from '../../core/services/order.service';
-import { MembershipService } from '../../core/services/membership.service';
 import { AuthService } from '../../core/services/auth.service';
+import { MembershipService } from '../../core/services/membership.service';
 import { type CartTicket, type CartSnackItem } from '../../core/models/cart.model';
+import { type CreateOrderResponse } from '../../core/models/order.model';
+import { type ActiveMembership, type MembershipPlan } from '../../core/models/membership.model';
+import { summarizeMembershipDiscount } from '../../core/models/membership-discount';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 
 const FORMAT_LABELS: Record<string, string> = {
-  standard: '2D', '3d': '3D', imax: 'IMAX', dbox: 'D-BOX',
+  standard: '2D',
+  '3d': '3D',
+  imax: 'IMAX',
+  dbox: 'D-BOX',
 };
 
 @Component({
@@ -29,13 +42,38 @@ const FORMAT_LABELS: Record<string, string> = {
 export class CheckoutPageComponent implements OnInit {
   readonly cartService = inject(CartService);
   private readonly orderService = inject(OrderService);
-  private readonly membershipService = inject(MembershipService);
   private readonly authService = inject(AuthService);
+  private readonly membershipService = inject(MembershipService);
   private readonly router = inject(Router);
 
   readonly paying = signal(false);
   readonly paymentError = signal(false);
-  readonly membershipName = signal<string | null>(null);
+  readonly membershipLoading = signal(true);
+  readonly activeMembership = signal<ActiveMembership | null>(null);
+  readonly activeMembershipPlan = signal<MembershipPlan | null>(null);
+  readonly pendingPayment = signal<CreateOrderResponse | null>(null);
+  readonly membershipBenefit = computed(() =>
+    summarizeMembershipDiscount(
+      this.cartService.cart().tickets,
+      this.cartService.cart().snacks,
+      this.activeMembership(),
+      this.activeMembershipPlan(),
+    ),
+  );
+  readonly displayDiscount = computed(
+    () => this.pendingPayment()?.order.discount ?? this.membershipBenefit().discount,
+  );
+  readonly displayTotal = computed(
+    () =>
+      this.pendingPayment()?.order.total ??
+      Math.max(0, this.cartService.subtotal() - this.displayDiscount()),
+  );
+  readonly membershipTicketsApplied = computed(
+    () =>
+      this.pendingPayment()?.membershipTicketsApplied ??
+      this.membershipBenefit().freeTicketsApplied,
+  );
+  readonly membershipSnacksApplied = computed(() => this.membershipBenefit().freeSnacksApplied);
 
   readonly ArrowLeft = ArrowLeft;
   readonly CreditCard = CreditCard;
@@ -44,6 +82,7 @@ export class CheckoutPageComponent implements OnInit {
   readonly Plus = Plus;
   readonly Trash2 = Trash2;
   readonly Tag = Tag;
+  readonly TicketCheck = TicketCheck;
 
   ngOnInit(): void {
     if (!this.authService.isClient()) {
@@ -51,34 +90,7 @@ export class CheckoutPageComponent implements OnInit {
       return;
     }
 
-    this.applyMembershipDiscount();
-  }
-
-  private applyMembershipDiscount(): void {
-    this.membershipService.getMyPlan().subscribe({
-      next: (membership) => {
-        if (!membership) return;
-        // Check quota hasn't been exhausted
-        if (membership.ticketsUsed >= membership.ticketsTotal) return;
-
-        const ticketSubtotal = this.cartService.cart().tickets.reduce((s, t) => s + t.price, 0);
-
-        // Fetch full plan to get discountPercentage
-        this.membershipService.getPlans().subscribe({
-          next: (plans) => {
-            const plan = plans.find((p) => p.id === membership.planId);
-            if (!plan) return;
-            const discountAmount = parseFloat(
-              (ticketSubtotal * plan.discountPercentage / 100).toFixed(2),
-            );
-            if (discountAmount > 0) {
-              this.cartService.applyMembershipDiscount(discountAmount);
-              this.membershipName.set(plan.name);
-            }
-          },
-        });
-      },
-    });
+    this.loadMembershipBenefit();
   }
 
   ticketTotal(): number {
@@ -95,18 +107,26 @@ export class CheckoutPageComponent implements OnInit {
 
   removeTicket(ticket: CartTicket): void {
     this.cartService.removeTicket(ticket.seat.id);
+    this.syncMembershipDiscount();
+    this.pendingPayment.set(null);
   }
 
   incrementSnack(item: CartSnackItem): void {
     this.cartService.updateSnackQuantity(item.snack.id, item.quantity + 1, item.selectedOptions);
+    this.syncMembershipDiscount();
+    this.pendingPayment.set(null);
   }
 
   decrementSnack(item: CartSnackItem): void {
     this.cartService.updateSnackQuantity(item.snack.id, item.quantity - 1, item.selectedOptions);
+    this.syncMembershipDiscount();
+    this.pendingPayment.set(null);
   }
 
   removeSnack(item: CartSnackItem): void {
     this.cartService.removeSnack(item.snack.id, item.selectedOptions);
+    this.syncMembershipDiscount();
+    this.pendingPayment.set(null);
   }
 
   pay(): void {
@@ -115,33 +135,72 @@ export class CheckoutPageComponent implements OnInit {
       return;
     }
 
+    if (this.membershipLoading()) {
+      return;
+    }
+
+    this.syncMembershipDiscount();
     this.paying.set(true);
     this.paymentError.set(false);
+    this.pendingPayment.set(null);
     const cart = this.cartService.cart();
-    this.orderService.createOrder({
-      tickets: cart.tickets,
-      snacks: cart.snacks,
-      membershipDiscount: cart.membershipDiscount,
-    }).subscribe({
-      next: (res) => {
-        this.orderService.confirmOrder(res.orderId, { formToken: res.formToken }).subscribe({
-          next: (order) => {
+    this.orderService
+      .createOrder({
+        tickets: cart.tickets,
+        snacks: cart.snacks,
+        membershipDiscount: cart.membershipDiscount,
+      })
+      .subscribe({
+        next: (res) => {
+          if (!res.requiresPayment) {
             this.cartService.clear();
             this.paying.set(false);
-            void this.router.navigate(['/confirmation', order.id], {
-              state: { order, cart },
+            void this.router.navigate(['/confirmation', res.order.id], {
+              state: { order: res.order, cart },
             });
-          },
-          error: () => {
-            this.paying.set(false);
-            this.paymentError.set(true);
-          },
-        });
-      },
-      error: () => {
-        this.paying.set(false);
-        this.paymentError.set(true);
-      },
-    });
+            return;
+          }
+
+          this.pendingPayment.set(res);
+          this.paying.set(false);
+        },
+        error: () => {
+          this.paying.set(false);
+          this.paymentError.set(true);
+        },
+      });
+  }
+
+  private loadMembershipBenefit(): void {
+    this.membershipLoading.set(true);
+    this.cartService.applyMembershipDiscount(0);
+
+    forkJoin({
+      membership: this.membershipService.getMyPlan().pipe(catchError(() => of(null))),
+      plans: this.membershipService.getPlans().pipe(catchError(() => of<MembershipPlan[]>([]))),
+    })
+      .pipe(finalize(() => this.membershipLoading.set(false)))
+      .subscribe(({ membership, plans }) => {
+        this.activeMembership.set(membership);
+        this.activeMembershipPlan.set(
+          membership ? this.findPlanForMembership(membership, plans) : null,
+        );
+        this.syncMembershipDiscount();
+      });
+  }
+
+  private findPlanForMembership(
+    membership: ActiveMembership,
+    plans: readonly MembershipPlan[],
+  ): MembershipPlan | null {
+    return (
+      plans.find((plan) => String(plan.id) === String(membership.planId)) ??
+      plans.find((plan) => plan.name === membership.planName) ??
+      null
+    );
+  }
+
+  private syncMembershipDiscount(): void {
+    this.cartService.applyMembershipDiscount(this.membershipBenefit().discount);
   }
 }

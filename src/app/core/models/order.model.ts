@@ -13,6 +13,8 @@ export interface Order {
   total: number;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
+  membershipTicketsApplied: number;
+  requiresPayment: boolean;
   createdAt: string; // ISO datetime
 }
 
@@ -48,5 +50,9 @@ export interface CreateOrderPayload {
 
 export interface CreateOrderResponse {
   orderId: string;
-  formToken: string; // Izipay payment form token
+  formToken: string | null; // Izipay payment form token, null when no payment is needed
+  order: Order;
+  requiresPayment: boolean;
+  membershipTicketsApplied: number;
+  paymentAmount: number;
 }

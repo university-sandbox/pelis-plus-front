@@ -83,7 +83,7 @@ export const BACKEND = {
 
   // --- Orders & Checkout ---
   ORDERS: {
-    /** POST /orders → { orderId, formToken } (Izipay formToken) */
+    /** POST /orders → { order, requiresPayment, formToken } */
     CREATE: '/orders',
     /** POST /orders/:id/confirm → { order } (verify Izipay paymentResult server-side) */
     CONFIRM: (id: number | string) => `/orders/${id}/confirm`,
