@@ -1,8 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { BACKEND } from '../api/endpoints';
+import { backendMediaUrl } from '../api/media-url';
 import { type Snack, type SnackCategory } from '../models/snack.model';
 
 type ListResponse<T> = T[] | { content: T[] } | { results: T[] } | { data: T[] };
@@ -16,7 +18,14 @@ export class SnackService {
     const url = category
       ? `${BACKEND.url(BACKEND.SNACKS.LIST)}?category=${category}`
       : BACKEND.url(BACKEND.SNACKS.LIST);
-    return this.http.get<ListResponse<Snack>>(url).pipe(map(normalizeListResponse));
+    return this.http.get<ListResponse<Snack>>(url).pipe(
+      map((response) =>
+        normalizeListResponse(response).map((snack) => ({
+          ...snack,
+          image: backendMediaUrl(snack.image),
+        })),
+      ),
+    );
   }
 
   /** All active categories */

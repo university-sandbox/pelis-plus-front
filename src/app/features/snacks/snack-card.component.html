@@ -1,13 +1,26 @@
-
-    <div
-      class="snack-card flex h-full flex-col overflow-hidden rounded-lg"
-      style="background: var(--color-surface); border: 1px solid var(--color-border);"
-    >
-      <div
-        class="snack-visual grain flex items-center justify-center"
-        style="height: 120px; background: radial-gradient(circle at 70% 12%, rgba(255,46,120,.28), transparent 52%), var(--color-surface-raised); color: var(--color-accent);"
-        aria-hidden="true"
-      >
+<div
+  class="snack-card flex h-full flex-col overflow-hidden rounded-lg"
+  style="background: var(--color-surface); border: 1px solid var(--color-border)"
+>
+  <div
+    class="snack-visual grain relative flex items-center justify-center overflow-hidden"
+    style="
+      height: 120px;
+      background:
+        radial-gradient(circle at 70% 12%, rgba(255, 46, 120, 0.28), transparent 52%),
+        var(--color-surface-raised);
+      color: var(--color-accent);
+    "
+  >
+    @if (snack().image) {
+      <img
+        [src]="snack().image"
+        [alt]="snack().name"
+        class="h-full w-full object-cover"
+        loading="lazy"
+      />
+    } @else {
+      <div class="flex h-full w-full items-center justify-center" aria-hidden="true">
         @switch (snack().category) {
           @case ('popcorn') {
             <lucide-icon [img]="Popcorn" [size]="34" />
@@ -26,53 +39,64 @@
           }
         }
       </div>
+    }
+  </div>
 
-      <div class="flex flex-1 flex-col gap-2 p-3">
-        <div class="flex-1">
-          <p class="font-semibold text-sm leading-tight" style="color: var(--color-text-primary);">{{ snack().name }}</p>
-          <p class="mt-1 text-xs leading-snug" style="color: var(--color-text-secondary);">{{ snack().description }}</p>
-        </div>
-
-        <div class="flex items-center justify-between gap-2 mt-auto">
-          <span
-            class="marquee-num rounded px-2 py-1 text-base font-bold"
-            style="background: rgba(245, 165, 36, 0.12); color: var(--color-warning);"
-          >S/ {{ snack().price }}</span>
-
-          @if (quantity() > 0) {
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                (click)="decrement.emit(snack())"
-                class="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
-                style="background: var(--color-surface-raised); color: var(--color-text-primary);"
-                [attr.aria-label]="'Quitar ' + snack().name"
-              >
-                <lucide-icon [img]="Minus" [size]="12" aria-hidden="true" />
-              </button>
-              <span class="w-5 text-center text-sm font-bold" style="color: var(--color-text-primary);">{{ quantity() }}</span>
-              <button
-                type="button"
-                (click)="increment.emit(snack())"
-                class="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
-                style="background: var(--color-accent); color: var(--color-text-primary);"
-                [attr.aria-label]="'Agregar ' + snack().name"
-              >
-                <lucide-icon [img]="Plus" [size]="12" aria-hidden="true" />
-              </button>
-            </div>
-          } @else {
-            <button
-              type="button"
-              (click)="increment.emit(snack())"
-              class="flex items-center gap-1 rounded px-3 py-1.5 text-xs font-bold transition-colors"
-              style="background: var(--color-accent); color: var(--color-text-primary);"
-              [attr.aria-label]="'Agregar ' + snack().name"
-            >
-              <lucide-icon [img]="Plus" [size]="12" aria-hidden="true" />
-              Agregar
-            </button>
-          }
-        </div>
-      </div>
+  <div class="flex flex-1 flex-col gap-2 p-3">
+    <div class="flex-1">
+      <p class="font-semibold text-sm leading-tight" style="color: var(--color-text-primary)">
+        {{ snack().name }}
+      </p>
+      <p class="mt-1 text-xs leading-snug" style="color: var(--color-text-secondary)">
+        {{ snack().description }}
+      </p>
     </div>
+
+    <div class="flex items-center justify-between gap-2 mt-auto">
+      <span
+        class="marquee-num rounded px-2 py-1 text-base font-bold"
+        style="background: rgba(245, 165, 36, 0.12); color: var(--color-warning)"
+        >S/ {{ snack().price }}</span
+      >
+
+      @if (quantity() > 0) {
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            (click)="decrement.emit(snack())"
+            class="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+            style="background: var(--color-surface-raised); color: var(--color-text-primary)"
+            [attr.aria-label]="'Quitar ' + snack().name"
+          >
+            <lucide-icon [img]="Minus" [size]="12" aria-hidden="true" />
+          </button>
+          <span
+            class="w-5 text-center text-sm font-bold"
+            style="color: var(--color-text-primary)"
+            >{{ quantity() }}</span
+          >
+          <button
+            type="button"
+            (click)="increment.emit(snack())"
+            class="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+            style="background: var(--color-accent); color: var(--color-text-primary)"
+            [attr.aria-label]="'Agregar ' + snack().name"
+          >
+            <lucide-icon [img]="Plus" [size]="12" aria-hidden="true" />
+          </button>
+        </div>
+      } @else {
+        <button
+          type="button"
+          (click)="increment.emit(snack())"
+          class="flex items-center gap-1 rounded px-3 py-1.5 text-xs font-bold transition-colors"
+          style="background: var(--color-accent); color: var(--color-text-primary)"
+          [attr.aria-label]="'Agregar ' + snack().name"
+        >
+          <lucide-icon [img]="Plus" [size]="12" aria-hidden="true" />
+          Agregar
+        </button>
+      }
+    </div>
+  </div>
+</div>
