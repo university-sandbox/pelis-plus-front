@@ -17,10 +17,12 @@
         "@angular/router": "^21.2.0",
         "@angular/ssr": "^21.2.5",
         "@types/qrcode": "^1.5.6",
+        "apexcharts": "^5.15.0",
         "dotenv": "^17.2.3",
         "express": "^5.1.0",
         "jwt-decode": "^4.0.0",
         "lucide-angular": "^1.0.0",
+        "ngx-apexcharts": "^0.10.0",
         "qrcode": "^1.5.4",
         "rxjs": "~7.8.0",
         "tslib": "^2.3.0",
@@ -669,6 +671,8 @@
 
     "ansi-styles": ["ansi-styles@4.3.0", "", { "dependencies": { "color-convert": "^2.0.1" } }, "sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg=="],
 
+    "apexcharts": ["apexcharts@5.15.0", "", {}, "sha512-ATswoiZi8wynKcwqf0eyE0Is5mBQoDpxZN3PlSVy41OrD+9GMBp2kZQRjyGK+5/j0GFjHkuAd7GKOrt5VMoPrw=="],
+
     "argparse": ["argparse@2.0.1", "", {}, "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q=="],
 
     "aria-query": ["aria-query@5.3.2", "", {}, "sha512-COROpnaoap1E2F000S62r6A60uHZnmlvomhfyT2DlTcrY1OrBKn2UhH7qn5wTC9zMvD0AY7csdPSNwKP+7WiQw=="],
@@ -1098,6 +1102,8 @@
     "natural-compare": ["natural-compare@1.4.0", "", {}, "sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw=="],
 
     "negotiator": ["negotiator@1.0.0", "", {}, "sha512-8Ofs/AUQh8MaEcrlq5xOX0CQ9ypTF5dl78mjlMNfOK08fzpgTHQRQPBxcPlEtIw0yRpws+Zo/3r+5WRby7u3Gg=="],
+
+    "ngx-apexcharts": ["ngx-apexcharts@0.10.0", "", { "dependencies": { "tslib": "^2.0.0" }, "peerDependencies": { "@angular/common": ">=14.0.0", "@angular/core": ">=14.0.0", "apexcharts": ">=5.0.0", "rxjs": "^6.5.5 || ^7.4.0" } }, "sha512-4TPj1YXisIa0Fl/NLb38q3peXjJSaV+ckPHIiCoG1VYWg870rLyN0JZDU4K+s+5nURHPxWWtt30ic1L2PVrI/w=="],
 
     "node-addon-api": ["node-addon-api@6.1.0", "", {}, "sha512-+eawOlIgy680F0kBzPUNFhMZGtJ1YmqM6l4+Crf4IkImjYrO/mqPwRMh352g23uIaQKFItcQ64I7KMaJxHgAVA=="],
 
