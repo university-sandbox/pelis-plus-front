@@ -1,0 +1,101 @@
+<div class="space-y-8">
+  <!-- Header -->
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-xl font-bold" style="color: var(--color-text-primary)">Analíticas</h1>
+      <p class="mt-0.5 text-sm" style="color: var(--color-text-secondary)">
+        Métricas y gráficos del negocio
+      </p>
+    </div>
+    <app-analytics-period-filter
+      [value]="period()"
+      (periodChange)="period.set($event)"
+    />
+  </div>
+
+  <!-- KPIs generales -->
+  <div class="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+    <app-analytics-kpi-card
+      label="Ingresos totales"
+      [value]="kpisResource.value()?.totalRevenue ?? null"
+      format="currency"
+      [icon]="DollarSign"
+      [loading]="kpisResource.isLoading()"
+    />
+    <app-analytics-kpi-card
+      label="Entradas vendidas"
+      [value]="kpisResource.value()?.totalTicketsSold ?? null"
+      format="number"
+      [icon]="Ticket"
+      [loading]="kpisResource.isLoading()"
+    />
+    <app-analytics-kpi-card
+      label="Valor prom. de orden"
+      [value]="kpisResource.value()?.averageOrderValue ?? null"
+      format="currency"
+      [icon]="ShoppingCart"
+      [loading]="kpisResource.isLoading()"
+    />
+    <app-analytics-kpi-card
+      label="Nuevos usuarios"
+      [value]="kpisResource.value()?.totalRegisteredUsers ?? null"
+      format="number"
+      [icon]="Users"
+      [loading]="kpisResource.isLoading()"
+    />
+    <app-analytics-kpi-card
+      label="Membresías activas"
+      [value]="kpisResource.value()?.activeMemberships ?? null"
+      format="number"
+      [icon]="CreditCard"
+      [loading]="kpisResource.isLoading()"
+    />
+    <app-analytics-kpi-card
+      label="Ocupación promedio"
+      [value]="kpisResource.value()?.averageOccupancyRate ?? null"
+      format="percent"
+      [icon]="Activity"
+      [loading]="kpisResource.isLoading()"
+    />
+  </div>
+
+  <!-- Ingresos -->
+  <div
+    class="rounded-xl p-5"
+    style="background: var(--color-surface-raised); border: 1px solid var(--color-border)"
+  >
+    <app-revenue-chart [period]="period()" />
+  </div>
+
+  <!-- Películas -->
+  <div
+    class="rounded-xl p-5"
+    style="background: var(--color-surface-raised); border: 1px solid var(--color-border)"
+  >
+    <app-movies-chart [period]="period()" />
+  </div>
+
+  <!-- Snacks -->
+  <div
+    class="rounded-xl p-5"
+    style="background: var(--color-surface-raised); border: 1px solid var(--color-border)"
+  >
+    <app-snacks-chart [period]="period()" />
+  </div>
+
+  <!-- Membresías -->
+  <div
+    class="rounded-xl p-5"
+    style="background: var(--color-surface-raised); border: 1px solid var(--color-border)"
+  >
+    <app-memberships-chart />
+  </div>
+
+  <!-- Usuarios -->
+  <div
+    class="rounded-xl p-5"
+    style="background: var(--color-surface-raised); border: 1px solid var(--color-border)"
+  >
+    <app-users-chart [period]="period()" />
+  </div>
+</div>

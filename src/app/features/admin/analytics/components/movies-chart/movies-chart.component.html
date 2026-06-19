@@ -1,0 +1,123 @@
+<section>
+  <h2 class="mb-4 text-base font-semibold" style="color: var(--color-text-primary)">Películas y Funciones</h2>
+
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <!-- Top películas -->
+    <div
+      class="lg:col-span-2 rounded-xl p-4"
+      style="background: var(--color-surface); border: 1px solid var(--color-border)"
+    >
+      <p class="mb-3 text-sm font-medium" style="color: var(--color-text-secondary)">Top películas por entradas</p>
+      @if (topMoviesResource.isLoading()) {
+        <div class="h-64 animate-pulse rounded-lg" style="background: var(--color-surface-raised)"></div>
+      } @else if ((topMoviesResource.value()?.length ?? 0) === 0) {
+        <div class="flex h-64 items-center justify-center">
+          <p class="text-sm" style="color: var(--color-text-disabled)">Sin ventas en este período</p>
+        </div>
+      } @else {
+        <apx-chart
+          [series]="$any(topMoviesOptions().series)"
+          [chart]="$any(topMoviesOptions().chart)"
+          [xaxis]="$any(topMoviesOptions().xaxis)"
+          [yaxis]="$any(topMoviesOptions().yaxis)"
+          [colors]="$any(topMoviesOptions().colors)"
+          [plotOptions]="$any(topMoviesOptions().plotOptions)"
+          [grid]="$any(topMoviesOptions().grid)"
+          [tooltip]="$any(topMoviesOptions().tooltip)"
+          [dataLabels]="$any(topMoviesOptions().dataLabels)"
+          [theme]="$any(topMoviesOptions().theme)"
+        />
+      }
+    </div>
+
+    <!-- Distribución por formato -->
+    <div
+      class="rounded-xl p-4"
+      style="background: var(--color-surface); border: 1px solid var(--color-border)"
+    >
+      <p class="mb-3 text-sm font-medium" style="color: var(--color-text-secondary)">Formato</p>
+      @if (formatResource.isLoading()) {
+        <div class="h-52 animate-pulse rounded-lg" style="background: var(--color-surface-raised)"></div>
+      } @else if ((formatResource.value()?.length ?? 0) === 0) {
+        <div class="flex h-52 items-center justify-center">
+          <p class="text-sm" style="color: var(--color-text-disabled)">Sin datos</p>
+        </div>
+      } @else {
+        <apx-chart
+          [series]="$any(formatOptions().series)"
+          [chart]="$any(formatOptions().chart)"
+          [labels]="$any(formatOptions().labels)"
+          [colors]="$any(formatOptions().colors)"
+          [legend]="$any(formatOptions().legend)"
+          [plotOptions]="$any(formatOptions().plotOptions)"
+          [tooltip]="$any(formatOptions().tooltip)"
+          [dataLabels]="$any(formatOptions().dataLabels)"
+          [theme]="$any(formatOptions().theme)"
+        />
+      }
+    </div>
+  </div>
+
+  <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <!-- Días pico -->
+    <div
+      class="rounded-xl p-4"
+      style="background: var(--color-surface); border: 1px solid var(--color-border)"
+    >
+      <p class="mb-3 text-sm font-medium" style="color: var(--color-text-secondary)">Días con más ventas</p>
+      @if (peakDaysResource.isLoading()) {
+        <div class="h-48 animate-pulse rounded-lg" style="background: var(--color-surface-raised)"></div>
+      } @else if ((peakDaysResource.value()?.length ?? 0) === 0) {
+        <div class="flex h-48 items-center justify-center">
+          <p class="text-sm" style="color: var(--color-text-disabled)">Sin datos</p>
+        </div>
+      } @else {
+        <apx-chart
+          [series]="$any(peakDaysOptions().series)"
+          [chart]="$any(peakDaysOptions().chart)"
+          [xaxis]="$any(peakDaysOptions().xaxis)"
+          [yaxis]="$any(peakDaysOptions().yaxis)"
+          [colors]="$any(peakDaysOptions().colors)"
+          [plotOptions]="$any(peakDaysOptions().plotOptions)"
+          [grid]="$any(peakDaysOptions().grid)"
+          [tooltip]="$any(peakDaysOptions().tooltip)"
+          [dataLabels]="$any(peakDaysOptions().dataLabels)"
+          [theme]="$any(peakDaysOptions().theme)"
+        />
+      }
+    </div>
+
+    <!-- Ocupación por venue -->
+    <div
+      class="rounded-xl p-4"
+      style="background: var(--color-surface); border: 1px solid var(--color-border)"
+    >
+      <p class="mb-3 text-sm font-medium" style="color: var(--color-text-secondary)">Ocupación por sede</p>
+      @if (occupancyResource.isLoading()) {
+        <div class="h-48 animate-pulse rounded-lg" style="background: var(--color-surface-raised)"></div>
+      } @else if ((occupancyResource.value()?.length ?? 0) === 0) {
+        <div class="flex h-48 items-center justify-center">
+          <p class="text-sm" style="color: var(--color-text-disabled)">Sin funciones en este período</p>
+        </div>
+      } @else {
+        <ul class="space-y-3 pt-1">
+          @for (v of occupancyResource.value(); track v.venueName) {
+            <li>
+              <div class="mb-1 flex items-center justify-between">
+                <span class="text-sm font-medium" style="color: var(--color-text-primary)">{{ v.venueName }}</span>
+                <span class="text-sm font-semibold" style="color: var(--color-accent)">{{ (v.occupancyRate * 100).toFixed(1) }}%</span>
+              </div>
+              <div class="h-2 overflow-hidden rounded-full" style="background: var(--color-surface-raised)">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  style="background: var(--color-accent)"
+                  [style.width.%]="v.occupancyRate * 100"
+                ></div>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+</section>

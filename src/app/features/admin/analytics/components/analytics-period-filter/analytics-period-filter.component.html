@@ -1,0 +1,19 @@
+<div
+  class="inline-flex items-center gap-1 rounded-lg p-1"
+  style="background: var(--color-surface-raised); border: 1px solid var(--color-border)"
+  role="group"
+  aria-label="Filtrar por período"
+>
+  @for (p of periods; track p.value) {
+    <button
+      type="button"
+      (click)="periodChange.emit(p.value)"
+      class="rounded-md px-3 py-1.5 text-xs font-semibold transition-all"
+      [style.background]="value() === p.value ? 'var(--color-accent)' : 'transparent'"
+      [style.color]="value() === p.value ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)'"
+      [attr.aria-pressed]="value() === p.value"
+    >
+      {{ p.label }}
+    </button>
+  }
+</div>

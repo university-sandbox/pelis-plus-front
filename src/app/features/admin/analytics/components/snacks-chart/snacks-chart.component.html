@@ -1,0 +1,70 @@
+<section>
+  <h2 class="mb-4 text-base font-semibold" style="color: var(--color-text-primary)">Confitería</h2>
+
+  <div class="mb-4">
+    <app-analytics-kpi-card
+      label="Ingreso promedio por orden"
+      [value]="avgPerOrderResource.value() ?? null"
+      format="currency"
+      [icon]="ShoppingBag"
+      [loading]="avgPerOrderResource.isLoading()"
+    />
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <!-- Top snacks -->
+    <div
+      class="lg:col-span-2 rounded-xl p-4"
+      style="background: var(--color-surface); border: 1px solid var(--color-border)"
+    >
+      <p class="mb-3 text-sm font-medium" style="color: var(--color-text-secondary)">Top snacks más vendidos</p>
+      @if (topSnacksResource.isLoading()) {
+        <div class="h-56 animate-pulse rounded-lg" style="background: var(--color-surface-raised)"></div>
+      } @else if ((topSnacksResource.value()?.length ?? 0) === 0) {
+        <div class="flex h-56 items-center justify-center">
+          <p class="text-sm" style="color: var(--color-text-disabled)">Sin ventas en este período</p>
+        </div>
+      } @else {
+        <apx-chart
+          [series]="$any(topSnacksOptions().series)"
+          [chart]="$any(topSnacksOptions().chart)"
+          [xaxis]="$any(topSnacksOptions().xaxis)"
+          [yaxis]="$any(topSnacksOptions().yaxis)"
+          [colors]="$any(topSnacksOptions().colors)"
+          [plotOptions]="$any(topSnacksOptions().plotOptions)"
+          [grid]="$any(topSnacksOptions().grid)"
+          [tooltip]="$any(topSnacksOptions().tooltip)"
+          [dataLabels]="$any(topSnacksOptions().dataLabels)"
+          [theme]="$any(topSnacksOptions().theme)"
+        />
+      }
+    </div>
+
+    <!-- Por categoría -->
+    <div
+      class="rounded-xl p-4"
+      style="background: var(--color-surface); border: 1px solid var(--color-border)"
+    >
+      <p class="mb-3 text-sm font-medium" style="color: var(--color-text-secondary)">Ingresos por categoría</p>
+      @if (categoryResource.isLoading()) {
+        <div class="h-52 animate-pulse rounded-lg" style="background: var(--color-surface-raised)"></div>
+      } @else if ((categoryResource.value()?.length ?? 0) === 0) {
+        <div class="flex h-52 items-center justify-center">
+          <p class="text-sm" style="color: var(--color-text-disabled)">Sin datos</p>
+        </div>
+      } @else {
+        <apx-chart
+          [series]="$any(categoryOptions().series)"
+          [chart]="$any(categoryOptions().chart)"
+          [labels]="$any(categoryOptions().labels)"
+          [colors]="$any(categoryOptions().colors)"
+          [legend]="$any(categoryOptions().legend)"
+          [plotOptions]="$any(categoryOptions().plotOptions)"
+          [tooltip]="$any(categoryOptions().tooltip)"
+          [dataLabels]="$any(categoryOptions().dataLabels)"
+          [theme]="$any(categoryOptions().theme)"
+        />
+      }
+    </div>
+  </div>
+</section>

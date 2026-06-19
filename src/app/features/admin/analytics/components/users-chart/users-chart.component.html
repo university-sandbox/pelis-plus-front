@@ -1,0 +1,48 @@
+<section>
+  <h2 class="mb-4 text-base font-semibold" style="color: var(--color-text-primary)">Usuarios</h2>
+
+  <div class="mb-4 grid grid-cols-2 gap-3">
+    <app-analytics-kpi-card
+      label="Nuevos registros"
+      [value]="totalNewUsers()"
+      format="number"
+      [icon]="Users"
+      [loading]="registrationsResource.isLoading()"
+    />
+    <app-analytics-kpi-card
+      label="Tasa de conversión"
+      [value]="purchaseRateResource.value() ?? null"
+      format="percent"
+      [icon]="UserCheck"
+      [loading]="purchaseRateResource.isLoading()"
+    />
+  </div>
+
+  <div
+    class="rounded-xl p-4"
+    style="background: var(--color-surface); border: 1px solid var(--color-border)"
+  >
+    <p class="mb-3 text-sm font-medium" style="color: var(--color-text-secondary)">Nuevos registros por período</p>
+    @if (registrationsResource.isLoading()) {
+      <div class="h-56 animate-pulse rounded-lg" style="background: var(--color-surface-raised)"></div>
+    } @else if ((registrationsResource.value()?.length ?? 0) === 0) {
+      <div class="flex h-56 items-center justify-center">
+        <p class="text-sm" style="color: var(--color-text-disabled)">Sin registros en este período</p>
+      </div>
+    } @else {
+      <apx-chart
+        [series]="$any(lineOptions().series)"
+        [chart]="$any(lineOptions().chart)"
+        [xaxis]="$any(lineOptions().xaxis)"
+        [yaxis]="$any(lineOptions().yaxis)"
+        [colors]="$any(lineOptions().colors)"
+        [fill]="$any(lineOptions().fill)"
+        [stroke]="$any(lineOptions().stroke)"
+        [grid]="$any(lineOptions().grid)"
+        [tooltip]="$any(lineOptions().tooltip)"
+        [dataLabels]="$any(lineOptions().dataLabels)"
+        [theme]="$any(lineOptions().theme)"
+      />
+    }
+  </div>
+</section>

@@ -1,0 +1,22 @@
+<div
+  class="flex flex-col gap-3 rounded-xl p-5"
+  style="background: var(--color-surface); border: 1px solid var(--color-border); box-shadow: var(--shadow-card)"
+>
+  <div class="flex items-start justify-between">
+    <p class="text-sm font-medium" style="color: var(--color-text-secondary)">{{ label() }}</p>
+    <div
+      class="flex h-9 w-9 items-center justify-center rounded-lg"
+      style="background: var(--color-accent-muted)"
+    >
+      <lucide-icon [img]="icon()" [size]="18" style="color: var(--color-accent)" aria-hidden="true" />
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="h-8 w-32 animate-pulse rounded-md" style="background: var(--color-surface-raised)"></div>
+  } @else {
+    <p class="text-2xl font-bold tracking-tight" style="color: var(--color-text-primary)">
+      {{ displayValue() }}
+    </p>
+  }
+</div>

@@ -1,0 +1,76 @@
+<section>
+  <h2 class="mb-4 text-base font-semibold" style="color: var(--color-text-primary)">Ingresos</h2>
+
+  <div class="mb-4 grid grid-cols-2 gap-3">
+    <app-analytics-kpi-card
+      label="Total del período"
+      [value]="totalRevenue()"
+      format="currency"
+      [icon]="DollarSign"
+      [loading]="isLoading()"
+    />
+    <app-analytics-kpi-card
+      label="Descuentos aplicados"
+      [value]="totalDiscount()"
+      format="currency"
+      [icon]="Percent"
+      [loading]="isLoading()"
+    />
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <!-- Evolución en el tiempo -->
+    <div
+      class="lg:col-span-2 rounded-xl p-4"
+      style="background: var(--color-surface); border: 1px solid var(--color-border)"
+    >
+      <p class="mb-3 text-sm font-medium" style="color: var(--color-text-secondary)">Evolución de ingresos</p>
+      @if (isLoading()) {
+        <div class="h-64 animate-pulse rounded-lg" style="background: var(--color-surface-raised)"></div>
+      } @else if ((seriesResource.value()?.length ?? 0) === 0) {
+        <div class="flex h-64 items-center justify-center">
+          <p class="text-sm" style="color: var(--color-text-disabled)">Sin datos en este período</p>
+        </div>
+      } @else {
+        <apx-chart
+          [series]="$any(lineOptions().series)"
+          [chart]="$any(lineOptions().chart)"
+          [xaxis]="$any(lineOptions().xaxis)"
+          [yaxis]="$any(lineOptions().yaxis)"
+          [colors]="$any(lineOptions().colors)"
+          [fill]="$any(lineOptions().fill)"
+          [stroke]="$any(lineOptions().stroke)"
+          [grid]="$any(lineOptions().grid)"
+          [tooltip]="$any(lineOptions().tooltip)"
+          [dataLabels]="$any(lineOptions().dataLabels)"
+          [theme]="$any(lineOptions().theme)"
+        />
+      }
+    </div>
+
+    <!-- Desglose entradas vs snacks -->
+    <div
+      class="rounded-xl p-4"
+      style="background: var(--color-surface); border: 1px solid var(--color-border)"
+    >
+      <p class="mb-3 text-sm font-medium" style="color: var(--color-text-secondary)">Desglose por tipo</p>
+      @if (isLoading()) {
+        <div class="h-60 animate-pulse rounded-lg" style="background: var(--color-surface-raised)"></div>
+      } @else {
+        <apx-chart
+          [series]="$any(stackedOptions().series)"
+          [chart]="$any(stackedOptions().chart)"
+          [xaxis]="$any(stackedOptions().xaxis)"
+          [yaxis]="$any(stackedOptions().yaxis)"
+          [colors]="$any(stackedOptions().colors)"
+          [plotOptions]="$any(stackedOptions().plotOptions)"
+          [grid]="$any(stackedOptions().grid)"
+          [tooltip]="$any(stackedOptions().tooltip)"
+          [legend]="$any(stackedOptions().legend)"
+          [dataLabels]="$any(stackedOptions().dataLabels)"
+          [theme]="$any(stackedOptions().theme)"
+        />
+      }
+    </div>
+  </div>
+</section>

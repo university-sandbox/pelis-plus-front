@@ -205,5 +205,33 @@ export const BACKEND = {
       /** PATCH /admin/users/:id/status */
       TOGGLE_STATUS: (id: number | string) => `/admin/users/${id}/status`,
     },
+    ANALYTICS: {
+      /** GET /admin/analytics/kpis?period= */
+      KPIS: '/admin/analytics/kpis',
+      /** GET /admin/analytics/revenue/series?period= */
+      REVENUE_SERIES: '/admin/analytics/revenue/series',
+      /** GET /admin/analytics/revenue/breakdown?period= */
+      REVENUE_BREAKDOWN: '/admin/analytics/revenue/breakdown',
+      /** GET /admin/analytics/movies/top?period=&limit= */
+      TOP_MOVIES: '/admin/analytics/movies/top',
+      /** GET /admin/analytics/movies/formats?period= */
+      MOVIE_FORMATS: '/admin/analytics/movies/formats',
+      /** GET /admin/analytics/movies/peak-days?period= */
+      PEAK_DAYS: '/admin/analytics/movies/peak-days',
+      /** GET /admin/analytics/movies/occupancy?period= */
+      OCCUPANCY: '/admin/analytics/movies/occupancy',
+      /** GET /admin/analytics/snacks/top?period=&limit= */
+      TOP_SNACKS: '/admin/analytics/snacks/top',
+      /** GET /admin/analytics/snacks/by-category?period= */
+      SNACK_CATEGORIES: '/admin/analytics/snacks/by-category',
+      /** GET /admin/analytics/snacks/avg-per-order?period= */
+      SNACK_AVG_PER_ORDER: '/admin/analytics/snacks/avg-per-order',
+      /** GET /admin/analytics/memberships/distribution */
+      MEMBERSHIP_DISTRIBUTION: '/admin/analytics/memberships/distribution',
+      /** GET /admin/analytics/users/registrations?period= */
+      USER_REGISTRATIONS: '/admin/analytics/users/registrations',
+      /** GET /admin/analytics/users/purchase-rate */
+      USER_PURCHASE_RATE: '/admin/analytics/users/purchase-rate',
+    },
   },
 } as const;

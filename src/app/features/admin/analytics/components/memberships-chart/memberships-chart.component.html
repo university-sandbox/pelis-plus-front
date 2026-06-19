@@ -1,0 +1,56 @@
+<section>
+  <h2 class="mb-4 text-base font-semibold" style="color: var(--color-text-primary)">Membresías</h2>
+
+  <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <div class="flex flex-col gap-3">
+      <app-analytics-kpi-card
+        label="Membresías activas"
+        [value]="totalActive()"
+        format="number"
+        [icon]="CreditCard"
+        [loading]="distributionResource.isLoading()"
+      />
+
+      @if (!distributionResource.isLoading() && (distributionResource.value()?.length ?? 0) > 0) {
+        <ul class="space-y-2">
+          @for (plan of distributionResource.value(); track plan.planName) {
+            <li
+              class="flex items-center justify-between rounded-lg px-4 py-3"
+              style="background: var(--color-surface); border: 1px solid var(--color-border)"
+            >
+              <span class="text-sm font-medium" style="color: var(--color-text-primary)">{{ plan.planName }}</span>
+              <span class="text-sm font-bold" style="color: var(--color-accent)">{{ plan.userCount }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- Dona de distribución -->
+    <div
+      class="lg:col-span-2 rounded-xl p-4"
+      style="background: var(--color-surface); border: 1px solid var(--color-border)"
+    >
+      <p class="mb-3 text-sm font-medium" style="color: var(--color-text-secondary)">Distribución por plan</p>
+      @if (distributionResource.isLoading()) {
+        <div class="h-60 animate-pulse rounded-lg" style="background: var(--color-surface-raised)"></div>
+      } @else if ((distributionResource.value()?.length ?? 0) === 0) {
+        <div class="flex h-60 items-center justify-center">
+          <p class="text-sm" style="color: var(--color-text-disabled)">Sin membresías activas</p>
+        </div>
+      } @else {
+        <apx-chart
+          [series]="$any(donutOptions().series)"
+          [chart]="$any(donutOptions().chart)"
+          [labels]="$any(donutOptions().labels)"
+          [colors]="$any(donutOptions().colors)"
+          [legend]="$any(donutOptions().legend)"
+          [plotOptions]="$any(donutOptions().plotOptions)"
+          [tooltip]="$any(donutOptions().tooltip)"
+          [dataLabels]="$any(donutOptions().dataLabels)"
+          [theme]="$any(donutOptions().theme)"
+        />
+      }
+    </div>
+  </div>
+</section>

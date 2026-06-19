@@ -14,6 +14,7 @@ import {
   Clapperboard,
   Home,
   LogOut,
+  BarChart2,
 } from 'lucide-angular';
 
 import { AuthService } from '../../core/services/auth.service';
@@ -44,6 +45,7 @@ export class AdminLayoutComponent {
   readonly LogOut = LogOut;
 
   readonly navItems: NavItem[] = [
+    { path: '/admin/analytics', label: 'Analíticas', icon: BarChart2 },
     { path: '/admin/movies', label: 'Películas', icon: Film },
     { path: '/admin/screenings', label: 'Funciones', icon: Calendar },
     { path: '/admin/rooms', label: 'Salas', icon: DoorOpen },

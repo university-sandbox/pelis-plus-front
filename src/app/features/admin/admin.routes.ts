@@ -6,7 +6,14 @@ export const adminRoutes: Routes = [
     loadComponent: () =>
       import('./admin-layout.component').then((c) => c.AdminLayoutComponent),
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'movies' },
+      { path: '', pathMatch: 'full', redirectTo: 'analytics' },
+      {
+        path: 'analytics',
+        loadComponent: () =>
+          import('./analytics/admin-analytics-page.component').then(
+            (c) => c.AdminAnalyticsPageComponent,
+          ),
+      },
       {
         path: 'movies',
         loadComponent: () =>
