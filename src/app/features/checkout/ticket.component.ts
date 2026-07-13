@@ -2,14 +2,12 @@ import {
   afterNextRender,
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
   inject,
   input,
-  OnChanges,
   PLATFORM_ID,
   signal,
-  viewChild,
 } from '@angular/core';
+import type { OnChanges } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import {
   LucideAngularModule,
@@ -19,9 +17,21 @@ import {
   Armchair,
   Film,
   Download,
+  AlertCircle,
 } from 'lucide-angular';
 
 import { type Ticket } from '../../core/models/ticket.model';
+import { PelisToastService } from '../../shared/services/pelis-toast.service';
+
+type QrDataUrlGenerator = (
+  text: string,
+  options: {
+    width: number;
+    margin: number;
+    errorCorrectionLevel: 'M';
+    color: { dark: string; light: string };
+  },
+) => Promise<string>;
 
 @Component({
   selector: 'app-ticket',
@@ -31,9 +41,13 @@ import { type Ticket } from '../../core/models/ticket.model';
 })
 export class TicketComponent implements OnChanges {
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly toast = inject(PelisToastService);
+  private qrGenerationId = 0;
 
   readonly ticket = input.required<Ticket>();
   readonly qrDataUrl = signal<string | null>(null);
+  readonly qrLoadFailed = signal(false);
+  readonly downloadingPdf = signal(false);
 
   readonly Calendar = Calendar;
   readonly Clock = Clock;
@@ -41,6 +55,7 @@ export class TicketComponent implements OnChanges {
   readonly Armchair = Armchair;
   readonly Film = Film;
   readonly Download = Download;
+  readonly AlertCircle = AlertCircle;
 
   constructor() {
     afterNextRender(() => {
@@ -56,39 +71,71 @@ export class TicketComponent implements OnChanges {
 
   private generateQr(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    const data = this.ticket().qrData || this.ticket().bookingCode;
-    if (!data) return;
 
-    // Dynamically import qrcode to avoid SSR issues
+    const generationId = ++this.qrGenerationId;
+    const data = this.ticket().qrData || this.ticket().bookingCode;
+    this.qrDataUrl.set(null);
+    this.qrLoadFailed.set(false);
+
+    if (!data) {
+      this.qrLoadFailed.set(true);
+      return;
+    }
+
+    // Keep this browser-only: qrcode uses the browser canvas renderer.
     import('qrcode')
-      .then(({ toDataURL }) => {
-        toDataURL(data, {
+      .then((module) => {
+        // The package is CommonJS. Depending on the production bundler it can be
+        // exposed either as named exports or below `default`.
+        const qrModule = module as unknown as {
+          toDataURL?: QrDataUrlGenerator;
+          default?: { toDataURL?: QrDataUrlGenerator };
+        };
+        const toDataURL = qrModule.toDataURL ?? qrModule.default?.toDataURL;
+        if (!toDataURL) {
+          throw new Error('El generador de código QR no está disponible.');
+        }
+
+        return toDataURL(data, {
           width: 200,
           margin: 1,
+          errorCorrectionLevel: 'M',
           color: { dark: '#000000', light: '#ffffff' },
-        })
-          .then((url) => {
-            this.qrDataUrl.set(url);
-          })
-          .catch(() => {
-            // QR generation failed — leave placeholder
-          });
+        });
       })
-      .catch(() => {
-        // qrcode not available
+      .then((url) => {
+        if (generationId !== this.qrGenerationId) return;
+        this.qrDataUrl.set(url);
+      })
+      .catch((error: unknown) => {
+        if (generationId !== this.qrGenerationId) return;
+        this.qrLoadFailed.set(true);
+        console.error('No se pudo generar el código QR de la entrada.', error);
       });
   }
 
-  async downloadQr(): Promise<void> {
+  async downloadTicketPdf(): Promise<void> {
     const url = this.qrDataUrl();
-    if (!url || !isPlatformBrowser(this.platformId)) return;
+    if (!url || !isPlatformBrowser(this.platformId) || this.downloadingPdf()) return;
 
-    const pdf = await this.createTicketPdf(url);
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(pdf);
-    a.download = `entrada-${this.ticket().bookingCode}.pdf`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    this.downloadingPdf.set(true);
+    try {
+      const pdf = await this.createTicketPdf(url);
+      const objectUrl = URL.createObjectURL(pdf);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = `entrada-${this.ticket().bookingCode}.pdf`;
+      link.style.display = 'none';
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1_000);
+    } catch (error) {
+      console.error('No se pudo descargar el ticket en PDF.', error);
+      this.toast.show('No se pudo generar el ticket en PDF. Inténtalo nuevamente.', 'error');
+    } finally {
+      this.downloadingPdf.set(false);
+    }
   }
 
   private async createTicketPdf(qrDataUrl: string): Promise<Blob> {

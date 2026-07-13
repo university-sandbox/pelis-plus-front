@@ -79,26 +79,38 @@
               [src]="qrDataUrl()"
               [alt]="'QR: ' + ticket().bookingCode"
               class="h-28 w-28 block"
+              width="112"
+              height="112"
+              decoding="sync"
             />
+          } @else if (qrLoadFailed()) {
+            <div class="flex h-28 w-28 flex-col items-center justify-center gap-2 px-2 text-center" style="color: #4b5563;">
+              <lucide-icon [img]="AlertCircle" [size]="20" aria-hidden="true" />
+              <span class="text-xs leading-tight">Usa el código de la entrada</span>
+            </div>
           } @else {
-            <!-- Fallback skeleton while QR generates -->
-            <div class="h-28 w-28 animate-pulse rounded" style="background: #e5e7eb;"></div>
+            <div class="h-28 w-28 animate-pulse rounded" style="background: #e5e7eb;" aria-label="Generando código QR"></div>
           }
         </div>
         <p class="font-mono text-xs" style="color: var(--color-text-secondary);">{{ ticket().qrData }}</p>
-        <p class="text-center text-xs" style="color: var(--color-text-disabled);">Muestra este código en el cine</p>
-
-        <!-- Download button -->
-        @if (qrDataUrl()) {
-          <button
-            type="button"
-            (click)="downloadQr()"
-            class="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-colors"
-            style="background: var(--color-surface-raised); color: var(--color-text-secondary); border: 1px solid var(--color-border);"
-          >
-            <lucide-icon [img]="Download" [size]="12" aria-hidden="true" />
-            Descargar QR
-          </button>
+        @if (qrLoadFailed()) {
+          <p class="text-center text-xs" style="color: var(--color-error);">No se pudo generar el QR. Muestra el código de la entrada en el cine.</p>
+        } @else {
+          <p class="text-center text-xs" style="color: var(--color-text-disabled);">Muestra este código en el cine</p>
         }
+
+        <button
+          type="button"
+          (click)="downloadTicketPdf()"
+          [disabled]="!qrDataUrl() || downloadingPdf()"
+          [class.opacity-60]="!qrDataUrl() || downloadingPdf()"
+          [class.cursor-not-allowed]="!qrDataUrl() || downloadingPdf()"
+          [attr.aria-busy]="downloadingPdf()"
+          class="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed"
+          style="background: var(--color-surface-raised); color: var(--color-text-secondary); border: 1px solid var(--color-border);"
+        >
+          <lucide-icon [img]="Download" [size]="12" aria-hidden="true" />
+          {{ downloadingPdf() ? 'Generando PDF…' : 'Descargar ticket en PDF' }}
+        </button>
       </div>
     </article>
