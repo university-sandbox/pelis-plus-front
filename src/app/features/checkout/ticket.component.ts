@@ -150,7 +150,7 @@ export class TicketComponent implements OnChanges {
     this.orderService.resendConfirmationEmail(this.ticket().orderId).subscribe({
       next: () => {
         this.sendingTestEmail.set(false);
-        this.toast.info('Reenvío de correo solicitado. Revisa los logs del backend para el resultado.');
+        this.toast.info('Reenvío de correo solicitado.');
       },
       error: (error: unknown) => {
         this.sendingTestEmail.set(false);
