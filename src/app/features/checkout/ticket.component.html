@@ -112,5 +112,17 @@
           <lucide-icon [img]="Download" [size]="12" aria-hidden="true" />
           {{ downloadingPdf() ? 'Generando PDF…' : 'Descargar ticket en PDF' }}
         </button>
+
+        <button
+          type="button"
+          (click)="sendTestEmail()"
+          [disabled]="sendingTestEmail()"
+          [attr.aria-busy]="sendingTestEmail()"
+          class="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          style="background: rgba(234, 179, 8, .12); color: var(--color-text-primary); border: 1px solid rgba(234, 179, 8, .45);"
+        >
+          <lucide-icon [img]="Mail" [size]="12" aria-hidden="true" />
+          {{ sendingTestEmail() ? 'Solicitando correo…' : 'Enviar correo de prueba' }}
+        </button>
       </div>
     </article>

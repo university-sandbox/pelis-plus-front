@@ -89,6 +89,8 @@ export const BACKEND = {
     CONFIRM: (id: number | string) => `/orders/${id}/confirm`,
     /** POST /orders/stripe/confirm → { order } */
     CONFIRM_STRIPE: '/orders/stripe/confirm',
+    /** POST /orders/:id/confirmation-email → resend confirmation to the configured test recipient */
+    RESEND_CONFIRMATION_EMAIL: (id: number | string) => `/orders/${id}/confirmation-email`,
     /** GET /orders/:id */
     DETAIL: (id: number | string) => `/orders/${id}`,
     /** GET /orders/me */

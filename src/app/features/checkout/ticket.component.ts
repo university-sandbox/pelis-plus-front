@@ -18,9 +18,11 @@ import {
   Film,
   Download,
   AlertCircle,
+  Mail,
 } from 'lucide-angular';
 
 import { type Ticket } from '../../core/models/ticket.model';
+import { OrderService } from '../../core/services/order.service';
 import { PelisToastService } from '../../shared/services/pelis-toast.service';
 
 type QrDataUrlGenerator = (
@@ -42,12 +44,14 @@ type QrDataUrlGenerator = (
 export class TicketComponent implements OnChanges {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly toast = inject(PelisToastService);
+  private readonly orderService = inject(OrderService);
   private qrGenerationId = 0;
 
   readonly ticket = input.required<Ticket>();
   readonly qrDataUrl = signal<string | null>(null);
   readonly qrLoadFailed = signal(false);
   readonly downloadingPdf = signal(false);
+  readonly sendingTestEmail = signal(false);
 
   readonly Calendar = Calendar;
   readonly Clock = Clock;
@@ -56,6 +60,7 @@ export class TicketComponent implements OnChanges {
   readonly Film = Film;
   readonly Download = Download;
   readonly AlertCircle = AlertCircle;
+  readonly Mail = Mail;
 
   constructor() {
     afterNextRender(() => {
@@ -136,6 +141,23 @@ export class TicketComponent implements OnChanges {
     } finally {
       this.downloadingPdf.set(false);
     }
+  }
+
+  sendTestEmail(): void {
+    if (this.sendingTestEmail()) return;
+
+    this.sendingTestEmail.set(true);
+    this.orderService.resendConfirmationEmail(this.ticket().orderId).subscribe({
+      next: () => {
+        this.sendingTestEmail.set(false);
+        this.toast.info('Correo de prueba solicitado. Revisa los logs del backend para el resultado.');
+      },
+      error: (error: unknown) => {
+        this.sendingTestEmail.set(false);
+        console.error('No se pudo solicitar el correo de prueba.', error);
+        this.toast.show('No se pudo solicitar el correo de prueba.', 'error');
+      },
+    });
   }
 
   private async createTicketPdf(qrDataUrl: string): Promise<Blob> {

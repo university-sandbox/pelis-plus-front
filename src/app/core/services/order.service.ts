@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import { BACKEND } from '../api/endpoints';
 import {
@@ -26,6 +26,11 @@ export class OrderService {
   /** Verify a Stripe Checkout Session server-side and issue tickets. */
   confirmStripeCheckout(sessionId: string): Observable<Order> {
     return this.http.post<Order>(BACKEND.url(BACKEND.ORDERS.CONFIRM_STRIPE), { sessionId });
+  }
+
+  /** Temporarily retry the confirmation email for an order owned by the current user. */
+  resendConfirmationEmail(orderId: string): Observable<void> {
+    return this.http.post<void>(BACKEND.url(BACKEND.ORDERS.RESEND_CONFIRMATION_EMAIL(orderId)), {});
   }
 
   /** Fetch order detail */
