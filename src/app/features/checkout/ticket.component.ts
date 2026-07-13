@@ -150,12 +150,12 @@ export class TicketComponent implements OnChanges {
     this.orderService.resendConfirmationEmail(this.ticket().orderId).subscribe({
       next: () => {
         this.sendingTestEmail.set(false);
-        this.toast.info('Correo de prueba solicitado. Revisa los logs del backend para el resultado.');
+        this.toast.info('Reenvío de correo solicitado. Revisa los logs del backend para el resultado.');
       },
       error: (error: unknown) => {
         this.sendingTestEmail.set(false);
-        console.error('No se pudo solicitar el correo de prueba.', error);
-        this.toast.show('No se pudo solicitar el correo de prueba.', 'error');
+        console.error('No se pudo solicitar el reenvío de correo.', error);
+        this.toast.show('No se pudo solicitar el reenvío de correo.', 'error');
       },
     });
   }
